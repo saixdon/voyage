@@ -4,24 +4,46 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { SearchBar } from "@/components/features/SearchBar";
 import { ActivityCard } from "@/components/features/ActivityCard";
-import { MOCK_ACTIVITIES } from "@/lib/api/mockData";
 import { Activity } from "@/types";
 
 import { Suspense } from "react";
+
+interface SearchResult {
+    source: "gyg" | "mock";
+    activities: Activity[];
+    total: number;
+    gygError?: string | null;
+}
 
 function SearchResults() {
     const searchParams = useSearchParams();
     const query = searchParams.get("q") || "";
     const [results, setResults] = useState<Activity[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [source, setSource] = useState<string>("");
 
     useEffect(() => {
-        // Basic filter logic to simulate API search
-        const filtered = MOCK_ACTIVITIES.filter(
-            (activity) =>
-                activity.title.toLowerCase().includes(query.toLowerCase()) ||
-                activity.location.toLowerCase().includes(query.toLowerCase())
-        );
-        setResults(filtered);
+        async function fetchResults() {
+            if (!query) {
+                setResults([]);
+                return;
+            }
+
+            setLoading(true);
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                const data: SearchResult = await response.json();
+                setResults(data.activities);
+                setSource(data.source);
+            } catch (error) {
+                console.error("Search error:", error);
+                setResults([]);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchResults();
     }, [query]);
 
     return (
@@ -32,7 +54,12 @@ function SearchResults() {
                         {query ? `Results for "${query}"` : "Discover Experiences"}
                     </h1>
                     <p className="text-gray-400">
-                        {results.length} experiences found
+                        {loading ? "Searching..." : `${results.length} experiences found`}
+                        {source === "gyg" && (
+                            <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">
+                                via GetYourGuide
+                            </span>
+                        )}
                     </p>
                 </div>
                 <div className="w-full md:w-auto md:min-w-[400px]">
@@ -40,7 +67,17 @@ function SearchResults() {
                 </div>
             </div>
 
-            {results.length > 0 ? (
+            {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    {[...Array(8)].map((_, i) => (
+                        <div key={i} className="animate-pulse">
+                            <div className="bg-white/5 rounded-2xl h-64 mb-4"></div>
+                            <div className="bg-white/5 rounded h-4 w-3/4 mb-2"></div>
+                            <div className="bg-white/5 rounded h-4 w-1/2"></div>
+                        </div>
+                    ))}
+                </div>
+            ) : results.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {results.map((activity) => (
                         <ActivityCard key={activity.id} {...activity} />

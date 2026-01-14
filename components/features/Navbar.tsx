@@ -16,7 +16,7 @@ export function Navbar() {
                             className="w-full h-full object-cover scale-150"
                         />
                     </div>
-                    <h2 className="text-xl font-bold tracking-tight text-white italic">VOYAGE</h2>
+                    <h2 className="text-xl font-bold tracking-tight text-white">TRIPVEGA</h2>
                 </Link>
 
                 {/* Desktop Links */}
@@ -44,15 +44,14 @@ export function Navbar() {
                     </Link>
                 </div>
 
-                {/* Actions */}
+                {/* Search Icon */}
                 <div className="flex items-center gap-4">
-                    <Link href="/login" className="hidden md:flex text-sm font-medium text-white hover:text-white/80 transition-colors">
-                        Log in
-                    </Link>
-                    <Link href="/register">
-                        <button className="h-10 px-6 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-full transition-all duration-300 hover:shadow-[0_0_20px_rgba(43,140,238,0.4)] hover:scale-105 active:scale-95 flex items-center justify-center">
-                            Sign Up
-                        </button>
+                    <Link
+                        href="/search"
+                        className="h-10 px-6 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-full transition-all duration-300 hover:shadow-[0_0_20px_rgba(43,140,238,0.4)] hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                    >
+                        <span className="material-symbols-outlined text-lg">search</span>
+                        Explore
                     </Link>
                 </div>
             </div>

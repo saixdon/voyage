@@ -2,14 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "Voyage - Discover the Unseen",
+    title: "TripVega - Entdecke die Welt",
     description:
-        "Premium experiences at your fingertips. Book tours, activities, and attractions anywhere in the world.",
+        "Premium Touren, Aktivitäten und Erlebnisse weltweit. Finde und buche einzigartige Reiseerlebnisse mit TripVega.",
 };
 
 import { Navbar } from "@/components/features/Navbar";
-
-import { ClerkProvider } from "@clerk/nextjs";
+import { Footer } from "@/components/features/Footer";
 
 export default function RootLayout({
     children,
@@ -17,29 +16,30 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
-            <html lang="de" className="dark">
-                <head>
-                    <link rel="preconnect" href="https://fonts.googleapis.com" />
-                    <link
-                        rel="preconnect"
-                        href="https://fonts.gstatic.com"
-                        crossOrigin="anonymous"
-                    />
-                    <link
-                        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
-                        rel="stylesheet"
-                    />
-                    <link
-                        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-                        rel="stylesheet"
-                    />
-                </head>
-                <body className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display overflow-x-hidden selection:bg-primary selection:text-white">
-                    <Navbar />
+        <html lang="de" className="dark">
+            <head>
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link
+                    rel="preconnect"
+                    href="https://fonts.gstatic.com"
+                    crossOrigin="anonymous"
+                />
+                <link
+                    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+                    rel="stylesheet"
+                />
+                <link
+                    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+                    rel="stylesheet"
+                />
+            </head>
+            <body className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display overflow-x-hidden selection:bg-primary selection:text-white">
+                <Navbar />
+                <main className="min-h-screen">
                     {children}
-                </body>
-            </html>
-        </ClerkProvider>
+                </main>
+                <Footer />
+            </body>
+        </html>
     );
 }
