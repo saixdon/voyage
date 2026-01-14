@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+/* Custom Theme Variables */
+@theme {
+    --color-primary: #2b8cee;
+    --color-background-light: #f6f7f8;
+    --color-background-dark: #101922;
+    --color-card-dark: #1c2127;
+    --color-card-hover: #283039;
+
+    --font-family-display: "Space Grotesk", sans-serif;
+    --font-family-sans: "Space Grotesk", sans-serif;
+
+    --animate-fade-in-up: fade-in-up 0.8s ease-out forwards;
+    --animate-fade-in-up-delay-1: fade-in-up 0.8s ease-out 0.2s forwards;
+    --animate-fade-in-up-delay-2: fade-in-up 0.8s ease-out 0.4s forwards;
+    --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+    @keyframes fade-in-up {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+/* Custom scrollbar for horizontal scrolling */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Glassmorphism utilities */
+.glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-strong {
+    background: rgba(16, 25, 34, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.text-glow {
+    text-shadow: 0 0 40px rgba(43, 140, 238, 0.3);
+}
+
+/* Base styles */
+body {
+    font-family: var(--font-family-sans);
+}

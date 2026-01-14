@@ -1,0 +1,61 @@
+"use client";
+
+import React from "react";
+import Link from "next/link";
+
+export function Navbar() {
+    return (
+        <nav className="fixed top-0 left-0 right-0 z-50 glass-strong transition-all duration-300">
+            <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                {/* Logo */}
+                <Link href="/" className="flex items-center gap-3 cursor-pointer group">
+                    <div className="size-10 relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-transform duration-300 group-hover:scale-110">
+                        <img
+                            src="/brand/logo.png"
+                            alt="Logo"
+                            className="w-full h-full object-cover scale-150"
+                        />
+                    </div>
+                    <h2 className="text-xl font-bold tracking-tight text-white italic">VOYAGE</h2>
+                </Link>
+
+                {/* Desktop Links */}
+                <div className="hidden md:flex items-center gap-8">
+                    <Link
+                        className="text-sm font-medium text-white/80 hover:text-primary transition-colors relative group"
+                        href="/search"
+                    >
+                        Destinations
+                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                    </Link>
+                    <Link
+                        className="text-sm font-medium text-white/80 hover:text-primary transition-colors relative group"
+                        href="/search"
+                    >
+                        Activities
+                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                    </Link>
+                    <Link
+                        className="text-sm font-medium text-white/80 hover:text-primary transition-colors relative group"
+                        href="/search"
+                    >
+                        Culture
+                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                    </Link>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-4">
+                    <Link href="/login" className="hidden md:flex text-sm font-medium text-white hover:text-white/80 transition-colors">
+                        Log in
+                    </Link>
+                    <Link href="/register">
+                        <button className="h-10 px-6 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-full transition-all duration-300 hover:shadow-[0_0_20px_rgba(43,140,238,0.4)] hover:scale-105 active:scale-95 flex items-center justify-center">
+                            Sign Up
+                        </button>
+                    </Link>
+                </div>
+            </div>
+        </nav>
+    );
+}
