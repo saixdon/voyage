@@ -13,8 +13,8 @@ export default function HomePage() {
                     <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background-dark z-10"></div>
                     <img
                         alt="Scenic view of mountains and lake with a boat in Switzerland"
-                        className="w-full h-full object-cover animate-pulse-slow scale-105"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0AW3APbVwOee6PwlmX8IpBMcXKtCgtA7UlIFcqL76PvrCD0izW208xf8s8uqzedqkSFtuscogmTX9xhXom3Cv-_gQNUxT9Nq8K5egTteA9EbV-1e0gMTx6Ty9l_pkD4ucf0pIcFQtvanzSOElU9qbHNpVN4VPEk-pJ-ShxYsoqMi33bWmCM-HRfhVHYQI2Fu1jIjtpvG0m5oMnZ6dNGhs5qF5pQggig-tLOkrNgkxOfHr1cu-gEz1fn0FRpMujWDe1_w-zWbbfTvc"
+                        className="w-full h-full object-cover"
+                        src="/swiss_alps_hero.png"
                     />
                 </div>
                 {/* Content */}

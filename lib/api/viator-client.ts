@@ -8,7 +8,7 @@ interface ViatorProduct {
     productCode: string;
     title: string;
     description?: string;
-    images?: { variants: { url: string }[] }[];
+    images?: { variants: { url: string; width?: number; height?: number }[] }[];
     pricing?: {
         summary?: {
             fromPrice?: number;
@@ -68,6 +68,99 @@ function formatDuration(duration?: ViatorProduct["duration"]): string {
     return "";
 }
 
+// Helper to select the best image resolution (prefer 720px+ width)
+function selectBestImage(images?: ViatorProduct["images"]): string {
+    if (!images || images.length === 0) return "";
+
+    const variants = images[0]?.variants;
+    if (!variants || variants.length === 0) return "";
+
+    // Try to find an image with width >= 720px
+    const hdImage = variants.find(v => v.width && v.width >= 720);
+    if (hdImage) return hdImage.url;
+
+    // If no HD image, try to find the largest one
+    const sorted = [...variants].sort((a, b) => (b.width || 0) - (a.width || 0));
+    return sorted[0]?.url || "";
+}
+
+// Cache for destinations to avoid repeated API calls
+let destinationsCache: { destinationId: number; name: string; type: string }[] | null = null;
+let destinationsCacheTime = 0;
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
+// Fetch all destinations from Viator and cache them
+async function fetchAllDestinations(): Promise<{ destinationId: number; name: string; type: string }[]> {
+    // Return cached data if still valid
+    if (destinationsCache && Date.now() - destinationsCacheTime < CACHE_DURATION) {
+        return destinationsCache;
+    }
+
+    if (!VIATOR_API_KEY) return [];
+
+    try {
+        const response = await fetch(`${VIATOR_API_BASE}/destinations`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json;version=2.0",
+                "Accept-Language": "en",
+                "exp-api-key": VIATOR_API_KEY,
+            },
+        });
+
+        if (!response.ok) {
+            console.error("Failed to fetch destinations:", response.status);
+            return [];
+        }
+
+        const data = await response.json();
+        if (data.destinations && Array.isArray(data.destinations)) {
+            destinationsCache = data.destinations;
+            destinationsCacheTime = Date.now();
+            console.log(`Cached ${data.destinations.length} Viator destinations`);
+            return data.destinations;
+        }
+        return [];
+    } catch (error) {
+        console.error("Viator Destinations Fetch Error:", error);
+        return [];
+    }
+}
+
+// Helper to find destination ID for a city name by searching cached destinations
+async function resolveDestinationId(query: string): Promise<string | null> {
+    const destinations = await fetchAllDestinations();
+    if (destinations.length === 0) return null;
+
+    const queryLower = query.toLowerCase().trim();
+
+    // 1. Try exact match first (case-insensitive)
+    let match = destinations.find(d => d.name.toLowerCase() === queryLower);
+
+    // 2. Try starts-with match
+    if (!match) {
+        match = destinations.find(d => d.name.toLowerCase().startsWith(queryLower));
+    }
+
+    // 3. Try contains match
+    if (!match) {
+        match = destinations.find(d => d.name.toLowerCase().includes(queryLower));
+    }
+
+    // 4. Try if query contains destination name
+    if (!match) {
+        match = destinations.find(d => queryLower.includes(d.name.toLowerCase()));
+    }
+
+    if (match) {
+        console.log(`Resolved "${query}" to destination: ${match.name} (ID: ${match.destinationId})`);
+        return match.destinationId.toString();
+    }
+
+    console.warn(`Could not resolve destination for: ${query}`);
+    return null;
+}
+
 export async function searchViatorProducts(
     query: string,
     limit = 20
@@ -77,7 +170,19 @@ export async function searchViatorProducts(
     }
 
     try {
-        // Search products by destination or free text
+        // 1. Resolve Destination ID mainly because /products/search REQUIRES a destination filter
+        // We try to find a destination matching the query string.
+        const destinationId = await resolveDestinationId(query);
+
+        if (!destinationId) {
+            console.warn(`Could not resolve destination for query: ${query}`);
+            // If we can't find a destination, we probably won't find products easily with /products/search
+            // However, we can try to search without filtering if the API allows it, or return empty.
+            // Based on tests, filtering is strict. fallback to no results.
+            return { activities: [], error: `Could not find destination: ${query}` };
+        }
+
+        // 2. Search products with the found Destination ID
         const response = await fetch(`${VIATOR_API_BASE}/products/search`, {
             method: "POST",
             headers: {
@@ -87,15 +192,15 @@ export async function searchViatorProducts(
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                searchTerm: query,
+                searchTerm: query, // Still verify text match + destination
                 pagination: {
                     start: 1,
                     count: limit,
                 },
-                sorting: {
-                    sort: "TRAVELER_RATING",
-                    order: "DESC",
+                filtering: {
+                    destination: destinationId,
                 },
+                currency: "EUR",
             }),
             next: { revalidate: 300 }, // Cache for 5 minutes
         });
@@ -117,7 +222,7 @@ export async function searchViatorProducts(
             id: product.productCode,
             title: product.title,
             location: product.destinations?.[0]?.name || "",
-            image: product.images?.[0]?.variants?.[0]?.url || "",
+            image: selectBestImage(product.images),
             price: product.pricing?.summary?.fromPrice || 0,
             currency: product.pricing?.currency || "EUR",
             rating: product.reviews?.combinedAverageRating || 0,

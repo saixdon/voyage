@@ -1,9 +1,13 @@
 "use client";
 
-import React, { use } from "react";
-import { MOCK_ACTIVITIES } from "@/lib/api/mockData";
+import React, { use, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { notFound } from "next/navigation";
+import type { TransformedActivity } from "@/lib/api/viator-client";
+
+interface ActivityWithBadge extends TransformedActivity {
+    badge?: string;
+}
 
 export default function ActivityDetailPage({
     params,
@@ -11,11 +15,45 @@ export default function ActivityDetailPage({
     params: Promise<{ id: string }>;
 }) {
     const { id } = use(params);
-    const activity = MOCK_ACTIVITIES.find((a) => a.id === id);
+    const [activity, setActivity] = useState<ActivityWithBadge | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    if (!activity) {
+    useEffect(() => {
+        async function fetchActivity() {
+            try {
+                // Fetch activity details from Viator API
+                const response = await fetch(`/api/activity/${id}`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        setError("Activity not found");
+                    } else {
+                        setError("Failed to load activity");
+                    }
+                    return;
+                }
+                const data = await response.json();
+                setActivity(data);
+            } catch (err) {
+                setError("Failed to load activity");
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchActivity();
+    }, [id]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-background-dark flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    if (error || !activity) {
         notFound();
-        return null; // For TS
+        return null;
     }
 
     return (

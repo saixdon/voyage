@@ -29,6 +29,20 @@
     }
 }
 
+/* Material Symbols Outlined */
+.material-symbols-outlined {
+    font-family: "Material Symbols Outlined";
+    font-weight: normal;
+    font-style: normal;
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+}
+
 /* Custom scrollbar for horizontal scrolling */
 .hide-scrollbar::-webkit-scrollbar {
     display: none;
