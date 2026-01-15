@@ -19,6 +19,7 @@ function SearchResults() {
     const searchParams = useSearchParams();
     const query = searchParams.get("q") || "";
     const [results, setResults] = useState<Activity[]>([]);
+    const [total, setTotal] = useState<number>(0);
     const [loading, setLoading] = useState(false);
     const [source, setSource] = useState<string>("");
 
@@ -26,6 +27,7 @@ function SearchResults() {
         async function fetchResults() {
             if (!query) {
                 setResults([]);
+                setTotal(0);
                 return;
             }
 
@@ -34,10 +36,12 @@ function SearchResults() {
                 const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
                 const data: SearchResult = await response.json();
                 setResults(data.activities);
+                setTotal(data.total);
                 setSource(data.source);
             } catch (error) {
                 console.error("Search error:", error);
                 setResults([]);
+                setTotal(0);
             } finally {
                 setLoading(false);
             }
@@ -54,10 +58,10 @@ function SearchResults() {
                         {query ? `Results for "${query}"` : "Discover Experiences"}
                     </h1>
                     <p className="text-gray-400">
-                        {loading ? "Searching..." : `${results.length} experiences found`}
-                        {source === "gyg" && (
+                        {loading ? "Searching..." : `${total} experiences found`}
+                        {source === "viator" && (
                             <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">
-                                via GetYourGuide
+                                via Viator
                             </span>
                         )}
                     </p>

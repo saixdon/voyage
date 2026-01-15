@@ -164,7 +164,7 @@ async function resolveDestinationId(query: string): Promise<string | null> {
 export async function searchViatorProducts(
     query: string,
     limit = 20
-): Promise<{ activities: TransformedActivity[]; error?: string }> {
+): Promise<{ activities: TransformedActivity[]; totalCount?: number; error?: string }> {
     if (!VIATOR_API_KEY) {
         return { activities: [], error: "Viator API key not configured" };
     }
@@ -231,10 +231,10 @@ export async function searchViatorProducts(
             productCode: product.productCode,
         }));
 
-        return { activities };
+        return { activities, totalCount: data.totalCount };
     } catch (error) {
         console.error("Viator API fetch error:", error);
-        return { activities: [], error: "Failed to fetch from Viator API" };
+        return { activities: [], totalCount: 0, error: "Failed to fetch from Viator API" };
     }
 }
 

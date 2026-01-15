@@ -9,14 +9,13 @@ export function Navbar() {
             <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-3 cursor-pointer group">
-                    <div className="size-10 relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-transform duration-300 group-hover:scale-110">
+                    <div className="h-12 w-auto relative transition-transform duration-300 group-hover:scale-105">
                         <img
-                            src="/brand/logo.png"
-                            alt="Logo"
-                            className="w-full h-full object-cover scale-150"
+                            src="/brand/logo_transparent.png"
+                            alt="TripVega"
+                            className="h-full w-auto object-contain"
                         />
                     </div>
-                    <h2 className="text-xl font-bold tracking-tight text-white">TRIPVEGA</h2>
                 </Link>
 
                 {/* Desktop Links */}

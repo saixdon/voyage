@@ -4,7 +4,7 @@ import { searchViatorProducts } from "@/lib/api/viator-client";
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q") || "";
-    const limit = parseInt(searchParams.get("limit") || "20");
+    const limit = parseInt(searchParams.get("limit") || "50");
 
     // Try to fetch from Viator Partner API
     const viatorResult = await searchViatorProducts(query, limit);
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
             source: "viator",
             activities: viatorResult.activities,
-            total: viatorResult.activities.length,
+            total: viatorResult.totalCount || viatorResult.activities.length,
         });
     }
 
