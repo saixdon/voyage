@@ -1,0 +1,10 @@
+﻿Testing Viator Production API...
+Status: 200
+Success! Data preview: {
+  "products": {
+    "totalCount": 4602,
+    "results": [
+      {
+        "productCode": "405135P4",
+        "title": "Transfer from Heathrow Airport to London or London to Heathrow",
+        "description": "We are a London-based company with over 10 years of experience, offering reliable transportation services with professional drivers. All our vehicles are fully insured, licensed, and authorised by Transport for London. We prioritise punctuality and ensure every journey is smooth and timely,

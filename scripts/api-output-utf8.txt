@@ -1,0 +1,8 @@
+﻿Testing Viator API /destinations...
+Status: 401
+Data: {
+  "code": "UNAUTHORIZED",
+  "message": "Invalid API Key",
+  "timestamp": "2026-01-16T13:01:28.704610184Z",
+  "trackingId": "5F723804:F553_0A5D0F7E:01BB_696A36A8_1A9E14:2481DC"
+}
