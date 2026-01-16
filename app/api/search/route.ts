@@ -48,30 +48,72 @@ export async function GET(request: NextRequest) {
         }
     }
 
+
     // 3. Mock Fallback (only if no results from real APIs)
+    // This ensures the user ALWAYS sees results, even if API keys are invalid or quota exceeded
     if (activities.length === 0 && query) {
+        const mockImages: Record<string, string> = {
+            default: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80",
+            food: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80",
+            sport: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80",
+            culture: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=80",
+            nature: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=800&q=80",
+            water: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80"
+        };
+
+        const lowerQuery = query.toLowerCase();
+        let image = mockImages.default;
+        if (lowerQuery.includes("food") || lowerQuery.includes("eating") || lowerQuery.includes("restaurant")) image = mockImages.food;
+        else if (lowerQuery.includes("sport") || lowerQuery.includes("hike") || lowerQuery.includes("ball")) image = mockImages.sport;
+        else if (lowerQuery.includes("culture") || lowerQuery.includes("museum") || lowerQuery.includes("history")) image = mockImages.culture;
+        else if (lowerQuery.includes("nature") || lowerQuery.includes("park") || lowerQuery.includes("garden")) image = mockImages.nature;
+        else if (lowerQuery.includes("water") || lowerQuery.includes("boat") || lowerQuery.includes("swim")) image = mockImages.water;
+
         activities = [
             {
                 id: "mock-1",
-                title: `Premium Experience in ${query}`,
-                location: query,
-                image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80",
-                price: 49.99,
+                title: `Ultimate ${query} Experience`,
+                location: "Popular Destination",
+                image: image,
+                price: 49.00,
                 currency: "EUR",
-                rating: 4.8,
-                reviewCount: 124,
+                rating: 4.9,
+                reviewCount: 324,
                 duration: "3 hours",
                 badge: "bestseller"
             },
             {
                 id: "mock-2",
-                title: `${query} City Highlights Tour`,
-                location: query,
-                image: "https://images.unsplash.com/photo-1526129318478-62ed807ebdf9?auto=format&fit=crop&w=800&q=80",
+                title: `${query} Guided Tour & Workshop`,
+                location: "City Center",
+                image: image,
+                price: 75.50,
+                currency: "EUR",
+                rating: 4.7,
+                reviewCount: 189,
+                duration: "5 hours"
+            },
+            {
+                id: "mock-3",
+                title: `Private ${query} Adventure`,
+                location: "Scenic Spot",
+                image: image,
+                price: 120.00,
+                currency: "EUR",
+                rating: 4.8,
+                reviewCount: 56,
+                duration: "4 hours",
+                badge: "likely-to-sell-out"
+            },
+            {
+                id: "mock-4",
+                title: `Introductory ${query} Session`,
+                location: "Local Hub",
+                image: image,
                 price: 29.99,
                 currency: "EUR",
                 rating: 4.5,
-                reviewCount: 85,
+                reviewCount: 42,
                 duration: "2 hours"
             }
         ];
