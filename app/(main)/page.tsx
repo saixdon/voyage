@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { SearchBar } from "@/components/features/SearchBar";
 
 export default function HomePage() {
@@ -72,72 +73,27 @@ export default function HomePage() {
                         Browse by Category
                     </h3>
                     <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-4">
-                        <a
-                            className="flex shrink-0 items-center gap-3 h-14 px-6 rounded-2xl bg-card-dark border border-white/5 hover:border-primary/50 hover:bg-card-hover transition-all duration-300 group"
-                            href="#"
-                        >
-                            <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">
-                                restaurant
-                            </span>
-                            <span className="text-white font-medium whitespace-nowrap">
-                                Food &amp; Drink
-                            </span>
-                        </a>
-                        <a
-                            className="flex shrink-0 items-center gap-3 h-14 px-6 rounded-2xl bg-card-dark border border-white/5 hover:border-primary/50 hover:bg-card-hover transition-all duration-300 group"
-                            href="#"
-                        >
-                            <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">
-                                sports_basketball
-                            </span>
-                            <span className="text-white font-medium whitespace-nowrap">
-                                Sports
-                            </span>
-                        </a>
-                        <a
-                            className="flex shrink-0 items-center gap-3 h-14 px-6 rounded-2xl bg-card-dark border border-white/5 hover:border-primary/50 hover:bg-card-hover transition-all duration-300 group"
-                            href="#"
-                        >
-                            <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">
-                                museum
-                            </span>
-                            <span className="text-white font-medium whitespace-nowrap">
-                                Culture
-                            </span>
-                        </a>
-                        <a
-                            className="flex shrink-0 items-center gap-3 h-14 px-6 rounded-2xl bg-card-dark border border-white/5 hover:border-primary/50 hover:bg-card-hover transition-all duration-300 group"
-                            href="#"
-                        >
-                            <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">
-                                landscape
-                            </span>
-                            <span className="text-white font-medium whitespace-nowrap">
-                                Nature
-                            </span>
-                        </a>
-                        <a
-                            className="flex shrink-0 items-center gap-3 h-14 px-6 rounded-2xl bg-card-dark border border-white/5 hover:border-primary/50 hover:bg-card-hover transition-all duration-300 group"
-                            href="#"
-                        >
-                            <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">
-                                hiking
-                            </span>
-                            <span className="text-white font-medium whitespace-nowrap">
-                                Adventures
-                            </span>
-                        </a>
-                        <a
-                            className="flex shrink-0 items-center gap-3 h-14 px-6 rounded-2xl bg-card-dark border border-white/5 hover:border-primary/50 hover:bg-card-hover transition-all duration-300 group"
-                            href="#"
-                        >
-                            <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">
-                                sailing
-                            </span>
-                            <span className="text-white font-medium whitespace-nowrap">
-                                Water Activities
-                            </span>
-                        </a>
+                        {[
+                            { icon: "restaurant", label: "Food & Drink", query: "Food Tour" },
+                            { icon: "sports_basketball", label: "Sports", query: "Sports Tour" },
+                            { icon: "museum", label: "Culture", query: "Cultural Tour" },
+                            { icon: "landscape", label: "Nature", query: "Nature Tour" },
+                            { icon: "hiking", label: "Adventures", query: "Adventure Tour" },
+                            { icon: "sailing", label: "Water Activities", query: "Water Activities" },
+                        ].map((category) => (
+                            <Link
+                                key={category.label}
+                                className="flex shrink-0 items-center gap-3 h-14 px-6 rounded-2xl bg-card-dark border border-white/5 hover:border-primary/50 hover:bg-card-hover transition-all duration-300 group"
+                                href={`/search?q=${encodeURIComponent(category.query)}`}
+                            >
+                                <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">
+                                    {category.icon}
+                                </span>
+                                <span className="text-white font-medium whitespace-nowrap">
+                                    {category.label}
+                                </span>
+                            </Link>
+                        ))}
                     </div>
                 </section>
 
@@ -165,7 +121,7 @@ export default function HomePage() {
                     {/* Bento Grid Layout */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]">
                         {/* Large Card - Rome */}
-                        <div className="relative md:col-span-2 md:row-span-2 group overflow-hidden rounded-3xl cursor-pointer">
+                        <Link href="/search?q=Rome" className="relative md:col-span-2 md:row-span-2 group overflow-hidden rounded-3xl cursor-pointer block">
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-20"></div>
                             <img
@@ -186,14 +142,14 @@ export default function HomePage() {
                                     </div>
                                     <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
                                         <span className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-white/20">
-                                            1,240 Tours
+                                            Explore Tours
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                         {/* Tall Card - Paris */}
-                        <div className="relative md:col-span-1 md:row-span-2 group overflow-hidden rounded-3xl cursor-pointer">
+                        <Link href="/search?q=Paris" className="relative md:col-span-1 md:row-span-2 group overflow-hidden rounded-3xl cursor-pointer block">
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-20"></div>
                             <img
@@ -211,13 +167,13 @@ export default function HomePage() {
                                         <span>France</span>
                                     </div>
                                     <span className="inline-block opacity-0 group-hover:opacity-100 transition-opacity duration-500 text-sm text-primary font-medium">
-                                        Discover 850+ activities
+                                        Explore Activities →
                                     </span>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                         {/* Regular Card - Barcelona */}
-                        <div className="relative group overflow-hidden rounded-3xl cursor-pointer">
+                        <Link href="/search?q=Barcelona" className="relative group overflow-hidden rounded-3xl cursor-pointer block">
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-20"></div>
                             <img
@@ -231,9 +187,9 @@ export default function HomePage() {
                                     <p className="text-gray-300 text-sm">Spain</p>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                         {/* Regular Card - New York */}
-                        <div className="relative group overflow-hidden rounded-3xl cursor-pointer md:col-span-2">
+                        <Link href="/search?q=New%20York" className="relative group overflow-hidden rounded-3xl cursor-pointer md:col-span-2 block">
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-20"></div>
                             <img
@@ -252,7 +208,7 @@ export default function HomePage() {
                                     </span>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     </div>
                 </section>
 
@@ -277,7 +233,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex gap-6 overflow-x-auto hide-scrollbar pb-10 snap-x snap-mandatory">
                         {/* Card 1 - Colosseum */}
-                        <div className="min-w-[300px] md:min-w-[340px] snap-center group">
+                        <Link href="/search?q=Colosseum" className="min-w-[300px] md:min-w-[340px] snap-center group block">
                             <div className="relative aspect-[4/5] overflow-hidden rounded-2xl mb-4">
                                 <div className="absolute top-3 left-3 bg-white/10 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold text-white border border-white/10 z-20">
                                     Bestseller
@@ -323,9 +279,9 @@ export default function HomePage() {
                                     </span>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                         {/* Card 2 - Louvre */}
-                        <div className="min-w-[300px] md:min-w-[340px] snap-center group">
+                        <Link href="/search?q=Louvre" className="min-w-[300px] md:min-w-[340px] snap-center group block">
                             <div className="relative aspect-[4/5] overflow-hidden rounded-2xl mb-4">
                                 <div className="absolute top-3 left-3 bg-primary/80 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold text-white border border-white/10 z-20">
                                     Likely to sell out
@@ -363,9 +319,9 @@ export default function HomePage() {
                                     <span className="text-white font-bold">From €17</span>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                         {/* Card 3 - Great Barrier Reef */}
-                        <div className="min-w-[300px] md:min-w-[340px] snap-center group">
+                        <Link href="/search?q=Great%20Barrier%20Reef" className="min-w-[300px] md:min-w-[340px] snap-center group block">
                             <div className="relative aspect-[4/5] overflow-hidden rounded-2xl mb-4">
                                 <img
                                     alt="Diving underwater in the Great Barrier Reef"
@@ -400,9 +356,9 @@ export default function HomePage() {
                                     <span className="text-white font-bold">From €140</span>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                         {/* Card 4 - Burj Khalifa */}
-                        <div className="min-w-[300px] md:min-w-[340px] snap-center group">
+                        <Link href="/search?q=Burj%20Khalifa" className="min-w-[300px] md:min-w-[340px] snap-center group block">
                             <div className="relative aspect-[4/5] overflow-hidden rounded-2xl mb-4">
                                 <div className="absolute top-3 left-3 bg-white/10 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold text-white border border-white/10 z-20">
                                     Top Pick
@@ -440,7 +396,7 @@ export default function HomePage() {
                                     <span className="text-white font-bold">From €45</span>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     </div>
                 </section>
 

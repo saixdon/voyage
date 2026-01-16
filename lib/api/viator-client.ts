@@ -202,7 +202,7 @@ export async function searchViatorProducts(
                 },
                 sorting: {
                     sort: "TRAVELER_RATING",
-                    order: "DESC",
+                    order: "DESCENDING",
                 },
                 currency: "EUR",
             }),
