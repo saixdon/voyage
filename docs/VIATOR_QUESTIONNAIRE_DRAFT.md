@@ -65,9 +65,7 @@ We may expand to full catalog access in the future.
 
 ## ENDPOINT USAGE TABLE
 
-> ⚠️ **Choose ONE model**: Ingestion OR Real-Time. Do not mix!
 
-### Option A: INGESTION MODEL (Recommended for Full Access)
 
 | Endpoint | Ingestion | Real-time | Additional notes |
 |----------|-----------|-----------|------------------|
@@ -99,53 +97,15 @@ We may expand to full catalog access in the future.
 | `/bookings/{booking-reference}/cancel-quote` | - | Yes | Before cancellation |
 | `/bookings/{booking-reference}/cancel` | - | Yes | User-initiated cancellation |
 
-### Option B: REAL-TIME MODEL (Current Implementation)
-
-| Endpoint | Ingestion | Real-time | Additional notes |
-|----------|-----------|-----------|------------------|
-| `/products/modified-since` | - | - | Not used |
-| `/products/bulk` | - | - | Not used |
-| `/products/{product-code}` | - | Yes | For single product selected from search. Cache 1h. |
-| `/availability/schedules/modified-since` | - | - | Not used |
-| `/availability/schedules/bulk` | - | - | Not used |
-| `/availability/schedules/{product-code}` | - | Yes | For single product. Cache 1h. |
-| `/products/search` | - | Yes | User search. Max 50/call. Paginated. Cache 1h. |
-| `/search/freetext` | - | Yes | User search. Max 50/call. Paginated. Cache 1h. |
-| `/products/tags` | Weekly | - | Cached |
-| `/products/booking-questions` | Monthly | - | Cached |
-| `/locations/bulk` | Monthly | - | Cached |
-| `/exchange-rates` | Daily | - | Based on expiry timestamp |
-| `/reviews/product` | Weekly | - | Cached, provider indicated |
-| `/suppliers/search/product-codes` | Weekly | - | Cached |
-| `/destinations` | Weekly | - | Cached |
-| `/attractions/search` | Weekly | - | Cached |
-| `/attractions/{attraction-id}` | Weekly | - | Cached |
-| `/availability/check` | - | Yes | When user selects date/pax + before booking |
-| `/bookings/cart/hold` | - | Yes | Before payment details |
-| `/bookings/cart/book` | - | Yes | At checkout |
-| `/v1/checkoutsessions/{sessionToken}/paymentaccounts` | - | Yes | For payment processing |
-| `/bookings/status` | - | Yes | For pending bookings (hourly) |
-| `/bookings/modified-since` | Every 3 min | - | For supplier cancellations |
-| `/bookings/modified-since/acknowledge` | - | Yes | Within 5 min of cancellation |
-| `/bookings/cancel-reasons` | Monthly | - | Cached |
-| `/bookings/{booking-reference}/cancel-quote` | - | Yes | Before cancellation |
-| `/bookings/{booking-reference}/cancel` | - | Yes | User-initiated cancellation |
-
 ---
 
 ## PRODUCT SEARCH
 
 ### 6. Do you provide search results to customers that are returned by our search endpoint or do you return search results directly from your database?
-**Response (Ingestion Model)**:
+**Response**:
 ```
 Search results are returned directly from our database (Supabase).
 Product data is ingested via /products/modified-since every 20 minutes.
-```
-
-**Response (Real-Time Model)**:
-```
-Search results are returned from the Viator /products/search endpoint in real-time.
-Results are cached for up to 1 hour.
 ```
 
 ---
@@ -153,11 +113,8 @@ Results are cached for up to 1 hour.
 ### 7. If you're using the search endpoint(s), can you confirm pagination is applied (max 50 products, additional requests only when customer wants more)?
 **Response**:
 ```
-Yes, confirmed. We implement pagination with:
-- Maximum 50 products per request (count: 50)
-- First request: start: 1
-- Subsequent requests only when user clicks "Load More" or navigates to next page
-- We do NOT automatically pull all products from a destination
+N/A. We do not use the Viator search endpoints. 
+Search is performed against our local database (Ingestion Model).
 ```
 
 ---
@@ -267,7 +224,7 @@ Yes, we have implemented a 120 second timeout for all Viator API services, as re
 ## CHECKLIST BEFORE SENDING
 
 - [ ] Company name filled in
-- [ ] Chose model: Ingestion OR Real-Time
+- [x] Chose model: Ingestion
 - [ ] Confirmed Google Places API access status
 - [ ] Reviewed all responses
 - [ ] Endpoint usage table completed

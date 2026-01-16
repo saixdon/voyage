@@ -44,24 +44,26 @@ export function ActivityCard({
 
     const renderStars = () => {
         const stars = [];
-        const fullStars = Math.floor(rating);
-        const hasHalfStar = rating % 1 >= 0.5;
+        // Round to nearest 0.5
+        const roundedRating = Math.round(rating * 2) / 2;
+        const fullStars = Math.floor(roundedRating);
+        const hasHalfStar = roundedRating % 1 !== 0;
 
         for (let i = 0; i < fullStars; i++) {
             stars.push(
-                <span key={i} className="material-symbols-outlined text-base">
+                <span key={`full-${i}`} className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
                     star
                 </span>
             );
         }
         if (hasHalfStar) {
             stars.push(
-                <span key="half" className="material-symbols-outlined text-base">
+                <span key="half" className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
                     star_half
                 </span>
             );
         }
-        const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+        const emptyStars = 5 - Math.ceil(roundedRating);
         for (let i = 0; i < emptyStars; i++) {
             stars.push(
                 <span key={`empty-${i}`} className="material-symbols-outlined text-base">

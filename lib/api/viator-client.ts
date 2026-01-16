@@ -200,6 +200,10 @@ export async function searchViatorProducts(
                 filtering: {
                     destination: destinationId,
                 },
+                sorting: {
+                    sort: "TRAVELER_RATING",
+                    order: "DESC",
+                },
                 currency: "EUR",
             }),
             next: { revalidate: 300 }, // Cache for 5 minutes
@@ -230,6 +234,17 @@ export async function searchViatorProducts(
             duration: formatDuration(product.duration),
             productCode: product.productCode,
         }));
+
+        // Secondary manual sort to ensure best results are at the top
+        // (Viator API sorting can sometimes be inconsistent with 0-rating products)
+        activities.sort((a, b) => {
+            // First by rating (DESC)
+            if (b.rating !== a.rating) {
+                return b.rating - a.rating;
+            }
+            // Then by review count (DESC)
+            return b.reviewCount - a.reviewCount;
+        });
 
         return { activities, totalCount: data.totalCount };
     } catch (error) {
