@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { Navbar } from "@/components/features/Navbar";
+import { Footer } from "@/components/features/Footer";
 
 export const metadata: Metadata = {
     title: "TripVega - Discover the World",
@@ -7,16 +10,13 @@ export const metadata: Metadata = {
         "Premium tours, activities, and experiences worldwide. Find and book unique travel experiences with TripVega.",
 };
 
-import { Navbar } from "@/components/features/Navbar";
-import { Footer } from "@/components/features/Footer";
-
 export default function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className="dark">
+        <html lang="en" suppressHydrationWarning>
             <head>
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link
@@ -34,11 +34,16 @@ export default function RootLayout({
                 />
             </head>
             <body className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display overflow-x-hidden selection:bg-primary selection:text-white">
-                <Navbar />
-                <main className="min-h-screen">
-                    {children}
-                </main>
-                <Footer />
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="dark"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    <Navbar />
+                    <main className="min-h-screen">{children}</main>
+                    <Footer />
+                </ThemeProvider>
             </body>
         </html>
     );

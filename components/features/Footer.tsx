@@ -33,6 +33,11 @@ export function Footer() {
                                 </Link>
                             </li>
                             <li>
+                                <Link href="/destinations" className="text-gray-400 hover:text-primary transition-colors text-sm font-medium text-white/90">
+                                    Interactive World Map
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/search?q=Germany" className="text-gray-400 hover:text-primary transition-colors text-sm">
                                     Germany
                                 </Link>

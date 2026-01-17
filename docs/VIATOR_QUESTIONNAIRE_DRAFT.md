@@ -70,10 +70,10 @@ We may expand to full catalog access in the future.
 | Endpoint | Ingestion | Real-time | Additional notes |
 |----------|-----------|-----------|------------------|
 | `/products/modified-since` | Every 20 min | - | Using cursor parameter |
-| `/products/bulk` | - | - | Not used |
-| `/products/{product-code}` | - | - | Not used (data from ingestion) |
+| `/products/bulk` | As needed | - | To fetch full product details (content) after modified-since |
+| `/products/{product-code}` | As needed | - | To fetch single product details (fallback) |
 | `/availability/schedules/modified-since` | Every 20 min | - | Using cursor parameter |
-| `/availability/schedules/bulk` | - | - | Not used |
+| `/availability/schedules/bulk` | As needed | - | To fetch full schedules after modified-since |
 | `/availability/schedules/{product-code}` | - | - | Not used (data from ingestion) |
 | `/products/search` | - | - | Not used (search from own DB) |
 | `/search/freetext` | - | - | Not used (search from own DB) |
