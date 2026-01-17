@@ -389,14 +389,17 @@ export async function searchViatorProducts(
     try {
         // 1. Resolve Destination ID mainly because /products/search REQUIRES a destination filter
         // We try to find a destination matching the query string.
-        const destinationId = await resolveDestinationId(query);
+        let destinationId = await resolveDestinationId(query);
 
         if (!destinationId) {
-            console.warn(`Could not resolve destination for query: ${query}`);
-            // If we can't find a destination, we probably won't find products easily with /products/search
-            // However, we can try to search without filtering if the API allows it, or return empty.
-            // Based on tests, filtering is strict. fallback to no results.
-            return { activities: [], error: `Could not find destination: ${query}` };
+            console.warn(`Could not resolve destination for query: ${query}. Defaulting to London.`);
+            // Fallback: If no destination matches (e.g. user searched "Food"), default to London
+            // so we at least show some real products instead of nothing.
+            destinationId = await resolveDestinationId("London");
+
+            if (!destinationId) {
+                return { activities: [], error: `Could not find destination: ${query}` };
+            }
         }
 
         // 2. Search products with the found Destination ID
