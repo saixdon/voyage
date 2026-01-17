@@ -1,10 +1,41 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { SearchBar } from "@/components/features/SearchBar";
+import { TopRatedSection } from "@/components/features/TopRatedSection";
+
+interface Category {
+    id: number;
+    name: string;
+    icon: string;
+    query: string;
+}
 
 export default function HomePage() {
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+    // Fetch categories from API on mount
+    useEffect(() => {
+        async function loadCategories() {
+            try {
+                const response = await fetch("/api/viator/tags?locale=en");
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.categories?.length > 0) {
+                        setCategories(data.categories);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to load categories:", error);
+                // Keep default categories on error
+            } finally {
+                setIsLoadingCategories(false);
+            }
+        }
+        loadCategories();
+    }, []);
     return (
         <>
             {/* Hero Section */}
@@ -73,27 +104,33 @@ export default function HomePage() {
                         Browse by Category
                     </h3>
                     <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-4">
-                        {[
-                            { icon: "restaurant", label: "Food & Drink", query: "Food Tour" },
-                            { icon: "sports_basketball", label: "Sports", query: "Sports Tour" },
-                            { icon: "museum", label: "Culture", query: "Cultural Tour" },
-                            { icon: "landscape", label: "Nature", query: "Nature Tour" },
-                            { icon: "hiking", label: "Adventures", query: "Adventure Tour" },
-                            { icon: "sailing", label: "Water Activities", query: "Water Activities" },
-                        ].map((category) => (
-                            <Link
-                                key={category.label}
-                                className="flex shrink-0 items-center gap-3 h-14 px-6 rounded-2xl bg-card-dark border border-white/5 hover:border-primary/50 hover:bg-card-hover transition-all duration-300 group"
-                                href={`/search?q=${encodeURIComponent(category.query)}`}
-                            >
-                                <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">
-                                    {category.icon}
-                                </span>
-                                <span className="text-white font-medium whitespace-nowrap">
-                                    {category.label}
-                                </span>
-                            </Link>
-                        ))}
+                        {isLoadingCategories ? (
+                            // Loading skeleton
+                            [...Array(6)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="flex shrink-0 items-center gap-3 h-14 px-6 rounded-2xl bg-card-dark border border-white/5 animate-pulse"
+                                >
+                                    <div className="w-6 h-6 rounded bg-white/10"></div>
+                                    <div className="w-20 h-4 rounded bg-white/10"></div>
+                                </div>
+                            ))
+                        ) : (
+                            categories.map((category) => (
+                                <Link
+                                    key={category.id}
+                                    className="flex shrink-0 items-center gap-3 h-14 px-6 rounded-2xl bg-card-dark border border-white/5 hover:border-primary/50 hover:bg-card-hover transition-all duration-300 group"
+                                    href={`/search?q=${encodeURIComponent(category.query)}`}
+                                >
+                                    <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">
+                                        {category.icon}
+                                    </span>
+                                    <span className="text-white font-medium whitespace-nowrap">
+                                        {category.name}
+                                    </span>
+                                </Link>
+                            ))
+                        )}
                     </div>
                 </section>
 
@@ -213,192 +250,7 @@ export default function HomePage() {
                 </section>
 
                 {/* Top Experiences Carousel */}
-                <section className="mb-20">
-                    <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-3xl font-bold text-white">
-                            Top Rated Experiences
-                        </h2>
-                        <div className="flex gap-2">
-                            <button className="size-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
-                                <span className="material-symbols-outlined text-white">
-                                    arrow_back
-                                </span>
-                            </button>
-                            <button className="size-10 rounded-full bg-primary flex items-center justify-center hover:bg-primary/80 transition-colors">
-                                <span className="material-symbols-outlined text-white">
-                                    arrow_forward
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="flex gap-6 overflow-x-auto hide-scrollbar pb-10 snap-x snap-mandatory">
-                        {/* Card 1 - Colosseum */}
-                        <Link href="/search?q=Colosseum" className="min-w-[300px] md:min-w-[340px] snap-center group block">
-                            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl mb-4">
-                                <div className="absolute top-3 left-3 bg-white/10 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold text-white border border-white/10 z-20">
-                                    Bestseller
-                                </div>
-                                <div className="absolute top-3 right-3 bg-white text-black p-1.5 rounded-full z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span className="material-symbols-outlined text-sm block">
-                                        favorite
-                                    </span>
-                                </div>
-                                <img
-                                    alt="Interior view of the Colosseum in Rome"
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIrYgUY-fL88EexfBUukYoEscAoH9BnoFAhxe3dYuaD1oXUFSwMA-qtonVaaph38VtFX0vc3kL-9fdjG6C1vpyearFZWGObvPA11cJ0fKF1sassvtOHZ3pLdnjrVgBtI6ZlN9ll6B-45wXl1nt330OJXjwHZ06H7TomXp30lOtnbdCoB7QULkcs-dA1L6FrRPCIaKGFJp36ISnvh6iLBj55O129jDWdXxytyLz6UuG-NiQol8q-zcqS9libTwB9dwH5jKfyPXH4GR5"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-1 text-yellow-400 text-sm">
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star_half
-                                    </span>
-                                    <span className="text-gray-400 ml-1 text-xs">(3,204)</span>
-                                </div>
-                                <h3 className="text-white text-lg font-bold leading-tight group-hover:text-primary transition-colors">
-                                    Colosseum, Roman Forum &amp; Palatine Hill Priority Access
-                                </h3>
-                                <p className="text-gray-400 text-sm">Guided Tour • 3 hours</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <span className="text-white font-bold">From €55</span>
-                                    <span className="text-gray-500 text-xs line-through">
-                                        €65
-                                    </span>
-                                </div>
-                            </div>
-                        </Link>
-                        {/* Card 2 - Louvre */}
-                        <Link href="/search?q=Louvre" className="min-w-[300px] md:min-w-[340px] snap-center group block">
-                            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl mb-4">
-                                <div className="absolute top-3 left-3 bg-primary/80 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold text-white border border-white/10 z-20">
-                                    Likely to sell out
-                                </div>
-                                <img
-                                    alt="Inside view of the Louvre Museum in Paris"
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrtnm7-DMa2PT8F8CRvd_8LX-vGGsnCTwu6jTIFEckGgUeaZJkFhF_ztgqKDifr2Jw2PwU4taH2bV5g66F3Ip4qALkRqBRPrGyNftf5dtm7dKwW3Qk_i1lq0LS8bokuheh2bgBuxuc4k9nPFDKiK8VdzjxJW2N1Bzn7OG7030gxNvC2vxLpkR6OaIdsbwmkpRQoIeq6YrsRCnbg59v8lSOVFr6rf6XoWHpDA3ncS042DjW_sEFfb4C-w-34HOc-H2cHjWkyotKXcTA"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-1 text-yellow-400 text-sm">
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="text-gray-400 ml-1 text-xs">(12,450)</span>
-                                </div>
-                                <h3 className="text-white text-lg font-bold leading-tight group-hover:text-primary transition-colors">
-                                    Louvre Museum Timed-Entrance Ticket
-                                </h3>
-                                <p className="text-gray-400 text-sm">Entry Ticket • Valid 1 day</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <span className="text-white font-bold">From €17</span>
-                                </div>
-                            </div>
-                        </Link>
-                        {/* Card 3 - Great Barrier Reef */}
-                        <Link href="/search?q=Great%20Barrier%20Reef" className="min-w-[300px] md:min-w-[340px] snap-center group block">
-                            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl mb-4">
-                                <img
-                                    alt="Diving underwater in the Great Barrier Reef"
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjrh4KBJEBKf9klt3hQWbEYdAGL-DnKofGS4Vnb-NJjr_BGu3CfoOaSZBsu_B2jT43XZomRwzX6Z5uLW4nNo6ZzXV1_kIhfaNBKdC8f9sw8RvVrudRHKd-5qZA4dt7-5_FZawXFkgZgRm3eJNiUGMUPbwx5ztREjuM61mzp4x9tuUVzC6VWXqFWM9yLC6Jsobw0H1IJYhzCy-J5OnEWKweBdEq_7Ze3hspxxZWix6GLJodkSy60OuzZXqjf3IGMxJInM-dm7qpCFbh"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-1 text-yellow-400 text-sm">
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star_border
-                                    </span>
-                                    <span className="text-gray-400 ml-1 text-xs">(890)</span>
-                                </div>
-                                <h3 className="text-white text-lg font-bold leading-tight group-hover:text-primary transition-colors">
-                                    Great Barrier Reef Snorkeling &amp; Diving Cruise
-                                </h3>
-                                <p className="text-gray-400 text-sm">Water Activity • 8 hours</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <span className="text-white font-bold">From €140</span>
-                                </div>
-                            </div>
-                        </Link>
-                        {/* Card 4 - Burj Khalifa */}
-                        <Link href="/search?q=Burj%20Khalifa" className="min-w-[300px] md:min-w-[340px] snap-center group block">
-                            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl mb-4">
-                                <div className="absolute top-3 left-3 bg-white/10 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold text-white border border-white/10 z-20">
-                                    Top Pick
-                                </div>
-                                <img
-                                    alt="Burj Khalifa in Dubai towering over the city"
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNfzJXVoFe9sOJSrghYNPD8ayZf79nvElA6P3n2Lb8O6W6VGjdzO4H86-lvrrpgLNKxuhKpF2rcPc0YRvgM7HBqKJaESP1KJGm_1fzPADVPF-UjN9pcHV_5VWidJ1q1GI-zxkZoOIvIP8BcAGwUU1gmxb2L-xhQhsTVQjFZFZUkNvQ-IqPeTrJCLZ-uiDXXckor3XIKqVP8GrEuyPQ6-E5REjg7qRX_CvpgW9hi_qGWT_Oc-RpntocOyWkzIgVrG9dt4dZTD_1B3PH"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-1 text-yellow-400 text-sm">
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="material-symbols-outlined text-base">
-                                        star
-                                    </span>
-                                    <span className="text-gray-400 ml-1 text-xs">(15k+)</span>
-                                </div>
-                                <h3 className="text-white text-lg font-bold leading-tight group-hover:text-primary transition-colors">
-                                    Dubai: Burj Khalifa Level 124 &amp; 125 Entry Ticket
-                                </h3>
-                                <p className="text-gray-400 text-sm">Entry Ticket • 1.5 hours</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <span className="text-white font-bold">From €45</span>
-                                </div>
-                            </div>
-                        </Link>
-                    </div>
-                </section>
+                <TopRatedSection />
 
                 {/* Newsletter / CTA Section */}
                 <section className="relative rounded-3xl overflow-hidden bg-card-dark border border-white/5 py-16 px-6 md:px-20 text-center">

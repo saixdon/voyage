@@ -89,6 +89,201 @@ let destinationsCache: { destinationId: number; name: string; type: string }[] |
 let destinationsCacheTime = 0;
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
+// Cache for tags
+let tagsCache: ViatorTag[] | null = null;
+let tagsCacheTime = 0;
+
+export interface ViatorTag {
+    tagId: number;
+    allNamesByLocale: Record<string, string>;
+    parentTagIds?: number[];
+}
+
+export interface TransformedTag {
+    id: number;
+    name: string;
+    icon: string;
+    query: string;
+}
+
+// Icon mapping for common tag categories
+const TAG_ICON_MAPPING: Record<string, string> = {
+    // Food & Drink
+    "food": "restaurant",
+    "drink": "restaurant",
+    "culinary": "restaurant",
+    "wine": "wine_bar",
+    "beer": "sports_bar",
+    "cooking": "soup_kitchen",
+    // Sports & Adventures
+    "sports": "sports_basketball",
+    "adventure": "hiking",
+    "hiking": "hiking",
+    "biking": "pedal_bike",
+    "cycling": "pedal_bike",
+    "climbing": "landscape",
+    "skiing": "downhill_skiing",
+    "golf": "golf_course",
+    // Culture & History
+    "culture": "museum",
+    "cultural": "museum",
+    "museum": "museum",
+    "history": "account_balance",
+    "historical": "account_balance",
+    "art": "palette",
+    "architecture": "domain",
+    "heritage": "castle",
+    // Nature & Outdoors
+    "nature": "landscape",
+    "outdoor": "park",
+    "park": "park",
+    "garden": "yard",
+    "wildlife": "pets",
+    "safari": "pets",
+    "mountain": "terrain",
+    "forest": "forest",
+    // Water Activities
+    "water": "sailing",
+    "beach": "beach_access",
+    "diving": "scuba_diving",
+    "snorkeling": "scuba_diving",
+    "boat": "sailing",
+    "cruise": "directions_boat",
+    "kayak": "kayaking",
+    "surfing": "surfing",
+    "swimming": "pool",
+    // Tours & Sightseeing
+    "tour": "tour",
+    "sightseeing": "visibility",
+    "walking": "directions_walk",
+    "bus": "directions_bus",
+    "city": "location_city",
+    // Entertainment
+    "entertainment": "celebration",
+    "show": "theater_comedy",
+    "nightlife": "nightlife",
+    "music": "music_note",
+    "concert": "music_note",
+    // Wellness
+    "spa": "spa",
+    "wellness": "spa",
+    "yoga": "self_improvement",
+    "relaxation": "self_improvement",
+    // Shopping
+    "shopping": "shopping_bag",
+    "market": "storefront",
+    // Default
+    "default": "explore",
+};
+
+// Get icon for a tag based on its name
+function getIconForTag(tagName: string): string {
+    const nameLower = tagName.toLowerCase();
+
+    for (const [keyword, icon] of Object.entries(TAG_ICON_MAPPING)) {
+        if (nameLower.includes(keyword)) {
+            return icon;
+        }
+    }
+
+    return TAG_ICON_MAPPING.default;
+}
+
+// Fetch all tags from Viator API
+export async function fetchViatorTags(): Promise<ViatorTag[]> {
+    // Return cached data if still valid
+    if (tagsCache && Date.now() - tagsCacheTime < CACHE_DURATION) {
+        return tagsCache;
+    }
+
+    if (!VIATOR_API_KEY) {
+        console.error("Viator API key not configured");
+        return [];
+    }
+
+    try {
+        const response = await fetch(`${VIATOR_API_BASE}/products/tags`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json;version=2.0",
+                "Accept-Language": "de",
+                "exp-api-key": VIATOR_API_KEY,
+            },
+        });
+
+        if (!response.ok) {
+            console.error("Failed to fetch tags:", response.status);
+            return [];
+        }
+
+        const data = await response.json();
+        if (data.tags && Array.isArray(data.tags)) {
+            tagsCache = data.tags;
+            tagsCacheTime = Date.now();
+            console.log(`Cached ${data.tags.length} Viator tags`);
+            return data.tags;
+        }
+        return [];
+    } catch (error) {
+        console.error("Viator Tags Fetch Error:", error);
+        return [];
+    }
+}
+
+// Curated main category tag IDs from Viator (these are the most relevant for travel)
+// These IDs were identified from the Viator tag hierarchy
+const CURATED_CATEGORY_CONFIG: { tagId: number; icon: string; fallbackName: string; query: string }[] = [
+    { tagId: 21911, icon: "restaurant", fallbackName: "Food and Drink", query: "Food Tour" },
+    { tagId: 21909, icon: "hiking", fallbackName: "Outdoor Activities", query: "Outdoor Adventure" },
+    { tagId: 21910, icon: "museum", fallbackName: "Art and Culture", query: "Kultur Museum" },
+    { tagId: 21912, icon: "confirmation_number", fallbackName: "Tickets", query: "Tickets Attractions" },
+    { tagId: 21913, icon: "sailing", fallbackName: "Tours & Cruises", query: "Boat Tour Cruise" },
+    { tagId: 21915, icon: "school", fallbackName: "Classes & Workshops", query: "Workshop Class" },
+    { tagId: 21914, icon: "directions_bus", fallbackName: "Transport", query: "Transfer Airport" },
+    { tagId: 21916, icon: "celebration", fallbackName: "Special Occasions", query: "Special Event" },
+];
+
+// Get transformed tags suitable for display
+export async function getDisplayCategories(locale = "en"): Promise<TransformedTag[]> {
+    const tags = await fetchViatorTags();
+
+    if (tags.length === 0) {
+        // Return curated categories with fallback names if API fails
+        return CURATED_CATEGORY_CONFIG.map(config => ({
+            id: config.tagId,
+            name: config.fallbackName,
+            icon: config.icon,
+            query: config.query,
+        }));
+    }
+
+    // Find our curated categories in the API response
+    const categories: TransformedTag[] = [];
+
+    for (const config of CURATED_CATEGORY_CONFIG) {
+        const tag = tags.find(t => t.tagId === config.tagId);
+        if (tag) {
+            const name = tag.allNamesByLocale[locale] || tag.allNamesByLocale["en"] || config.fallbackName;
+            categories.push({
+                id: config.tagId,
+                name,
+                icon: config.icon,
+                query: config.query,
+            });
+        } else {
+            // Use fallback if tag not found
+            categories.push({
+                id: config.tagId,
+                name: config.fallbackName,
+                icon: config.icon,
+                query: config.query,
+            });
+        }
+    }
+
+    return categories;
+}
+
 // Fetch all destinations from Viator and cache them
 async function fetchAllDestinations(): Promise<{ destinationId: number; name: string; type: string }[]> {
     // Return cached data if still valid
@@ -187,7 +382,7 @@ export async function searchViatorProducts(
             method: "POST",
             headers: {
                 "Accept": "application/json;version=2.0",
-                "Accept-Language": "de",
+                "Accept-Language": "en",
                 "exp-api-key": VIATOR_API_KEY,
                 "Content-Type": "application/json",
             },
