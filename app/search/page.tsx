@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import React, { useEffect, useState, useMemo } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { SearchBar } from "@/components/features/SearchBar";
 import { ActivityCard } from "@/components/features/ActivityCard";
 import { Activity } from "@/types";
@@ -9,19 +9,34 @@ import { Activity } from "@/types";
 import { Suspense } from "react";
 
 interface SearchResult {
-    source: "gyg" | "mock";
+    source: "gyg" | "viator" | "mock";
     activities: Activity[];
     total: number;
     gygError?: string | null;
 }
 
+// Category filter definitions
+const CATEGORY_FILTERS = [
+    { id: "all", label: "All", icon: "apps" },
+    { id: "food", label: "Food & Drink", icon: "restaurant", keywords: ["food", "culinary", "wine", "beer", "cooking", "gastronomy", "tasting", "dinner", "lunch", "brunch", "restaurant"] },
+    { id: "sport", label: "Sport & Outdoor", icon: "sports_soccer", keywords: ["sport", "hiking", "biking", "cycling", "climbing", "kayak", "surf", "ski", "golf", "adventure", "outdoor"] },
+    { id: "culture", label: "Art & Culture", icon: "museum", keywords: ["museum", "art", "gallery", "history", "heritage", "architecture", "culture", "monument", "theater", "theatre", "church", "cathedral", "palace"] },
+    { id: "nature", label: "Nature", icon: "park", keywords: ["nature", "park", "garden", "wildlife", "safari", "forest", "mountain", "lake", "beach", "waterfall", "eco"] },
+    { id: "tours", label: "City Tours", icon: "location_city", keywords: ["city tour", "walking tour", "sightseeing", "hop-on", "bus tour", "guided tour"] },
+    { id: "water", label: "Water Activities", icon: "sailing", keywords: ["boat", "cruise", "sailing", "snorkel", "diving", "swim", "water", "river", "canal", "yacht", "kayak", "paddle"] },
+];
+
 function SearchResults() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const query = searchParams.get("q") || "";
+    const categoryParam = searchParams.get("category") || "all";
+
     const [results, setResults] = useState<Activity[]>([]);
     const [total, setTotal] = useState<number>(0);
     const [loading, setLoading] = useState(false);
     const [source, setSource] = useState<string>("");
+    const [activeCategory, setActiveCategory] = useState(categoryParam);
 
     useEffect(() => {
         async function fetchResults() {
@@ -50,17 +65,58 @@ function SearchResults() {
         fetchResults();
     }, [query]);
 
+    // Update active category when URL param changes
+    useEffect(() => {
+        setActiveCategory(categoryParam);
+    }, [categoryParam]);
+
+    // Filter results based on selected category
+    const filteredResults = useMemo(() => {
+        if (activeCategory === "all") {
+            return results;
+        }
+
+        const categoryConfig = CATEGORY_FILTERS.find(c => c.id === activeCategory);
+        if (!categoryConfig || !categoryConfig.keywords) {
+            return results;
+        }
+
+        return results.filter(activity => {
+            const searchText = `${activity.title} ${activity.location}`.toLowerCase();
+            return categoryConfig.keywords!.some(keyword => searchText.includes(keyword.toLowerCase()));
+        });
+    }, [results, activeCategory]);
+
+    // Handle category click
+    const handleCategoryClick = (categoryId: string) => {
+        setActiveCategory(categoryId);
+        // Update URL with category param
+        const params = new URLSearchParams(searchParams.toString());
+        if (categoryId === "all") {
+            params.delete("category");
+        } else {
+            params.set("category", categoryId);
+        }
+        router.push(`/search?${params.toString()}`, { scroll: false });
+    };
+
     return (
         <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+            {/* Header with search */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-8">
                 <div>
                     <h1 className="text-4xl font-bold text-white mb-2">
                         {query ? `Results for "${query}"` : "Discover Experiences"}
                     </h1>
                     <p className="text-gray-400">
-                        {loading ? "Searching..." : `${total} experiences found`}
-                        {source === "viator" && (
+                        {loading ? "Searching..." : `${filteredResults.length} experiences found`}
+                        {activeCategory !== "all" && (
                             <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">
+                                {CATEGORY_FILTERS.find(c => c.id === activeCategory)?.label}
+                            </span>
+                        )}
+                        {source === "viator" && (
+                            <span className="ml-2 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded">
                                 via Viator
                             </span>
                         )}
@@ -71,6 +127,30 @@ function SearchResults() {
                 </div>
             </div>
 
+            {/* Category filter chips */}
+            <div className="mb-8">
+                <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-4">
+                    {CATEGORY_FILTERS.map((category) => (
+                        <button
+                            key={category.id}
+                            onClick={() => handleCategoryClick(category.id)}
+                            className={`flex shrink-0 items-center gap-2 h-11 px-5 rounded-full border transition-all duration-300 ${activeCategory === category.id
+                                    ? "bg-primary border-primary text-white"
+                                    : "bg-card-dark border-white/10 text-gray-300 hover:border-primary/50 hover:bg-card-hover"
+                                }`}
+                        >
+                            <span className="material-symbols-outlined text-lg">
+                                {category.icon}
+                            </span>
+                            <span className="font-medium whitespace-nowrap text-sm">
+                                {category.label}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Results grid */}
             {loading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {[...Array(8)].map((_, i) => (
@@ -81,9 +161,9 @@ function SearchResults() {
                         </div>
                     ))}
                 </div>
-            ) : results.length > 0 ? (
+            ) : filteredResults.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {results.map((activity) => (
+                    {filteredResults.map((activity) => (
                         <ActivityCard key={activity.id} {...activity} />
                     ))}
                 </div>
@@ -96,8 +176,19 @@ function SearchResults() {
                         No results found
                     </h3>
                     <p className="text-gray-400 max-w-md">
-                        We couldn't find any experiences matching your search. Try different keywords or browse our top categories.
+                        {activeCategory !== "all"
+                            ? `No "${CATEGORY_FILTERS.find(c => c.id === activeCategory)?.label}" activities found. Try selecting "All" or a different category.`
+                            : "We couldn't find any experiences matching your search. Try different keywords."
+                        }
                     </p>
+                    {activeCategory !== "all" && (
+                        <button
+                            onClick={() => handleCategoryClick("all")}
+                            className="mt-4 px-6 py-2 bg-primary text-white rounded-full hover:bg-primary/80 transition-colors"
+                        >
+                            Show all results
+                        </button>
+                    )}
                 </div>
             )}
         </div>

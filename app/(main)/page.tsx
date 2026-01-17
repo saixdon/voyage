@@ -5,13 +5,6 @@ import Link from "next/link";
 import { SearchBar } from "@/components/features/SearchBar";
 import { TopRatedSection } from "@/components/features/TopRatedSection";
 
-interface Category {
-    id: number;
-    name: string;
-    icon: string;
-    query: string;
-}
-
 interface TrendingDestination {
     id: number;
     name: string;
@@ -21,28 +14,12 @@ interface TrendingDestination {
 }
 
 export default function HomePage() {
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [isLoadingCategories, setIsLoadingCategories] = useState(true);
     const [destinations, setDestinations] = useState<TrendingDestination[]>([]);
     const [isLoadingDestinations, setIsLoadingDestinations] = useState(true);
 
     // Fetch data on mount
     useEffect(() => {
         async function loadData() {
-            // Fetch categories
-            try {
-                const catRes = await fetch("/api/viator/tags?locale=de");
-                if (catRes.ok) {
-                    const data = await catRes.json();
-                    if (data.success && data.categories?.length > 0) {
-                        setCategories(data.categories);
-                    }
-                }
-            } catch (error) {
-                console.error("Failed to load categories:", error);
-            } finally {
-                setIsLoadingCategories(false);
-            }
 
             // Fetch destinations
             try {
@@ -123,41 +100,7 @@ export default function HomePage() {
 
             {/* Main Content Container */}
             <main className="max-w-7xl mx-auto px-6 py-20">
-                {/* Categories / Chips */}
-                <section className="mb-20">
-                    <h3 className="text-white/60 text-sm font-medium uppercase tracking-widest mb-6">
-                        Browse by Category
-                    </h3>
-                    <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-4">
-                        {isLoadingCategories ? (
-                            // Loading skeleton
-                            [...Array(6)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="flex shrink-0 items-center gap-3 h-14 px-6 rounded-2xl bg-card-dark border border-white/5 animate-pulse"
-                                >
-                                    <div className="w-6 h-6 rounded bg-white/10"></div>
-                                    <div className="w-20 h-4 rounded bg-white/10"></div>
-                                </div>
-                            ))
-                        ) : (
-                            categories.map((category) => (
-                                <Link
-                                    key={category.id}
-                                    className="flex shrink-0 items-center gap-3 h-14 px-6 rounded-2xl bg-card-dark border border-white/5 hover:border-primary/50 hover:bg-card-hover transition-all duration-300 group"
-                                    href={`/search?q=${encodeURIComponent(category.query)}`}
-                                >
-                                    <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">
-                                        {category.icon}
-                                    </span>
-                                    <span className="text-white font-medium whitespace-nowrap">
-                                        {category.name}
-                                    </span>
-                                </Link>
-                            ))
-                        )}
-                    </div>
-                </section>
+
 
                 {/* Trending Destinations */}
                 <section className="mb-24">
