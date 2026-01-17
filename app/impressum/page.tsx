@@ -1,90 +1,90 @@
 import Link from "next/link";
 
 export const metadata = {
-    title: "Impressum | TripVega",
-    description: "Impressum und rechtliche Informationen zu TripVega.",
+    title: "Imprint | TripVega",
+    description: "Imprint and legal information about TripVega.",
 };
 
 export default function ImprintPage() {
     return (
         <div className="min-h-screen bg-background-dark pt-32 pb-20 px-6">
             <div className="max-w-4xl mx-auto">
-                <h1 className="text-4xl font-bold text-white mb-8">Impressum</h1>
+                <h1 className="text-4xl font-bold text-white mb-8">Imprint</h1>
 
                 <div className="prose prose-invert prose-lg max-w-none">
                     <section className="mb-8">
-                        <h2 className="text-2xl font-semibold text-white mb-4">Angaben gemäß § 5 TMG</h2>
+                        <h2 className="text-2xl font-semibold text-white mb-4">Information according to § 5 TMG</h2>
                         <p className="text-gray-300">
                             TripVega<br />
-                            [Ihr vollständiger Name / Firmenname]<br />
-                            [Straße und Hausnummer]<br />
-                            [PLZ und Ort]<br />
-                            Deutschland
+                            [Your Full Name / Company Name]<br />
+                            [Street and House Number]<br />
+                            [ZIP and City]<br />
+                            Germany
                         </p>
                     </section>
 
                     <section className="mb-8">
-                        <h2 className="text-2xl font-semibold text-white mb-4">Kontakt</h2>
+                        <h2 className="text-2xl font-semibold text-white mb-4">Contact</h2>
                         <p className="text-gray-300">
-                            Telefon: [Ihre Telefonnummer]<br />
-                            E-Mail: kontakt@tripvega.com
+                            Phone: [Your Phone Number]<br />
+                            E-Mail: contact@tripvega.com
                         </p>
                     </section>
 
                     <section className="mb-8">
-                        <h2 className="text-2xl font-semibold text-white mb-4">Umsatzsteuer-ID</h2>
+                        <h2 className="text-2xl font-semibold text-white mb-4">VAT ID</h2>
                         <p className="text-gray-300">
-                            Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br />
-                            [Ihre USt-IdNr., falls vorhanden]
+                            VAT Identification Number according to § 27 a VAT Act:<br />
+                            [Your VAT ID, if available]
                         </p>
                     </section>
 
                     <section className="mb-8">
-                        <h2 className="text-2xl font-semibold text-white mb-4">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
+                        <h2 className="text-2xl font-semibold text-white mb-4">Responsible for Content according to § 55 Para. 2 RStV</h2>
                         <p className="text-gray-300">
-                            [Ihr Name]<br />
-                            [Adresse]
+                            [Your Name]<br />
+                            [Address]
                         </p>
                     </section>
 
                     <section className="mb-8">
-                        <h2 className="text-2xl font-semibold text-white mb-4">EU-Streitschlichtung</h2>
+                        <h2 className="text-2xl font-semibold text-white mb-4">EU Dispute Resolution</h2>
                         <p className="text-gray-300">
-                            Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:{" "}
+                            The European Commission provides a platform for online dispute resolution (ODR):{" "}
                             <a href="https://ec.europa.eu/consumers/odr/" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
                                 https://ec.europa.eu/consumers/odr/
                             </a>
                         </p>
                         <p className="text-gray-300 mt-2">
-                            Unsere E-Mail-Adresse finden Sie oben im Impressum.
+                            Our email address can be found above in the imprint.
                         </p>
                     </section>
 
                     <section className="mb-8">
-                        <h2 className="text-2xl font-semibold text-white mb-4">Verbraucherstreitbeilegung</h2>
+                        <h2 className="text-2xl font-semibold text-white mb-4">Consumer Dispute Resolution</h2>
                         <p className="text-gray-300">
-                            Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+                            We are not willing or obliged to participate in dispute resolution proceedings before a consumer arbitration board.
                         </p>
                     </section>
 
                     <section className="mb-8">
-                        <h2 className="text-2xl font-semibold text-white mb-4">Haftung für Inhalte</h2>
+                        <h2 className="text-2xl font-semibold text-white mb-4">Liability for Content</h2>
                         <p className="text-gray-300">
-                            Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
+                            As a service provider, we are responsible for our own content on these pages according to the general laws pursuant to § 7 Para. 1 TMG. According to §§ 8 to 10 TMG, however, we as a service provider are not obliged to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity.
                         </p>
                     </section>
 
                     <section className="mb-8">
-                        <h2 className="text-2xl font-semibold text-white mb-4">Haftung für Links</h2>
+                        <h2 className="text-2xl font-semibold text-white mb-4">Liability for Links</h2>
                         <p className="text-gray-300">
-                            Unser Angebot enthält Links zu externen Websites Dritter (z.B. Viator/TripAdvisor), auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.
+                            Our offer contains links to external websites of third parties (e.g., Viator/TripAdvisor), over whose content we have no influence. Therefore, we cannot assume any liability for this external content. The respective provider or operator of the pages is always responsible for the content of the linked pages.
                         </p>
                     </section>
                 </div>
 
                 <div className="mt-12 pt-8 border-t border-white/10">
                     <Link href="/" className="text-primary hover:underline">
-                        ← Zurück zur Startseite
+                        ← Back to Home
                     </Link>
                 </div>
             </div>

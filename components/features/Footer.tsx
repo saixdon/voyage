@@ -19,32 +19,32 @@ export function Footer() {
                             <h2 className="text-xl font-bold tracking-tight text-white">TRIPVEGA</h2>
                         </Link>
                         <p className="text-gray-400 text-sm">
-                            Entdecke die besten Touren, Aktivitäten und Erlebnisse weltweit. Dein Partner für unvergessliche Reisen.
+                            Discover the best tours, activities, and experiences worldwide. Your partner for unforgettable travels.
                         </p>
                     </div>
 
                     {/* Explore */}
                     <div>
-                        <h3 className="text-white font-semibold mb-4">Entdecken</h3>
+                        <h3 className="text-white font-semibold mb-4">Explore</h3>
                         <ul className="space-y-2">
                             <li>
                                 <Link href="/search" className="text-gray-400 hover:text-primary transition-colors text-sm">
-                                    Alle Aktivitäten
+                                    All Activities
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/search?q=Deutschland" className="text-gray-400 hover:text-primary transition-colors text-sm">
-                                    Deutschland
+                                <Link href="/search?q=Germany" className="text-gray-400 hover:text-primary transition-colors text-sm">
+                                    Germany
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/search?q=Europa" className="text-gray-400 hover:text-primary transition-colors text-sm">
-                                    Europa
+                                <Link href="/search?q=Europe" className="text-gray-400 hover:text-primary transition-colors text-sm">
+                                    Europe
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/search?q=Asien" className="text-gray-400 hover:text-primary transition-colors text-sm">
-                                    Asien
+                                <Link href="/search?q=Asia" className="text-gray-400 hover:text-primary transition-colors text-sm">
+                                    Asia
                                 </Link>
                             </li>
                         </ul>
@@ -52,21 +52,21 @@ export function Footer() {
 
                     {/* Company */}
                     <div>
-                        <h3 className="text-white font-semibold mb-4">Unternehmen</h3>
+                        <h3 className="text-white font-semibold mb-4">Company</h3>
                         <ul className="space-y-2">
                             <li>
                                 <Link href="/about" className="text-gray-400 hover:text-primary transition-colors text-sm">
-                                    Über uns
+                                    About Us
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/kontakt" className="text-gray-400 hover:text-primary transition-colors text-sm">
-                                    Kontakt
+                                    Contact
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/partner" className="text-gray-400 hover:text-primary transition-colors text-sm">
-                                    Partner werden
+                                    Become a Partner
                                 </Link>
                             </li>
                         </ul>
@@ -74,21 +74,21 @@ export function Footer() {
 
                     {/* Legal */}
                     <div>
-                        <h3 className="text-white font-semibold mb-4">Rechtliches</h3>
+                        <h3 className="text-white font-semibold mb-4">Legal</h3>
                         <ul className="space-y-2">
                             <li>
                                 <Link href="/impressum" className="text-gray-400 hover:text-primary transition-colors text-sm">
-                                    Impressum
+                                    Imprint
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/privacy" className="text-gray-400 hover:text-primary transition-colors text-sm">
-                                    Datenschutz
+                                    Privacy Policy
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/agb" className="text-gray-400 hover:text-primary transition-colors text-sm">
-                                    AGB
+                                    Terms & Conditions
                                 </Link>
                             </li>
                         </ul>
@@ -98,7 +98,7 @@ export function Footer() {
                 {/* Bottom bar */}
                 <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-gray-500 text-sm">
-                        © {new Date().getFullYear()} TripVega. Alle Rechte vorbehalten.
+                        © {new Date().getFullYear()} TripVega. All rights reserved.
                     </p>
                     <div className="flex items-center gap-6">
                         <a
@@ -137,8 +137,8 @@ export function Footer() {
                 {/* Affiliate Notice */}
                 <div className="mt-8 text-center">
                     <p className="text-gray-500 text-xs">
-                        TripVega ist Affiliate-Partner von Viator. Bei Klick auf "Buchen" wirst du zu viator.com weitergeleitet.
-                        Wir erhalten eine Provision für vermittelte Buchungen.
+                        TripVega is an affiliate partner of Viator. By clicking "Book" you will be redirected to viator.com.
+                        We receive a commission for successful bookings.
                     </p>
                 </div>
             </div>
