@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "TripVega - Entdecke die Welt",
+    title: "TripVega - Discover the World",
     description:
-        "Premium Touren, Aktivitäten und Erlebnisse weltweit. Finde und buche einzigartige Reiseerlebnisse mit TripVega.",
+        "Premium tours, activities, and experiences worldwide. Find and book unique travel experiences with TripVega.",
 };
 
 import { Navbar } from "@/components/features/Navbar";
@@ -16,7 +16,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="de" className="dark">
+        <html lang="en" className="dark">
             <head>
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link

@@ -12,29 +12,54 @@ interface Category {
     query: string;
 }
 
+interface TrendingDestination {
+    id: number;
+    name: string;
+    country: string;
+    image: string;
+    query: string;
+}
+
 export default function HomePage() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+    const [destinations, setDestinations] = useState<TrendingDestination[]>([]);
+    const [isLoadingDestinations, setIsLoadingDestinations] = useState(true);
 
-    // Fetch categories from API on mount
+    // Fetch data on mount
     useEffect(() => {
-        async function loadCategories() {
+        async function loadData() {
+            // Fetch categories
             try {
-                const response = await fetch("/api/viator/tags?locale=en");
-                if (response.ok) {
-                    const data = await response.json();
+                const catRes = await fetch("/api/viator/tags?locale=de");
+                if (catRes.ok) {
+                    const data = await catRes.json();
                     if (data.success && data.categories?.length > 0) {
                         setCategories(data.categories);
                     }
                 }
             } catch (error) {
                 console.error("Failed to load categories:", error);
-                // Keep default categories on error
             } finally {
                 setIsLoadingCategories(false);
             }
+
+            // Fetch destinations
+            try {
+                const destRes = await fetch("/api/viator/destinations/trending");
+                if (destRes.ok) {
+                    const data = await destRes.json();
+                    if (data.success && data.destinations?.length > 0) {
+                        setDestinations(data.destinations);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to load destinations:", error);
+            } finally {
+                setIsLoadingDestinations(false);
+            }
         }
-        loadCategories();
+        loadData();
     }, []);
     return (
         <>
@@ -145,107 +170,70 @@ export default function HomePage() {
                                 Most popular places traveled by our community
                             </p>
                         </div>
-                        <a
+                        <Link
                             className="hidden md:flex items-center gap-1 text-primary hover:text-white transition-colors font-medium group"
-                            href="#"
+                            href="/search?q=popular"
                         >
                             View all
                             <span className="material-symbols-outlined text-sm transition-transform group-hover:translate-x-1">
                                 arrow_forward
                             </span>
-                        </a>
+                        </Link>
                     </div>
-                    {/* Bento Grid Layout */}
+
+                    {/* Bento Grid Layout - Dynamic or Skeleton */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]">
-                        {/* Large Card - Rome */}
-                        <Link href="/search?q=Rome" className="relative md:col-span-2 md:row-span-2 group overflow-hidden rounded-3xl cursor-pointer block">
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-20"></div>
-                            <img
-                                alt="Ancient Roman architecture in Rome, Italy during sunset"
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1AjHuGxBbevjUBWBcJQ5CyII45U8ouI_ZNeOFKGpbDo1JbzLhJ8EMGdcdMhgwfFSOwKVKx6A4FggkIy0KLL2upxmYjdKEtFMtpdmAlps3yfLY7Awy2yDEoXXMNABWE8aaX6w9qAo6EAHARA3lrUVCqU-52pK8D3In6jnbFB7AOqUBlGwcoBJaZPVXoxe0OB5ES-vdEvrUOzLfCxPnvsAKnadPR5heVQfo2eK2ihEXw7R6D0JT29d9BkVJaBCJOMXGdGL9Glkdue8T"
-                            />
-                            <div className="absolute bottom-0 left-0 p-8 z-30 w-full">
-                                <div className="flex justify-between items-end transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                                    <div>
-                                        <h3 className="text-4xl font-bold text-white mb-2">Rome</h3>
-                                        <div className="flex items-center gap-2 text-gray-300">
-                                            <span className="material-symbols-outlined text-primary text-sm">
-                                                location_on
-                                            </span>
-                                            <span>Italy</span>
+                        {isLoadingDestinations ? (
+                            // Loading skeletons for bento grid
+                            <>
+                                <div className="md:col-span-2 md:row-span-2 rounded-3xl bg-card-dark animate-pulse border border-white/5" />
+                                <div className="md:col-span-1 md:row-span-2 rounded-3xl bg-card-dark animate-pulse border border-white/5" />
+                                <div className="rounded-3xl bg-card-dark animate-pulse border border-white/5" />
+                                <div className="md:col-span-2 rounded-3xl bg-card-dark animate-pulse border border-white/5" />
+                            </>
+                        ) : (
+                            destinations.map((dest, index) => {
+                                // Designate different grid spans for bento effect
+                                let gridClass = "relative group overflow-hidden rounded-3xl cursor-pointer block";
+                                if (index === 0) gridClass += " md:col-span-2 md:row-span-2";
+                                else if (index === 1) gridClass += " md:col-span-1 md:row-span-2";
+                                else if (index === 3) gridClass += " md:col-span-2";
+
+                                return (
+                                    <Link
+                                        key={dest.id}
+                                        href={`/search?q=${encodeURIComponent(dest.query)}`}
+                                        className={gridClass}
+                                    >
+                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-20"></div>
+                                        <img
+                                            alt={`${dest.name} in ${dest.country}`}
+                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                            src={dest.image}
+                                        />
+                                        <div className="absolute bottom-0 left-0 p-8 z-30 w-full">
+                                            <div className="flex justify-between items-end transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                                                <div>
+                                                    <h3 className={`${index < 2 ? 'text-4xl' : 'text-3xl'} font-bold text-white mb-2`}>{dest.name}</h3>
+                                                    <div className="flex items-center gap-2 text-gray-300">
+                                                        <span className="material-symbols-outlined text-primary text-sm">
+                                                            location_on
+                                                        </span>
+                                                        <span>{dest.country}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                                                    <span className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-white/20">
+                                                        Explore
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
-                                        <span className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-white/20">
-                                            Explore Tours
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
-                        {/* Tall Card - Paris */}
-                        <Link href="/search?q=Paris" className="relative md:col-span-1 md:row-span-2 group overflow-hidden rounded-3xl cursor-pointer block">
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-20"></div>
-                            <img
-                                alt="Eiffel Tower view from a street in Paris, France"
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA42_x_NJKZ3NPmOSGnKRtxxxlKjqPR1lM6r4_yv8FBoQFXEI32ij0Ge15c3fL0lmob4utP6JsYuKESTPuwdxwLL7UmESH0_c-nqXobs71zaCQ6XmcfSHe2ySOV8DgSpBZa2PNQ8ZF6hkMK0szLUVFEQFk7Gx8E6TfK4m3fx5yC59QnQDsqblLdyXNsEIDP2YDTRoih3KqhbJFrQDIAFaLx3XFsCn8kudL4uEMr3iIETY54zoimjtDwFv9FxKLYO9mu6R6L5vXthByb"
-                            />
-                            <div className="absolute bottom-0 left-0 p-6 z-30 w-full">
-                                <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                                    <h3 className="text-3xl font-bold text-white mb-1">Paris</h3>
-                                    <div className="flex items-center gap-2 text-gray-300 mb-4">
-                                        <span className="material-symbols-outlined text-primary text-sm">
-                                            location_on
-                                        </span>
-                                        <span>France</span>
-                                    </div>
-                                    <span className="inline-block opacity-0 group-hover:opacity-100 transition-opacity duration-500 text-sm text-primary font-medium">
-                                        Explore Activities →
-                                    </span>
-                                </div>
-                            </div>
-                        </Link>
-                        {/* Regular Card - Barcelona */}
-                        <Link href="/search?q=Barcelona" className="relative group overflow-hidden rounded-3xl cursor-pointer block">
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-20"></div>
-                            <img
-                                alt="Colorful architecture and streets in Barcelona, Spain"
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUMn1vzToK6c-BU8uLhEmxpQSo_XWFd6Y8vfNF-Jm4vjsTEOSzWXh6FSh1AtynHOiPqYnSP_5v9q9YCotgxaXfNJHpSHUC3RtoCnw9uJ_V-tWz4FEJHCb79wkn0eAs-ZlaTiyxo1faQRZN0mn2KEswOLfoRarkJUllq6f0FBxz6BVQwOKUEsjInfIQL0OQGsdp1JRJ2G4orT4QMF5wYojUJlgrlhYxgnBKRE3oeO1Tb07Q9saXQe9OBcJhUVnW2A0WOZRP8NO5LKHQ"
-                            />
-                            <div className="absolute bottom-0 left-0 p-6 z-30 w-full">
-                                <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                                    <h3 className="text-2xl font-bold text-white">Barcelona</h3>
-                                    <p className="text-gray-300 text-sm">Spain</p>
-                                </div>
-                            </div>
-                        </Link>
-                        {/* Regular Card - New York */}
-                        <Link href="/search?q=New%20York" className="relative group overflow-hidden rounded-3xl cursor-pointer md:col-span-2 block">
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-20"></div>
-                            <img
-                                alt="Skyline of New York City, USA during daytime"
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1qfrwqE84IJy1QbWT2hUAjBIxKI4BU1cSjYurt1uCo0nQVpEuAwOC_1YEE6KVJ-KYTDQp2XGp30_TU1Yy_gFKbRO1vDNu6-eWABTWL2ZmJ59OehHK61ni7noNJgf5xyWSLSVqCgBEGuo-h0YMs6iLfWfxkV_gk23Gbegv59zTrji4envRdpB8zEGhjeci0H-YLUhgAluO0wFK1VP2VShLduLeZSlqmCcY_IKv3QWF8tEtnqWPHQ5pkq26LocnSovB1KdhL_79Q7Z1"
-                            />
-                            <div className="absolute bottom-0 left-0 p-6 z-30 w-full flex justify-between items-end">
-                                <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                                    <h3 className="text-2xl font-bold text-white">New York</h3>
-                                    <p className="text-gray-300 text-sm">USA</p>
-                                </div>
-                                <div className="transform translate-x-10 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
-                                    <span className="material-symbols-outlined text-white bg-primary p-2 rounded-full">
-                                        arrow_forward
-                                    </span>
-                                </div>
-                            </div>
-                        </Link>
+                                    </Link>
+                                );
+                            })
+                        )}
                     </div>
                 </section>
 

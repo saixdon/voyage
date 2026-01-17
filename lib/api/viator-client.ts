@@ -189,6 +189,28 @@ function getIconForTag(tagName: string): string {
     return TAG_ICON_MAPPING.default;
 }
 
+export interface TrendingDestination {
+    id: number;
+    name: string;
+    country: string;
+    image: string;
+    query: string;
+}
+
+const TRENDING_DESTINATION_IDS = [
+    { id: 711, name: "Rome", country: "Italy", query: "Rome", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1000&auto=format&fit=crop" },
+    { id: 479, name: "Paris", country: "France", query: "Paris", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1000&auto=format&fit=crop" },
+    { id: 562, name: "Barcelona", country: "Spain", query: "Barcelona", image: "https://images.unsplash.com/photo-1583997051651-8255c48b782c?q=80&w=1000&auto=format&fit=crop" },
+    { id: 674, name: "New York", country: "USA", query: "New York", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=1000&auto=format&fit=crop" },
+    { id: 737, name: "London", country: "UK", query: "London", image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=1000&auto=format&fit=crop" }
+];
+
+export async function getTrendingDestinations(): Promise<TrendingDestination[]> {
+    // In a real scenario, we could fetch these from Viator, but for now we use 
+    // these IDs to ensure we get high-quality content for the landing page.
+    return TRENDING_DESTINATION_IDS;
+}
+
 // Fetch all tags from Viator API
 export async function fetchViatorTags(): Promise<ViatorTag[]> {
     // Return cached data if still valid
@@ -206,7 +228,7 @@ export async function fetchViatorTags(): Promise<ViatorTag[]> {
             method: "GET",
             headers: {
                 "Accept": "application/json;version=2.0",
-                "Accept-Language": "de",
+                "Accept-Language": "en",
                 "exp-api-key": VIATOR_API_KEY,
             },
         });
@@ -458,7 +480,7 @@ export async function getViatorProductDetails(productCode: string) {
             method: "GET",
             headers: {
                 "Accept": "application/json;version=2.0",
-                "Accept-Language": "de",
+                "Accept-Language": "en",
                 "exp-api-key": VIATOR_API_KEY,
             },
             next: { revalidate: 3600 }, // Cache for 1 hour

@@ -7,7 +7,7 @@ export const revalidate = 3600; // Cache for 1 hour
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
-        const locale = searchParams.get("locale") || "de";
+        const locale = searchParams.get("locale") || "en";
         const raw = searchParams.get("raw") === "true";
 
         if (raw) {

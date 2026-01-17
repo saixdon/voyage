@@ -35,9 +35,9 @@ export default function ContactPage() {
         <div className="min-h-screen bg-background-dark pt-32 pb-20 px-6">
             <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold text-white mb-4">Kontakt</h1>
+                    <h1 className="text-4xl font-bold text-white mb-4">Contact</h1>
                     <p className="text-gray-400 text-lg">
-                        Haben Sie Fragen oder Anregungen? Wir freuen uns, von Ihnen zu hören!
+                        Do you have any questions or suggestions? We look forward to hearing from you!
                     </p>
                 </div>
 
@@ -51,7 +51,7 @@ export default function ContactPage() {
                                 </div>
                                 <div>
                                     <h3 className="text-white font-semibold mb-1">E-Mail</h3>
-                                    <p className="text-gray-400">kontakt@tripvega.com</p>
+                                    <p className="text-gray-400">contact@tripvega.com</p>
                                     <p className="text-gray-400">support@tripvega.com</p>
                                 </div>
                             </div>
@@ -63,9 +63,9 @@ export default function ContactPage() {
                                     <span className="material-symbols-outlined text-primary">schedule</span>
                                 </div>
                                 <div>
-                                    <h3 className="text-white font-semibold mb-1">Erreichbarkeit</h3>
-                                    <p className="text-gray-400">Mo - Fr: 9:00 - 18:00 Uhr</p>
-                                    <p className="text-gray-400">Sa - So: Geschlossen</p>
+                                    <h3 className="text-white font-semibold mb-1">Availability</h3>
+                                    <p className="text-gray-400">Mon - Fri: 9:00 AM - 6:00 PM</p>
+                                    <p className="text-gray-400">Sat - Sun: Closed</p>
                                 </div>
                             </div>
                         </div>
@@ -78,11 +78,11 @@ export default function ContactPage() {
                                 <div>
                                     <h3 className="text-white font-semibold mb-1">FAQ</h3>
                                     <p className="text-gray-400">
-                                        Viele Fragen werden bereits in unseren{" "}
+                                        Many questions are already answered in our{" "}
                                         <Link href="/faq" className="text-primary hover:underline">
-                                            häufig gestellten Fragen
-                                        </Link>{" "}
-                                        beantwortet.
+                                            frequently asked questions
+                                        </Link>
+                                        .
                                     </p>
                                 </div>
                             </div>
@@ -96,15 +96,15 @@ export default function ContactPage() {
                                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <span className="material-symbols-outlined text-green-500 text-3xl">check_circle</span>
                                 </div>
-                                <h3 className="text-xl font-semibold text-white mb-2">Nachricht gesendet!</h3>
+                                <h3 className="text-xl font-semibold text-white mb-2">Message sent!</h3>
                                 <p className="text-gray-400 mb-6">
-                                    Vielen Dank für Ihre Nachricht. Wir werden uns schnellstmöglich bei Ihnen melden.
+                                    Thank you for your message. We will get back to you as soon as possible.
                                 </p>
                                 <button
                                     onClick={() => setStatus("idle")}
                                     className="text-primary hover:underline"
                                 >
-                                    Weitere Nachricht senden
+                                    Send another message
                                 </button>
                             </div>
                         ) : (
@@ -121,7 +121,7 @@ export default function ContactPage() {
                                         onChange={handleChange}
                                         required
                                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"
-                                        placeholder="Ihr Name"
+                                        placeholder="Your Name"
                                     />
                                 </div>
 
@@ -137,13 +137,13 @@ export default function ContactPage() {
                                         onChange={handleChange}
                                         required
                                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"
-                                        placeholder="ihre@email.com"
+                                        placeholder="your@email.com"
                                     />
                                 </div>
 
                                 <div>
                                     <label htmlFor="subject" className="block text-white font-medium mb-2">
-                                        Betreff *
+                                        Subject *
                                     </label>
                                     <select
                                         id="subject"
@@ -153,19 +153,19 @@ export default function ContactPage() {
                                         required
                                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-colors"
                                     >
-                                        <option value="" className="bg-gray-900">Bitte wählen...</option>
-                                        <option value="general" className="bg-gray-900">Allgemeine Anfrage</option>
-                                        <option value="booking" className="bg-gray-900">Frage zur Buchung</option>
-                                        <option value="partnership" className="bg-gray-900">Partnerschaft / Kooperation</option>
-                                        <option value="technical" className="bg-gray-900">Technisches Problem</option>
-                                        <option value="feedback" className="bg-gray-900">Feedback / Vorschläge</option>
-                                        <option value="other" className="bg-gray-900">Sonstiges</option>
+                                        <option value="" className="bg-gray-900">Please select...</option>
+                                        <option value="general" className="bg-gray-900">General Inquiry</option>
+                                        <option value="booking" className="bg-gray-900">Question about Booking</option>
+                                        <option value="partnership" className="bg-gray-900">Partnership / Cooperation</option>
+                                        <option value="technical" className="bg-gray-900">Technical Problem</option>
+                                        <option value="feedback" className="bg-gray-900">Feedback / Suggestions</option>
+                                        <option value="other" className="bg-gray-900">Other</option>
                                     </select>
                                 </div>
 
                                 <div>
                                     <label htmlFor="message" className="block text-white font-medium mb-2">
-                                        Nachricht *
+                                        Message *
                                     </label>
                                     <textarea
                                         id="message"
@@ -175,7 +175,7 @@ export default function ContactPage() {
                                         required
                                         rows={5}
                                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors resize-none"
-                                        placeholder="Ihre Nachricht..."
+                                        placeholder="Your message..."
                                     />
                                 </div>
 
@@ -187,12 +187,12 @@ export default function ContactPage() {
                                     {status === "sending" ? (
                                         <>
                                             <span className="animate-spin">⏳</span>
-                                            Wird gesendet...
+                                            Sending...
                                         </>
                                     ) : (
                                         <>
                                             <span className="material-symbols-outlined">send</span>
-                                            Nachricht senden
+                                            Send Message
                                         </>
                                     )}
                                 </button>
@@ -203,7 +203,7 @@ export default function ContactPage() {
 
                 <div className="mt-12 pt-8 border-t border-white/10">
                     <Link href="/" className="text-primary hover:underline">
-                        ← Zurück zur Startseite
+                        ← Back to Home
                     </Link>
                 </div>
             </div>
