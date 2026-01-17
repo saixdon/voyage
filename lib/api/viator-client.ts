@@ -380,7 +380,9 @@ async function resolveDestinationId(query: string): Promise<string | null> {
 
 export async function searchViatorProducts(
     query: string,
-    limit = 20
+    limit = 20,
+    startDate?: string, // YYYY-MM-DD
+    endDate?: string    // YYYY-MM-DD
 ): Promise<{ activities: TransformedActivity[]; totalCount?: number; error?: string }> {
     if (!VIATOR_API_KEY) {
         return { activities: [], error: "Viator API key not configured" };
@@ -419,6 +421,8 @@ export async function searchViatorProducts(
                 },
                 filtering: {
                     destination: destinationId,
+                    ...(startDate && { startDate: startDate }),
+                    ...(endDate && { endDate: endDate }),
                 },
                 sorting: {
                     sort: "TRAVELER_RATING",

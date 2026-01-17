@@ -30,6 +30,7 @@ function SearchResults() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const query = searchParams.get("q") || "";
+    const dateParam = searchParams.get("date") || "";
     const categoryParam = searchParams.get("category") || "all";
 
     const [results, setResults] = useState<Activity[]>([]);
@@ -40,7 +41,7 @@ function SearchResults() {
 
     useEffect(() => {
         async function fetchResults() {
-            if (!query) {
+            if (!query && !dateParam) {
                 setResults([]);
                 setTotal(0);
                 return;
@@ -48,7 +49,11 @@ function SearchResults() {
 
             setLoading(true);
             try {
-                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                let url = `/api/search?q=${encodeURIComponent(query)}`;
+                if (dateParam) {
+                    url += `&date=${encodeURIComponent(dateParam)}`;
+                }
+                const response = await fetch(url);
                 const data: SearchResult = await response.json();
                 setResults(data.activities);
                 setTotal(data.total);
@@ -63,7 +68,7 @@ function SearchResults() {
         }
 
         fetchResults();
-    }, [query]);
+    }, [query, dateParam]);
 
     // Update active category when URL param changes
     useEffect(() => {
@@ -106,7 +111,7 @@ function SearchResults() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-8">
                 <div>
                     <h1 className="text-4xl font-bold text-white mb-2">
-                        {query ? `Results for "${query}"` : "Discover Experiences"}
+                        {query ? `Results for "${query}"` : dateParam ? `Experiences on ${dateParam}` : "Discover Experiences"}
                     </h1>
                     <p className="text-gray-400">
                         {loading ? "Searching..." : `${filteredResults.length} experiences found`}
@@ -123,7 +128,7 @@ function SearchResults() {
                     </p>
                 </div>
                 <div className="w-full md:w-auto md:min-w-[400px]">
-                    <SearchBar initialValue={query} />
+                    <SearchBar initialValue={query} initialDate={dateParam} />
                 </div>
             </div>
 
@@ -135,8 +140,8 @@ function SearchResults() {
                             key={category.id}
                             onClick={() => handleCategoryClick(category.id)}
                             className={`flex shrink-0 items-center gap-2 h-11 px-5 rounded-full border transition-all duration-300 ${activeCategory === category.id
-                                    ? "bg-primary border-primary text-white"
-                                    : "bg-card-dark border-white/10 text-gray-300 hover:border-primary/50 hover:bg-card-hover"
+                                ? "bg-primary border-primary text-white"
+                                : "bg-card-dark border-white/10 text-gray-300 hover:border-primary/50 hover:bg-card-hover"
                                 }`}
                         >
                             <span className="material-symbols-outlined text-lg">
@@ -178,7 +183,7 @@ function SearchResults() {
                     <p className="text-gray-400 max-w-md">
                         {activeCategory !== "all"
                             ? `No "${CATEGORY_FILTERS.find(c => c.id === activeCategory)?.label}" activities found. Try selecting "All" or a different category.`
-                            : "We couldn't find any experiences matching your search. Try different keywords."
+                            : "We couldn't find any experiences matching your search. Try different keywords or dates."
                         }
                     </p>
                     {activeCategory !== "all" && (

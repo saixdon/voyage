@@ -6,6 +6,7 @@ import { Activity } from "@/types";
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q") || "";
+    const dateParam = searchParams.get("date"); // YYYY-MM-DD
     const limit = parseInt(searchParams.get("limit") || "20");
 
     let activities: Activity[] = [];
@@ -13,6 +14,7 @@ export async function GET(request: NextRequest) {
     let total = 0;
 
     // 1. Try GetYourGuide (Primary)
+    // (Skipping date update for GYG for now as per instructions focusing on adding calendar mostly for display/Viator flow first, or adapt if known)
     try {
         const gygResult = await searchGygActivities(query, limit);
         if (gygResult.data?.activities && gygResult.data.activities.length > 0) {
@@ -37,7 +39,8 @@ export async function GET(request: NextRequest) {
     // 2. Try Viator if GYG failed or returned nothing
     if (activities.length === 0) {
         try {
-            const viatorResult = await searchViatorProducts(query, limit);
+            // Pass date if present. For a single date selection, we might want startDate = date, endDate = date
+            const viatorResult = await searchViatorProducts(query, limit, dateParam || undefined, dateParam || undefined);
             if (viatorResult.activities && viatorResult.activities.length > 0) {
                 activities = viatorResult.activities as unknown as Activity[];
                 source = "viator";
