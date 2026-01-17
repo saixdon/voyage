@@ -1,7 +1,7 @@
 // Viator Partner API Client
 // Documentation: https://docs.viator.com/partner-api/technical/
 
-const VIATOR_API_BASE = process.env.VIATOR_API_BASE_URL || "https://api.sandbox.viator.com/partner";
+const VIATOR_API_BASE = process.env.VIATOR_API_BASE_URL || "https://api.viator.com/partner";
 const VIATOR_API_KEY = process.env.VIATOR_API_KEY;
 
 interface ViatorProduct {
