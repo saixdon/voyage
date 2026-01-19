@@ -20,7 +20,7 @@ function Calendar({
             className={cn("p-6", className)}
             classNames={{
                 months: "flex flex-col sm:flex-row space-y-6 sm:space-x-12 sm:space-y-0 p-2",
-                month: "space-y-6",
+                month: "space-y-6 min-w-[350px]",
                 caption: "flex justify-center pt-1 relative items-center mb-4",
                 caption_label: "text-base font-bold text-white",
                 nav: "space-x-1 flex items-center",
@@ -29,14 +29,14 @@ function Calendar({
                 ),
                 nav_button_previous: "absolute left-2",
                 nav_button_next: "absolute right-2",
-                table: "w-full border-collapse",
-                head_row: "flex mb-4 gap-4",
+                table: "w-full border-separate border-spacing-x-1 mx-auto",
+                head_row: "flex mb-2 justify-between px-2",
                 head_cell:
-                    "text-gray-400 rounded-md w-16 font-medium text-sm uppercase tracking-widest",
-                row: "flex w-full mt-4 gap-4",
-                cell: "h-16 w-16 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
+                    "text-gray-400 font-medium text-xs uppercase tracking-[0.3em] w-12 h-10 flex items-center justify-center",
+                row: "flex mt-2 justify-between px-2",
+                cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
                 day: cn(
-                    "h-16 w-16 p-0 font-normal aria-selected:opacity-100 hover:bg-white/10 hover:text-white rounded-2xl flex items-center justify-center transition-all cursor-pointer text-xl"
+                    "h-12 w-12 p-0 font-normal aria-selected:opacity-100 hover:bg-white/10 hover:text-white rounded-2xl flex items-center justify-center transition-all cursor-pointer text-base"
                 ),
                 day_range_end: "day-range-end",
                 day_selected:
