@@ -30,7 +30,8 @@ function SearchResults() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const query = searchParams.get("q") || "";
-    const dateParam = searchParams.get("date") || "";
+    const dateFromParam = searchParams.get("from") || "";
+    const dateToParam = searchParams.get("to") || "";
     const categoryParam = searchParams.get("category") || "all";
 
     const [results, setResults] = useState<Activity[]>([]);
@@ -41,7 +42,7 @@ function SearchResults() {
 
     useEffect(() => {
         async function fetchResults() {
-            if (!query && !dateParam) {
+            if (!query && !dateFromParam) {
                 setResults([]);
                 setTotal(0);
                 return;
@@ -50,8 +51,11 @@ function SearchResults() {
             setLoading(true);
             try {
                 let url = `/api/search?q=${encodeURIComponent(query)}`;
-                if (dateParam) {
-                    url += `&date=${encodeURIComponent(dateParam)}`;
+                if (dateFromParam) {
+                    url += `&from=${encodeURIComponent(dateFromParam)}`;
+                }
+                if (dateToParam) {
+                    url += `&to=${encodeURIComponent(dateToParam)}`;
                 }
                 const response = await fetch(url);
                 const data: SearchResult = await response.json();
@@ -68,7 +72,7 @@ function SearchResults() {
         }
 
         fetchResults();
-    }, [query, dateParam]);
+    }, [query, dateFromParam, dateToParam]);
 
     // Update active category when URL param changes
     useEffect(() => {
@@ -111,7 +115,7 @@ function SearchResults() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-8">
                 <div>
                     <h1 className="text-4xl font-bold text-white mb-2">
-                        {query ? `Results for "${query}"` : dateParam ? `Experiences on ${dateParam}` : "Discover Experiences"}
+                        {query ? `Results for "${query}"` : dateFromParam ? `Experiences matching your dates` : "Discover Experiences"}
                     </h1>
                     <p className="text-gray-400">
                         {loading ? "Searching..." : `${filteredResults.length} experiences found`}
@@ -128,7 +132,11 @@ function SearchResults() {
                     </p>
                 </div>
                 <div className="w-full md:w-auto md:min-w-[400px]">
-                    <SearchBar initialValue={query} initialDate={dateParam} />
+                    <SearchBar
+                        initialValue={query}
+                        initialDateFrom={dateFromParam}
+                        initialDateTo={dateToParam}
+                    />
                 </div>
             </div>
 
