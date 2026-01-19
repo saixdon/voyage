@@ -29,14 +29,14 @@ function Calendar({
                 ),
                 nav_button_previous: "absolute left-1",
                 nav_button_next: "absolute right-1",
-                table: "w-full border-collapse",
-                head_row: "grid grid-cols-7 mb-3",
+                table: "w-full border-separate border-spacing-3",
+                head_row: "",
                 head_cell:
-                    "text-gray-400 font-medium text-xs text-center py-2",
-                row: "grid grid-cols-7 mb-2",
-                cell: "relative p-1 text-center focus-within:relative focus-within:z-20",
+                    "text-gray-400 font-medium text-xs text-center p-2",
+                row: "",
+                cell: "text-center p-2",
                 day: cn(
-                    "h-10 w-10 mx-auto p-0 font-normal aria-selected:opacity-100 hover:bg-white/10 hover:text-white rounded-full flex items-center justify-center transition-all cursor-pointer text-sm"
+                    "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-white/10 hover:text-white rounded-full flex items-center justify-center transition-all cursor-pointer text-sm mx-auto"
                 ),
                 day_range_end: "day-range-end",
                 day_selected:
