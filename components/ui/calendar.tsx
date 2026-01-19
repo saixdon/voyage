@@ -17,30 +17,30 @@ function Calendar({
     return (
         <DayPicker
             showOutsideDays={showOutsideDays}
-            className={cn("p-6", className)}
+            className={cn("p-3", className)}
             classNames={{
-                months: "flex flex-col sm:flex-row space-y-6 sm:space-x-12 sm:space-y-0 p-2",
-                month: "space-y-6 min-w-[350px]",
-                caption: "flex justify-center pt-1 relative items-center mb-4",
-                caption_label: "text-base font-bold text-white",
+                months: "flex flex-col p-0",
+                month: "space-y-3",
+                caption: "flex justify-center pt-1 relative items-center mb-2",
+                caption_label: "text-sm font-semibold text-white",
                 nav: "space-x-1 flex items-center",
                 nav_button: cn(
-                    "h-9 w-9 bg-transparent p-0 opacity-70 hover:opacity-100 border border-white/10 rounded-2xl flex items-center justify-center hover:bg-white/10 transition-all"
+                    "h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100 border border-white/10 rounded-lg flex items-center justify-center hover:bg-white/10 transition-all"
                 ),
-                nav_button_previous: "absolute left-2",
-                nav_button_next: "absolute right-2",
-                table: "w-full border-separate border-spacing-x-1 mx-auto",
-                head_row: "flex mb-2 justify-between px-2",
+                nav_button_previous: "absolute left-1",
+                nav_button_next: "absolute right-1",
+                table: "w-full border-collapse",
+                head_row: "flex justify-around mb-1",
                 head_cell:
-                    "text-gray-400 font-medium text-xs uppercase tracking-[0.3em] w-12 h-10 flex items-center justify-center",
-                row: "flex mt-2 justify-between px-2",
+                    "text-gray-400 font-medium text-[11px] uppercase tracking-widest w-9 flex items-center justify-center",
+                row: "flex justify-around mt-1",
                 cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
                 day: cn(
-                    "h-12 w-12 p-0 font-normal aria-selected:opacity-100 hover:bg-white/10 hover:text-white rounded-2xl flex items-center justify-center transition-all cursor-pointer text-base"
+                    "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-white/10 hover:text-white rounded-lg flex items-center justify-center transition-all cursor-pointer text-sm"
                 ),
                 day_range_end: "day-range-end",
                 day_selected:
-                    "bg-primary text-white hover:bg-primary/90 hover:text-white focus:bg-primary focus:text-white rounded-xl",
+                    "bg-primary text-white hover:bg-primary/90 hover:text-white focus:bg-primary focus:text-white rounded-lg",
                 day_today: "bg-white/5 text-white border border-white/10",
                 day_outside:
                     "day-outside text-gray-500 opacity-30 aria-selected:bg-primary/30 aria-selected:text-white aria-selected:opacity-30",
