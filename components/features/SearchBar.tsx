@@ -132,7 +132,7 @@ export function SearchBar({
                                 defaultMonth={dateRange?.from}
                                 selected={dateRange}
                                 onSelect={setDateRange}
-                                numberOfMonths={2}
+                                numberOfMonths={1}
                                 className="bg-card-dark border-white/10 text-white"
                                 classNames={{
                                     day_selected: "bg-primary text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white",
