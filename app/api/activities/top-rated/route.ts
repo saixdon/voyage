@@ -10,11 +10,15 @@ const TOP_RATED_QUERIES = [
     { query: "Burj Khalifa", badge: "Top Pick" }
 ];
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
+        const { searchParams } = new URL(request.url);
+        const locale = searchParams.get("locale") || "en";
+
         const results = await Promise.all(
             TOP_RATED_QUERIES.map(async (item) => {
-                const searchResult = await searchViatorProducts(item.query, 1);
+                // Pass locale and undefined for start/end dates
+                const searchResult = await searchViatorProducts(item.query, 1, undefined, undefined, locale);
                 if (searchResult.activities && searchResult.activities.length > 0) {
                     return {
                         ...searchResult.activities[0],

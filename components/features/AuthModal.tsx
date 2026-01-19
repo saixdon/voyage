@@ -8,7 +8,12 @@ interface AuthModalProps {
     onClose: () => void;
 }
 
+import { useTranslations } from "next-intl";
+
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+    const t = useTranslations('auth');
+    const commonT = useTranslations('common');
+
     const [mode, setMode] = useState<"login" | "register">("login");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -31,21 +36,34 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     password,
                 });
                 if (error) throw error;
-                setSuccess("Login successful!");
+                setSuccess(t('loginSuccess') || "Login successful!");
                 setTimeout(() => {
                     onClose();
                     window.location.reload();
                 }, 1000);
             } else {
-                const { error } = await supabase.auth.signUp({
+                const { data, error } = await supabase.auth.signUp({
                     email,
                     password,
                 });
                 if (error) throw error;
-                setSuccess("Account created! Check your email for confirmation.");
+
+                if (data.session) {
+                    setSuccess(t('loginSuccess'));
+                    setTimeout(() => {
+                        onClose();
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    setSuccess(t('registerSuccess'));
+                    // Falls Email-Bestätigung nötig ist
+                    setTimeout(() => {
+                        onClose();
+                    }, 2000);
+                }
             }
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "An error occurred");
+            setError(err instanceof Error ? err.message : commonT('error'));
         } finally {
             setLoading(false);
         }
@@ -72,12 +90,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 {/* Header */}
                 <div className="text-center mb-8">
                     <h2 className="text-2xl font-bold text-white mb-2">
-                        {mode === "login" ? "Welcome Back" : "Create Account"}
+                        {mode === "login" ? t('signIn') : t('signUp')}
                     </h2>
                     <p className="text-gray-400 text-sm">
                         {mode === "login"
-                            ? "Sign in to access your bookings"
-                            : "Join TripVega for exclusive deals"}
+                            ? t('loginSubtitle')
+                            : t('registerSubtitle')}
                     </p>
                 </div>
 
@@ -85,7 +103,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Email
+                            {t('email')}
                         </label>
                         <input
                             type="email"
@@ -99,7 +117,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Password
+                            {t('password')}
                         </label>
                         <input
                             type="password"
@@ -134,12 +152,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                 <span className="material-symbols-outlined animate-spin">
                                     progress_activity
                                 </span>
-                                Processing...
+                                {commonT('loading')}
                             </span>
                         ) : mode === "login" ? (
-                            "Sign In"
+                            t('signIn')
                         ) : (
-                            "Create Account"
+                            t('signUp')
                         )}
                     </button>
                 </form>
@@ -149,22 +167,22 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     <p className="text-gray-400 text-sm">
                         {mode === "login" ? (
                             <>
-                                Don&apos;t have an account?{" "}
+                                {t('noAccount')}{" "}
                                 <button
                                     onClick={() => setMode("register")}
                                     className="text-primary hover:underline font-medium"
                                 >
-                                    Sign up
+                                    {t('signUp')}
                                 </button>
                             </>
                         ) : (
                             <>
-                                Already have an account?{" "}
+                                {t('hasAccount')}{" "}
                                 <button
                                     onClick={() => setMode("login")}
                                     className="text-primary hover:underline font-medium"
                                 >
-                                    Sign in
+                                    {t('signIn')}
                                 </button>
                             </>
                         )}

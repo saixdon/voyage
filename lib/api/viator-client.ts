@@ -3,11 +3,16 @@
 
 const VIATOR_API_BASE = process.env.VIATOR_API_BASE_URL || "https://api.viator.com/partner";
 const VIATOR_API_KEY = process.env.VIATOR_API_KEY;
+import { MOCK_DESTINATIONS, MOCK_PRODUCTS, MOCK_TAGS } from './viator-mock';
+
+// Force mock usage if API key is obviously invalid or for testing
+const USE_MOCK = false; // Disabled as per user request
 
 interface ViatorProduct {
     productCode: string;
     title: string;
     description?: string;
+    productUrl?: string; // Full Viator URL with affiliate tracking
     images?: { variants: { url: string; width?: number; height?: number }[] }[];
     pricing?: {
         summary?: {
@@ -40,12 +45,14 @@ export interface TransformedActivity {
     title: string;
     location: string;
     image: string;
+    images: string[];
     price: number;
     currency: string;
     rating: number;
     reviewCount: number;
     duration: string;
     productCode: string;
+    productUrl: string; // Full Viator URL with affiliate tracking
 }
 
 function formatDuration(duration?: ViatorProduct["duration"]): string {
@@ -82,6 +89,21 @@ function selectBestImage(images?: ViatorProduct["images"]): string {
     // If no HD image, try to find the largest one
     const sorted = [...variants].sort((a, b) => (b.width || 0) - (a.width || 0));
     return sorted[0]?.url || "";
+}
+
+// NEW: Helper to extract up to 5 high-quality images
+function extractImages(images?: ViatorProduct["images"]): string[] {
+    if (!images || images.length === 0) return [];
+
+    // Take up to 5 images
+    return images.slice(0, 5).map(img => {
+        if (!img.variants || img.variants.length === 0) return "";
+        // Prefer HD >= 1080px for gallery, fallback to largest
+        const hd = img.variants.find(v => v.width && v.width >= 1080);
+        if (hd) return hd.url;
+        const sorted = [...img.variants].sort((a, b) => (b.width || 0) - (a.width || 0));
+        return sorted[0]?.url || "";
+    }).filter(url => url !== "");
 }
 
 // Cache for destinations to avoid repeated API calls
@@ -195,32 +217,56 @@ export interface TrendingDestination {
     country: string;
     image: string;
     query: string;
+    lat?: number;
+    lng?: number;
 }
 
-const TRENDING_DESTINATION_IDS = [
-    { id: 711, name: "Rome", country: "Italy", query: "Rome", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1000&auto=format&fit=crop" },
-    { id: 479, name: "Paris", country: "France", query: "Paris", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1000&auto=format&fit=crop" },
-    { id: 562, name: "Barcelona", country: "Spain", query: "Barcelona", image: "https://images.unsplash.com/photo-1583997051651-8255c48b782c?q=80&w=1000&auto=format&fit=crop" },
-    { id: 674, name: "New York", country: "USA", query: "New York", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=1000&auto=format&fit=crop" },
-    { id: 737, name: "London", country: "UK", query: "London", image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=1000&auto=format&fit=crop" }
+const TRENDING_DESTINATION_IDS: TrendingDestination[] = [
+    { id: 479, name: "Paris", country: "France", query: "Paris", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=1200", lat: 48.8566, lng: 2.3522 },
+    { id: 828, name: "Dubai", country: "UAE", query: "Dubai", image: "https://images.unsplash.com/photo-1546412414-e1885259563a?auto=format&fit=crop&q=80&w=1200", lat: 25.2048, lng: 55.2708 },
+    { id: 711, name: "Rome", country: "Italy", query: "Rome", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&q=80&w=1200", lat: 41.9028, lng: 12.4964 },
+    { id: 1007, name: "Vaduz", country: "Liechtenstein", query: "Vaduz", image: "https://images.unsplash.com/photo-1600623471616-8c1966c91ff6?auto=format&fit=crop&q=80&w=1200", lat: 47.1415, lng: 9.5215 },
+    { id: 562, name: "Barcelona", country: "Spain", query: "Barcelona", image: "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&q=80&w=1200", lat: 41.3851, lng: 2.1734 },
+    { id: 674, name: "New York", country: "USA", query: "New York", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&q=80&w=1200", lat: 40.7128, lng: -74.0060 },
+    { id: 737, name: "London", country: "UK", query: "London", image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&q=80&w=1200", lat: 51.5074, lng: -0.1278 },
+    { id: 334, name: "Tokyo", country: "Japan", query: "Tokyo", image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&q=80&w=1200", lat: 35.6762, lng: 139.6503 },
+    { id: 357, name: "Sydney", country: "Australia", query: "Sydney", image: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&q=80&w=1200", lat: -33.8688, lng: 151.2093 },
+    { id: 1004, name: "Cape Town", country: "South Africa", query: "Cape Town", image: "https://images.unsplash.com/photo-1576485290814-1c72aa4bbb8e?auto=format&fit=crop&q=80&w=1200", lat: -33.9249, lng: 18.4241 },
+    { id: 1005, name: "Rio de Janeiro", country: "Brazil", query: "Rio de Janeiro", image: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&q=80&w=1200", lat: -22.9068, lng: -43.1729 },
+    { id: 1006, name: "Reykjavik", country: "Iceland", query: "Reykjavik", image: "https://images.unsplash.com/photo-1476610182048-b716b8518aae?auto=format&fit=crop&q=80&w=1200", lat: 64.1466, lng: -21.9426 }
 ];
 
-export async function getTrendingDestinations(): Promise<TrendingDestination[]> {
-    // In a real scenario, we could fetch these from Viator, but for now we use 
-    // these IDs to ensure we get high-quality content for the landing page.
-    return TRENDING_DESTINATION_IDS;
+export async function getTrendingDestinations(locale = "en"): Promise<TrendingDestination[]> {
+    // Fetch all destinations (cached) for the requested locale
+    const cachedDestinations = await fetchAllDestinations(locale);
+
+    // Map our hardcoded IDs to the localized names found in the API response
+    return TRENDING_DESTINATION_IDS.map(dest => {
+        const found = cachedDestinations.find(d => d.destinationId === dest.id);
+        return {
+            ...dest,
+            name: found?.name || dest.name, // Use localized name if found, else fallback
+            country: found?.type === "COUNTRY" ? found.name : dest.country // Viator destinations list doesn't easily give country for a city without lookup, but we can try.
+            // Actually, fetchAllDestinations returns flat list. 
+            // 'Rome' (711) name will be 'Rom' in German. 
+            // We might keep the hardcoded country for now or try to resolve it if we had parent lookup.
+            // For now, let's just localize the City Name which is the most important.
+        };
+    });
 }
 
 // Fetch all tags from Viator API
-export async function fetchViatorTags(): Promise<ViatorTag[]> {
+export async function fetchViatorTags(locale = "en"): Promise<ViatorTag[]> {
     // Return cached data if still valid
     if (tagsCache && Date.now() - tagsCacheTime < CACHE_DURATION) {
         return tagsCache;
     }
 
-    if (!VIATOR_API_KEY) {
-        console.error("Viator API key not configured");
-        return [];
+    if (USE_MOCK || !VIATOR_API_KEY) {
+        console.warn("Using MOCK Viator Tags");
+        tagsCache = MOCK_TAGS;
+        tagsCacheTime = Date.now();
+        return MOCK_TAGS;
     }
 
     try {
@@ -228,8 +274,8 @@ export async function fetchViatorTags(): Promise<ViatorTag[]> {
             method: "GET",
             headers: {
                 "Accept": "application/json;version=2.0",
-                "Accept-Language": "en",
-                "exp-api-key": VIATOR_API_KEY,
+                "Accept-Language": locale,
+                "exp-api-key": VIATOR_API_KEY!,
             },
         });
 
@@ -267,7 +313,7 @@ const CURATED_CATEGORY_CONFIG: { tagId: number; icon: string; fallbackName: stri
 
 // Get transformed tags suitable for display
 export async function getDisplayCategories(locale = "en"): Promise<TransformedTag[]> {
-    const tags = await fetchViatorTags();
+    const tags = await fetchViatorTags(locale);
 
     if (tags.length === 0) {
         // Return curated categories with fallback names if API fails
@@ -307,20 +353,25 @@ export async function getDisplayCategories(locale = "en"): Promise<TransformedTa
 }
 
 // Fetch all destinations from Viator and cache them
-async function fetchAllDestinations(): Promise<{ destinationId: number; name: string; type: string }[]> {
+async function fetchAllDestinations(locale = "en"): Promise<{ destinationId: number; name: string; type: string }[]> {
     // Return cached data if still valid
     if (destinationsCache && Date.now() - destinationsCacheTime < CACHE_DURATION) {
         return destinationsCache;
     }
 
-    if (!VIATOR_API_KEY) return [];
+    if (USE_MOCK || !VIATOR_API_KEY) {
+        console.warn("Using MOCK Viator Destinations");
+        destinationsCache = MOCK_DESTINATIONS;
+        destinationsCacheTime = Date.now();
+        return MOCK_DESTINATIONS;
+    }
 
     try {
         const response = await fetch(`${VIATOR_API_BASE}/destinations`, {
             method: "GET",
             headers: {
                 "Accept": "application/json;version=2.0",
-                "Accept-Language": "en",
+                "Accept-Language": locale,
                 "exp-api-key": VIATOR_API_KEY,
             },
         });
@@ -345,8 +396,8 @@ async function fetchAllDestinations(): Promise<{ destinationId: number; name: st
 }
 
 // Helper to find destination ID for a city name by searching cached destinations
-async function resolveDestinationId(query: string): Promise<string | null> {
-    const destinations = await fetchAllDestinations();
+async function resolveDestinationId(query: string, locale = "en"): Promise<string | null> {
+    const destinations = await fetchAllDestinations(locale);
     if (destinations.length === 0) return null;
 
     const queryLower = query.toLowerCase().trim();
@@ -382,26 +433,52 @@ export async function searchViatorProducts(
     query: string,
     limit = 20,
     startDate?: string, // YYYY-MM-DD
-    endDate?: string    // YYYY-MM-DD
+    endDate?: string,   // YYYY-MM-DD
+    locale = "en",
+    filters?: {
+        priceMin?: number;
+        priceMax?: number;
+        tags?: number[];
+    }
 ): Promise<{ activities: TransformedActivity[]; totalCount?: number; error?: string }> {
-    if (!VIATOR_API_KEY) {
+    if (!USE_MOCK && !VIATOR_API_KEY) {
         return { activities: [], error: "Viator API key not configured" };
+    }
+
+    if (USE_MOCK) {
+        console.warn(`Using MOCK Search for: ${query}`);
+        // Simple mock search filtering
+        const results = MOCK_PRODUCTS.filter(p =>
+            p.title.toLowerCase().includes(query.toLowerCase()) ||
+            p.destinations?.some(d => d.name?.toLowerCase().includes(query.toLowerCase()))
+        );
+
+        const activities: TransformedActivity[] = results.map((product) => ({
+            id: product.productCode,
+            title: product.title,
+            location: product.destinations?.[0]?.name || "",
+            image: selectBestImage(product.images as any),
+            images: extractImages(product.images as any), // POPULATE MOCK
+            price: product.pricing?.summary?.fromPrice || 0,
+            currency: product.pricing?.currency || "EUR",
+            rating: product.reviews?.combinedAverageRating || 0,
+            reviewCount: product.reviews?.totalReviews || 0,
+            duration: formatDuration(product.duration),
+            productCode: product.productCode,
+            productUrl: product.productUrl || "",
+        }));
+
+        return { activities, totalCount: activities.length };
     }
 
     try {
         // 1. Resolve Destination ID mainly because /products/search REQUIRES a destination filter
         // We try to find a destination matching the query string.
-        let destinationId = await resolveDestinationId(query);
+        let destinationId = await resolveDestinationId(query, locale);
 
         if (!destinationId) {
-            console.warn(`Could not resolve destination for query: ${query}. Defaulting to London.`);
-            // Fallback: If no destination matches (e.g. user searched "Food"), default to London
-            // so we at least show some real products instead of nothing.
-            destinationId = await resolveDestinationId("London");
-
-            if (!destinationId) {
-                return { activities: [], error: `Could not find destination: ${query}` };
-            }
+            console.warn(`Could not resolve destination for query: ${query}.`);
+            return { activities: [], error: `Could not resolve destination: ${query}` };
         }
 
         // 2. Search products with the found Destination ID
@@ -409,8 +486,8 @@ export async function searchViatorProducts(
             method: "POST",
             headers: {
                 "Accept": "application/json;version=2.0",
-                "Accept-Language": "en",
-                "exp-api-key": VIATOR_API_KEY,
+                "Accept-Language": locale,
+                "exp-api-key": VIATOR_API_KEY!,
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -423,6 +500,9 @@ export async function searchViatorProducts(
                     destination: destinationId,
                     ...(startDate && { startDate: startDate }),
                     ...(endDate && { endDate: endDate }),
+                    ...(filters?.priceMin !== undefined && { lowestPrice: filters.priceMin }),
+                    ...(filters?.priceMax !== undefined && { highestPrice: filters.priceMax }),
+                    ...(filters?.tags && filters.tags.length > 0 && { tags: filters.tags }),
                 },
                 sorting: {
                     sort: "TRAVELER_RATING",
@@ -451,12 +531,14 @@ export async function searchViatorProducts(
             title: product.title,
             location: product.destinations?.[0]?.name || "",
             image: selectBestImage(product.images),
+            images: extractImages(product.images), // POPULATE REAL
             price: product.pricing?.summary?.fromPrice || 0,
             currency: product.pricing?.currency || "EUR",
             rating: product.reviews?.combinedAverageRating || 0,
             reviewCount: product.reviews?.totalReviews || 0,
             duration: formatDuration(product.duration),
             productCode: product.productCode,
+            productUrl: product.productUrl || "", // Viator API returns complete affiliate URL
         }));
 
         // Secondary manual sort to ensure best results are at the top
@@ -477,18 +559,35 @@ export async function searchViatorProducts(
     }
 }
 
-export async function getViatorProductDetails(productCode: string) {
-    if (!VIATOR_API_KEY) {
+export async function getViatorProductDetails(productCode: string, locale = "en") {
+    if (!USE_MOCK && !VIATOR_API_KEY) {
         return { error: "Viator API key not configured" };
     }
 
     try {
+        if (USE_MOCK) {
+            console.warn("Using MOCK product details");
+            const mock = MOCK_PRODUCTS.find(p => p.productCode === productCode);
+            if (mock) {
+                // Ensure the mock has the structure the UI expects
+                return {
+                    ...mock,
+                    // Add any missing details required for full page
+                    inclusions: ["Entry Ticket", "Digital Guide"],
+                    exclusions: ["Food", "Hotel Pickup"],
+                    logistics: { start: [{ name: "Meeting Point A" }] }
+                };
+            }
+            // If not found in mock list, return a generic one or error
+            return { error: "Product not found in mock data" };
+        }
+
         const response = await fetch(`${VIATOR_API_BASE}/products/${productCode}`, {
             method: "GET",
             headers: {
                 "Accept": "application/json;version=2.0",
-                "Accept-Language": "en",
-                "exp-api-key": VIATOR_API_KEY,
+                "Accept-Language": locale,
+                "exp-api-key": VIATOR_API_KEY!,
             },
             next: { revalidate: 3600 }, // Cache for 1 hour
         });
@@ -509,16 +608,36 @@ export async function getViatorAvailability(
     productCode: string,
     travelDate: string // Format: YYYY-MM-DD
 ) {
-    if (!VIATOR_API_KEY) {
+    if (!USE_MOCK && !VIATOR_API_KEY) {
         return { error: "Viator API key not configured" };
     }
 
     try {
+        if (USE_MOCK) {
+            console.warn("Using MOCK availability");
+            return {
+                bookableItems: [
+                    {
+                        productOptionCode: "DEFAULT",
+                        price: {
+                            totalPrice: {
+                                price: {
+                                    value: 25.00,
+                                    currency: "EUR"
+                                }
+                            }
+                        },
+                        available: true
+                    }
+                ]
+            };
+        }
+
         const response = await fetch(`${VIATOR_API_BASE}/availability/check`, {
             method: "POST",
             headers: {
                 "Accept": "application/json;version=2.0",
-                "exp-api-key": VIATOR_API_KEY,
+                "exp-api-key": VIATOR_API_KEY!,
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({

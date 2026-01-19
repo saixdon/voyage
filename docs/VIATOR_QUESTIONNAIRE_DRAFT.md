@@ -1,16 +1,19 @@
 # Viator Backend Checks Questionnaire - DRAFT ANSWERS
 
-> **Status**: ⏳ DRAFT - Needs user review before sending
+> **Status**: ⏳ DRAFT v2 - Updated based on Viator feedback (2026-01-19)
 > **Send to**: affiliateapi@tripadvisor.com
 > **Important**: Once approved, any changes to endpoint usage must be discussed with Viator in advance!
+>
+> **Chosen Data Model**: ✅ **Ingestion Model** (with `/products/modified-since` and `/availability/schedules/modified-since`)
 
 ---
 
 ## GENERAL QUESTIONS
 
 ### 1. What is your company name?
-**Your response**: 
-Tripvega
+**Response**: 
+```
+TripVega
 ```
 
 ---
@@ -47,33 +50,29 @@ All destinations included in the curated catalog will be supported.
 ---
 
 ### 5. How many products do you support? If you filter out some products, what criteria is it based on? Are you going to add more products post launch?
-**Suggested response (Option A - Full Catalog)**:
+**Response**:
 ```
-We plan to support all products available through the Viator API.
-No products are filtered out.
-We will continuously add new products as they become available via the ingestion endpoints.
-```
-
-**Suggested response (Option B - Curated Catalog)**:
-```
-We will use the curated subset of products provided by Viator.
-This includes high-performing, reliable products as recommended by Viator.
-We may expand to full catalog access in the future.
+We plan to support all products available through the Viator API (full catalog).
+No products are filtered out - we ingest all destinations and products available on Viator.
+New products are automatically added via the hourly /products/modified-since delta updates.
 ```
 
 ---
 
 ## ENDPOINT USAGE TABLE
 
-
+> **Note**: We are using the **Ingestion Model**. As per Viator guidelines:
+> - `/products/modified-since` returns full product details, so `/products/bulk` is NOT needed for ingestion
+> - `/bulk` endpoints are only used for edge cases (e.g., fetching a few specific products)
+> - No real-time calls to `/products/{product-code}` since data comes from ingestion
 
 | Endpoint | Ingestion | Real-time | Additional notes |
 |----------|-----------|-----------|------------------|
-| `/products/modified-since` | Every 20 min | - | Using cursor parameter |
-| `/products/bulk` | As needed | - | To fetch full product details (content) after modified-since |
-| `/products/{product-code}` | As needed | - | To fetch single product details (fallback) |
-| `/availability/schedules/modified-since` | Every 20 min | - | Using cursor parameter |
-| `/availability/schedules/bulk` | As needed | - | To fetch full schedules after modified-since |
+| `/products/modified-since` | Hourly | - | Full product content ingestion, using cursor parameter |
+| `/products/bulk` | - | - | Only for edge cases (max a few products at a time) |
+| `/products/{product-code}` | - | - | Not used (data from ingestion) |
+| `/availability/schedules/modified-since` | Hourly | - | Availability & pricing schedules, using cursor parameter |
+| `/availability/schedules/bulk` | - | - | Only for edge cases |
 | `/availability/schedules/{product-code}` | - | - | Not used (data from ingestion) |
 | `/products/search` | - | - | Not used (search from own DB) |
 | `/search/freetext` | - | - | Not used (search from own DB) |
@@ -92,10 +91,12 @@ We may expand to full catalog access in the future.
 | `/v1/checkoutsessions/{sessionToken}/paymentaccounts` | - | Yes | For payment processing |
 | `/bookings/status` | - | Yes | For pending bookings (hourly) |
 | `/bookings/modified-since` | Every 3 min | - | For supplier cancellations |
-| `/bookings/modified-since/acknowledge` | - | Yes | Within 5 min of cancellation |
 | `/bookings/cancel-reasons` | Monthly | - | Cached |
 | `/bookings/{booking-reference}/cancel-quote` | - | Yes | Before cancellation |
 | `/bookings/{booking-reference}/cancel` | - | Yes | User-initiated cancellation |
+
+> **Removed Endpoints**:
+> - `/bookings/modified-since/acknowledge` - Not applicable (only for merchant partners to stop Viator cancellation emails)
 
 ---
 
@@ -105,7 +106,8 @@ We may expand to full catalog access in the future.
 **Response**:
 ```
 Search results are returned directly from our database (Supabase).
-Product data is ingested via /products/modified-since every 20 minutes.
+Product data is ingested via /products/modified-since at least hourly (as per Viator requirements).
+We do NOT use /products/search or /products/{product-code} in real-time.
 ```
 
 ---
@@ -169,10 +171,8 @@ We use EUR as our primary booking currency.
 ### 12. Do you have access to Google Places API to retrieve details of Google locations?
 **Response**:
 ```
-[TODO: Confirm if you have Google Places API access]
-
-Option A: Yes, we have our own Google Places API account to retrieve location details.
-Option B: No, we do not currently have Google Places API access. We will only use Viator-provided location data.
+No, we do not currently have Google Places API access. 
+We will only use Viator-provided location data from the /locations/bulk endpoint.
 ```
 
 ---
@@ -183,8 +183,15 @@ Option B: No, we do not currently have Google Places API access. We will only us
 **Response**:
 ```
 Yes, we conduct real-time availability and pricing checks using /availability/check at two stages:
-1. When the customer selects a date and passenger mix (age bands)
-2. Immediately before submitting the booking request to verify current price/availability
+
+1. On the product display page when the customer selects a date and passenger mix (age bands)
+   - This displays available product options and start times
+
+2. Immediately before making the booking request
+   - This double-checks availability and pricing before payment
+
+This workflow follows Viator's best practice recommendation to minimize the possibility 
+of customers finding items unavailable at checkout.
 ```
 
 ---
@@ -221,13 +228,33 @@ Yes, we have implemented a 120 second timeout for all Viator API services, as re
 
 ---
 
+## PCI COMPLIANCE
+
+### 17. Can you confirm your PCI compliance status for handling payment data?
+**Response**:
+```
+We use Viator's hosted checkout/payment solution. 
+Payment card data is handled entirely by Viator's PCI-compliant infrastructure. 
+We do NOT store, process, or transmit cardholder data on our systems.
+
+Viator manages:
+- Payment processing
+- Customer support for payment-related inquiries
+- Refunds and chargebacks
+```
+
+---
+
 ## CHECKLIST BEFORE SENDING
 
-- [ ] Company name filled in
-- [x] Chose model: Ingestion
-- [ ] Confirmed Google Places API access status
-- [ ] Reviewed all responses
-- [ ] Endpoint usage table completed
+- [x] Company name filled in: TripVega
+- [x] Chose model: Ingestion Model (with /products/modified-since and /availability/schedules/modified-since)
+- [x] Confirmed ingestion frequency is at least hourly (via Supabase + cron-jobs)
+- [x] Confirmed Google Places API access status: No (using Viator location data only)
+- [x] Confirmed PCI Compliance status: Viator handles all payments
+- [x] Full product catalog (all Viator destinations/products)
+- [ ] Final review complete
+- [ ] Send to affiliateapi@tripadvisor.com
 
 ---
 

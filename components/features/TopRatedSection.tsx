@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 import type { TransformedActivity } from "@/lib/api/viator-client";
 
 interface ActivityWithBadge extends TransformedActivity {
@@ -9,6 +10,8 @@ interface ActivityWithBadge extends TransformedActivity {
 }
 
 export function TopRatedSection() {
+    const t = useTranslations('topRated');
+    const locale = useLocale();
     const [activities, setActivities] = useState<ActivityWithBadge[]>([]);
     const [loading, setLoading] = useState(true);
     const scrollContainerRef = React.useRef<HTMLDivElement>(null);
@@ -16,7 +19,7 @@ export function TopRatedSection() {
     useEffect(() => {
         async function fetchActivities() {
             try {
-                const res = await fetch("/api/activities/top-rated");
+                const res = await fetch(`/api/activities/top-rated?locale=${locale}`);
                 if (!res.ok) throw new Error("Failed to fetch");
                 const data = await res.json();
                 setActivities(data);
@@ -27,7 +30,7 @@ export function TopRatedSection() {
             }
         }
         fetchActivities();
-    }, []);
+    }, [locale]);
 
     const scroll = (direction: "left" | "right") => {
         if (scrollContainerRef.current) {
@@ -44,8 +47,8 @@ export function TopRatedSection() {
             <section className="mb-20">
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h2 className="text-3xl font-bold text-white">Attractions you can&apos;t miss</h2>
-                        <p className="text-gray-400 mt-2">Top-rated experiences around the world</p>
+                        <h2 className="text-3xl font-bold text-white">{t('title')}</h2>
+                        <p className="text-gray-400 mt-2">{t('subtitle')}</p>
                     </div>
                 </div>
                 <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-4">
@@ -66,8 +69,8 @@ export function TopRatedSection() {
         <section className="mb-20">
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-white">Attractions you can&apos;t miss</h2>
-                    <p className="text-gray-400 mt-2">Top-rated experiences around the world</p>
+                    <h2 className="text-3xl font-bold text-white">{t('title')}</h2>
+                    <p className="text-gray-400 mt-2">{t('subtitle')}</p>
                 </div>
                 <div className="flex gap-2">
                     <button
@@ -91,7 +94,7 @@ export function TopRatedSection() {
             >
                 {activities.slice(0, 8).map((activity, index) => (
                     <Link
-                        key={activity.id}
+                        key={`${activity.id}-${index}`}
                         href={`/activities/${activity.id}`}
                         className="relative min-w-[260px] md:min-w-[280px] aspect-[4/3] rounded-2xl overflow-hidden group cursor-pointer flex-shrink-0 snap-start"
                     >

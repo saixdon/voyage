@@ -1,0 +1,191 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "retry": "Try again",
+        "search": "Search",
+        "close": "Close"
+    },
+    "nav": {
+        "destinations": "Destinations",
+        "activities": "Activities",
+        "culture": "Culture",
+        "login": "Login",
+        "logout": "Sign Out",
+        "explore": "Explore",
+        "bookings": "My Bookings",
+        "favorites": "Favorites",
+        "settings": "Settings"
+    },
+    "auth": {
+        "signIn": "Sign In",
+        "signUp": "Create Account",
+        "email": "Email",
+        "password": "Password",
+        "loginSubtitle": "Sign in to access your bookings",
+        "registerSubtitle": "Join TripVega for exclusive deals",
+        "noAccount": "Don't have an account? Sign up",
+        "hasAccount": "Already have an account? Sign in",
+        "loginSuccess": "Successfully signed in!",
+        "registerSuccess": "Registration successful! Please check your email."
+    },
+    "footer": {
+        "company": "Company",
+        "support": "Support",
+        "legal": "Legal",
+        "followUs": "Follow Us",
+        "newsletter": "Newsletter",
+        "subscribe": "Subscribe",
+        "desc": "Discover the world's best experiences with TripVega."
+    },
+    "hero": {
+        "title1": "DISCOVER THE",
+        "title2": "UNSEEN",
+        "subtitle": "Unforgettable experiences at your fingertips. Book tours, activities, and attractions anywhere in the world.",
+        "searchPlaceholder": "Where are you going?",
+        "classicSearch": "Classic Search",
+        "aiPlanner": "AI Planner",
+        "aiPlaceholder": "Describe your dream trip...",
+        "customizeTrip": "Customize Trip",
+        "planning": "Planning...",
+        "generatePlan": "Generate Plan",
+        "suggestions": [
+            "Romantic weekend in Paris",
+            "Family trip to Rome 3 days",
+            "Solo adventure in Tokyo",
+            "Food tour in Barcelona"
+        ],
+        "hint": "Enter your destination and optionally adjust the filters"
+    },
+    "stats": {
+        "experiences": "Experiences",
+        "countries": "Countries",
+        "rating": "User Rating"
+    },
+    "trust": {
+        "bestPrice": "Best Price",
+        "guaranteed": "Guaranteed",
+        "freeCancel": "Free Cancellation",
+        "mostBookings": "Most bookings",
+        "securePayment": "Secure Payment",
+        "secure100": "100% Secure",
+        "support247": "24/7 Support",
+        "hereForYou": "We're here"
+    },
+    "home": {
+        "trendingTitle": "Trending Destinations",
+        "trendingSubtitle": "Most popular places traveled by our community",
+        "viewAll": "View all",
+        "explore": "Explore",
+        "newsletterTitle": "Your travel journey starts here",
+        "newsletterSubtitle": "Sign up to receive travel inspiration, exclusive offers, and tips for your next adventure.",
+        "emailPlaceholder": "Your email address",
+        "subscribeParams": "By signing up, you agree to receive promotional emails. You can unsubscribe at any time."
+    },
+    "topLists": {
+        "attractions": "Top attractions worldwide",
+        "destinations": "Top destinations",
+        "countries": "Top countries to visit",
+        "categories": "Top attraction categories",
+        "toursActivities": "tours & activities",
+        "viewOnMap": "View on interactive map"
+    },
+    "topRated": {
+        "title": "Attractions you can't miss",
+        "subtitle": "Top-rated experiences around the world"
+    },
+    "faq": {
+        "title": "Frequently Asked Questions",
+        "subtitle": "Everything you need to know about TripVega",
+        "stillQuestions": "Still have questions?",
+        "contactSupport": "Contact Support",
+        "helpCenter": "Help Center",
+        "items": [
+            {
+                "question": "What is TripVega?",
+                "answer": "TripVega is your global platform for unforgettable travel experiences, tours, and activities worldwide. We help you make the most of every trip."
+            },
+            {
+                "question": "How do I book an activity?",
+                "answer": "Simply choose your destination, find the activity you like, and click 'Book Now'. You'll be securely redirected to our partner Viator to complete your booking."
+            },
+            {
+                "question": "Can I cancel my booking?",
+                "answer": "Most activities offer free cancellation up to 24 hours before they start. You'll find the specific terms on the detail page of each activity."
+            },
+            {
+                "question": "How does the AI Planner work?",
+                "answer": "Our AI-powered trip planner creates a customized itinerary for you in seconds. Just enter your destination and preferences, and the AI does the rest."
+            },
+            {
+                "question": "Are my payments secure?",
+                "answer": "Yes, all payments are processed through our partner Viator according to the highest security standards. Your data is 100% protected."
+            }
+        ]
+    },
+    "aiPlan": {
+        "badge": "AI-generated trip",
+        "headerTitle": "Your trip to {destination}",
+        "saveButton": "Save trip",
+        "saving": "Saving...",
+        "saved": "Trip saved",
+        "loginToSave": "Please login to save the trip",
+        "day": "Day {number}",
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening",
+        "bookOnViator": "Book on Viator",
+        "booked": "Booked!",
+        "details": "Details",
+        "proposed": "Proposed",
+        "pending": "Pending",
+        "confirmTitle": "Booking completed?",
+        "confirmText": "Have you completed the booking for \"{title}\" on Viator?",
+        "yesBooked": "Yes, booked!",
+        "notYet": "Not yet",
+        "regeneratePlan": "Regenerate plan",
+        "notSuitable": "Not suitable? Get alternative",
+        "findingAlternative": "Finding alternative...",
+        "noAlternatives": "No alternatives available",
+        "replaceError": "Failed to find alternative",
+        "selectDate": "Select a specific date",
+        "selectDateDesc": "Please choose a date to check availability.",
+        "continueBooking": "Continue to Book"
+    },
+    "aiAdvanced": {
+        "whoIsTraveling": "Who is traveling?",
+        "vibeAndStyle": "Vibe & Style",
+        "budget": "Budget",
+        "tempo": "Tempo",
+        "mobility": "Mobility",
+        "closeSettings": "Close Settings",
+        "options": {
+            "solo": "Solo",
+            "couple": "Couple",
+            "family_kids": "Family (Young Kids)",
+            "family_teens": "Family (Teens)",
+            "friends": "Friends",
+            "adventure": "Adventure",
+            "culture": "Culture",
+            "romance": "Romance",
+            "food": "Foodie",
+            "hidden_gems": "Hidden Gems",
+            "saver": "Saver",
+            "saverDesc": "Budget friendly",
+            "balanced": "Balanced",
+            "balancedDesc": "Value for money",
+            "luxury": "Luxury",
+            "luxuryDesc": "Premium style",
+            "relaxed": "Relaxed",
+            "relaxedDesc": "Max 2 activities/day, short distances.",
+            "balancedTempo": "Balanced",
+            "balancedTempoDesc": "Perfect mix of sights & leisure.",
+            "fast": "Maximizer",
+            "fastDesc": "See everything! Full schedule.",
+            "active": "Active",
+            "activeDesc": "Hiking, cycling OK",
+            "accessible": "Accessible",
+            "accessibleDesc": "Wheelchair, stroller"
+        }
+    }
+}

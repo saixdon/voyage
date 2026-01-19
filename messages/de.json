@@ -1,0 +1,191 @@
+{
+    "common": {
+        "loading": "Laden...",
+        "error": "Ein Fehler ist aufgetreten",
+        "retry": "Erneut versuchen",
+        "search": "Suchen",
+        "close": "Schließen"
+    },
+    "nav": {
+        "destinations": "Reiseziele",
+        "activities": "Aktivitäten",
+        "culture": "Kultur",
+        "login": "Anmelden",
+        "logout": "Abmelden",
+        "explore": "Entdecken",
+        "bookings": "Meine Buchungen",
+        "favorites": "Favoriten",
+        "settings": "Einstellungen"
+    },
+    "auth": {
+        "signIn": "Anmelden",
+        "signUp": "Konto erstellen",
+        "email": "E-Mail",
+        "password": "Passwort",
+        "loginSubtitle": "Melde dich an für deine Buchungen",
+        "registerSubtitle": "Werde Mitglied für exklusive Deals",
+        "noAccount": "Kein Konto? Registrieren",
+        "hasAccount": "Bereits ein Konto? Anmelden",
+        "loginSuccess": "Erfolgreich eingeloggt!",
+        "registerSuccess": "Registrierung erfolgreich! Bitte überprüfe deine E-Mails."
+    },
+    "footer": {
+        "company": "Unternehmen",
+        "support": "Hilfe",
+        "legal": "Rechtliches",
+        "followUs": "Folge uns",
+        "newsletter": "Newsletter",
+        "subscribe": "Abonnieren",
+        "desc": "Entdecke die besten Erlebnisse der Welt mit TripVega."
+    },
+    "hero": {
+        "title1": "ENTDECKE DAS",
+        "title2": "VERBORGENE",
+        "subtitle": "Unvergessliche Erlebnisse zum Greifen nah. Buche Touren, Aktivitäten und Attraktionen weltweit.",
+        "searchPlaceholder": "Wohin geht die Reise?",
+        "classicSearch": "Klassische Suche",
+        "aiPlanner": "KI Planer",
+        "aiPlaceholder": "Beschreibe deine Traumreise...",
+        "customizeTrip": "Reise anpassen",
+        "planning": "Planung...",
+        "generatePlan": "Plan erstellen",
+        "suggestions": [
+            "Romantisches Wochenende in Paris",
+            "Familienreise nach Rom 3 Tage",
+            "Solo-Abenteuer in Tokio",
+            "Food-Tour in Barcelona"
+        ],
+        "hint": "Gib dein Ziel ein und passe optional die Filter an"
+    },
+    "stats": {
+        "experiences": "Erlebnisse",
+        "countries": "Länder",
+        "rating": "Nutzerbewertung"
+    },
+    "trust": {
+        "bestPrice": "Bester Preis",
+        "guaranteed": "Garantiert",
+        "freeCancel": "Kostenl. Storno",
+        "mostBookings": "Meiste Buchungen",
+        "securePayment": "Sichere Zahlung",
+        "secure100": "100% Sicher",
+        "support247": "24/7 Support",
+        "hereForYou": "Wir sind da"
+    },
+    "home": {
+        "trendingTitle": "Beliebte Reiseziele",
+        "trendingSubtitle": "Die populärsten Orte unserer Community",
+        "viewAll": "Alle ansehen",
+        "explore": "Entdecken",
+        "newsletterTitle": "Deine Reise beginnt hier",
+        "newsletterSubtitle": "Melde dich an für Reise-Inspiration, exklusive Angebote und Tipps für dein nächstes Abenteuer.",
+        "emailPlaceholder": "Deine E-Mail Adresse",
+        "subscribeParams": "Mit der Anmeldung stimmst du dem Erhalt von Werbe-E-Mails zu. Du kannst dich jederzeit abmelden."
+    },
+    "topLists": {
+        "attractions": "Top Attraktionen weltweit",
+        "destinations": "Beliebteste Reiseziele",
+        "countries": "Beste Reiseländer",
+        "categories": "Beliebte Kategorien",
+        "toursActivities": "Touren & Aktivitäten",
+        "viewOnMap": "Auf Karte ansehen"
+    },
+    "topRated": {
+        "title": "Attraktionen, die du nicht verpassen solltest",
+        "subtitle": "Die am besten bewerteten Erlebnisse weltweit"
+    },
+    "faq": {
+        "title": "Häufig gestellte Fragen",
+        "subtitle": "Alles was du über TripVega wissen musst",
+        "stillQuestions": "Noch Fragen?",
+        "contactSupport": "Kontakt Support",
+        "helpCenter": "Hilfecenter",
+        "items": [
+            {
+                "question": "Was ist TripVega?",
+                "answer": "TripVega ist deine globale Plattform für unvergessliche Reiseerlebnisse, Touren und Aktivitäten weltweit. Wir helfen dir, das Beste aus jeder Reise zu machen."
+            },
+            {
+                "question": "Wie buche ich eine Aktivität?",
+                "answer": "Wähle einfach dein Wunschziel, finde die passende Aktivität und klicke auf 'Jetzt buchen'. Du wirst sicher zu unserem Partner Viator weitergeleitet, um die Buchung abzuschließen."
+            },
+            {
+                "question": "Kann ich meine Buchung stornieren?",
+                "answer": "Die meisten Aktivitäten bieten eine kostenlose Stornierung bis zu 24 Stunden vor Beginn an. Die genauen Bedingungen findest du auf der Detailseite der jeweiligen Aktivität."
+            },
+            {
+                "question": "Wie funktioniert der AI Planner?",
+                "answer": "Unser KI-gestützter Reiseplaner erstellt dir in Sekunden einen maßgeschneiderten Reiseplan. Gib einfach dein Ziel und deine Vorlieben ein, und die KI erledigt den Rest."
+            },
+            {
+                "question": "Sind meine Zahlungen sicher?",
+                "answer": "Ja, alle Zahlungen werden über unseren Partner Viator nach höchsten Sicherheitsstandards abgewickelt. Deine Daten sind zu 100% geschützt."
+            }
+        ]
+    },
+    "aiPlan": {
+        "badge": "KI-generierte Reise",
+        "headerTitle": "Deine Reise nach {destination}",
+        "saveButton": "Reise speichern",
+        "saving": "Speichern...",
+        "saved": "Reise gespeichert",
+        "loginToSave": "Bitte einloggen um die Reise zu speichern",
+        "day": "Tag {number}",
+        "morning": "Vormittag",
+        "afternoon": "Nachmittag",
+        "evening": "Abend",
+        "bookOnViator": "Auf Viator buchen",
+        "booked": "Gebucht!",
+        "details": "Details",
+        "proposed": "Vorgeschlagen",
+        "pending": "Ausstehend",
+        "confirmTitle": "Buchung abgeschlossen?",
+        "confirmText": "Haben Sie die Buchung für \"{title}\" auf Viator abgeschlossen?",
+        "yesBooked": "Ja, gebucht!",
+        "notYet": "Noch nicht",
+        "regeneratePlan": "Plan neu generieren",
+        "notSuitable": "Nicht passend? Alternative",
+        "findingAlternative": "Alternative suchen...",
+        "noAlternatives": "Keine Alternativen verfügbar",
+        "replaceError": "Fehler beim Suchen einer Alternative",
+        "selectDate": "Datum auswählen",
+        "selectDateDesc": "Bitte wähle ein Datum, um die Verfügbarkeit zu prüfen.",
+        "continueBooking": "Weiter zur Buchung"
+    },
+    "aiAdvanced": {
+        "whoIsTraveling": "Wer reist?",
+        "vibeAndStyle": "Vibe & Stil",
+        "budget": "Budget",
+        "tempo": "Tempo",
+        "mobility": "Mobilität",
+        "closeSettings": "Einstellungen schließen",
+        "options": {
+            "solo": "Solo",
+            "couple": "Paar",
+            "family_kids": "Familie (Kl. Kinder)",
+            "family_teens": "Familie (Teens)",
+            "friends": "Freunde",
+            "adventure": "Abenteuer",
+            "culture": "Kultur",
+            "romance": "Romantik",
+            "food": "Genuss",
+            "hidden_gems": "Geheimtipps",
+            "saver": "Sparfuchs",
+            "saverDesc": "Günstig & Gut",
+            "balanced": "Ausgewogen",
+            "balancedDesc": "Preis-Leistung",
+            "luxury": "Luxus",
+            "luxuryDesc": "Nur das Beste",
+            "relaxed": "Entspannt",
+            "relaxedDesc": "Max. 2 Aktivitäten pro Tag, kurze Wege.",
+            "balancedTempo": "Ausgewogen",
+            "balancedTempoDesc": "Der perfekte Mix aus Sehenswürdigkeiten & Freizeit.",
+            "fast": "Maximizer",
+            "fastDesc": "Alles sehen! Voller Zeitplan für Power-User.",
+            "active": "Aktiv",
+            "activeDesc": "Wandern, Radfahren OK",
+            "accessible": "Barrierefrei",
+            "accessibleDesc": "Rollstuhl, Kinderwagen"
+        }
+    }
+}

@@ -1,0 +1,188 @@
+{
+    "common": {
+        "loading": "Chargement...",
+        "error": "Une erreur est survenue",
+        "retry": "Réessayer",
+        "search": "Rechercher",
+        "close": "Fermer"
+    },
+    "nav": {
+        "destinations": "Destinations",
+        "activities": "Activités",
+        "culture": "Culture",
+        "login": "Connexion",
+        "logout": "Déconnexion",
+        "explore": "Explorer",
+        "bookings": "Mes réservations",
+        "favorites": "Favoris",
+        "settings": "Paramètres"
+    },
+    "auth": {
+        "signIn": "Se connecter",
+        "signUp": "Créer un compte",
+        "email": "Email",
+        "password": "Mot de passe",
+        "loginSubtitle": "Connectez-vous pour accéder à vos réservations",
+        "registerSubtitle": "Rejoignez TripVega pour des offres exclusives",
+        "noAccount": "Vous n'avez pas de compte ? S'inscrire",
+        "hasAccount": "Vous avez déjà un compte ? Se connecter",
+        "loginSuccess": "Connexion réussie !",
+        "registerSuccess": "Inscription réussie ! Veuillez vérifier vos e-mails."
+    },
+    "footer": {
+        "company": "Entreprise",
+        "support": "Support",
+        "legal": "Mentions légales",
+        "followUs": "Suivez-nous",
+        "newsletter": "Newsletter",
+        "subscribe": "S'abonner",
+        "desc": "Découvrez les meilleures expériences du monde avec TripVega."
+    },
+    "hero": {
+        "title1": "DÉCOUVREZ L'",
+        "title2": "INCONNU",
+        "subtitle": "Des expériences inoubliables à portée de main. Réservez des visites, des activités et des attractions partout dans le monde.",
+        "searchPlaceholder": "Où allez-vous ?",
+        "classicSearch": "Recherche Classique",
+        "aiPlanner": "AI Planner",
+        "aiPlaceholder": "Décrivez votre voyage de rêve...",
+        "customizeTrip": "Personnaliser le voyage",
+        "planning": "Planification...",
+        "generatePlan": "Générer le plan",
+        "suggestions": [
+            "Week-end romantique à Paris",
+            "Voyage en famille à Rome 3 jours",
+            "Aventure en solo à Tokyo",
+            "Tour gastronomique à Barcelone"
+        ],
+        "hint": "Entrez votre destination et ajustez les filtres si vous le souhaitez"
+    },
+    "stats": {
+        "experiences": "Expériences",
+        "countries": "Pays",
+        "rating": "Note utilisateur"
+    },
+    "trust": {
+        "bestPrice": "Meilleur prix",
+        "guaranteed": "Garanti",
+        "freeCancel": "Annulation gratuite",
+        "mostBookings": "Plus de réservations",
+        "securePayment": "Paiement sécurisé",
+        "secure100": "100% Sécurisé",
+        "support247": "Support 24/7",
+        "hereForYou": "Nous sommes là"
+    },
+    "home": {
+        "trendingTitle": "Destinations tendances",
+        "trendingSubtitle": "Les lieux les plus populaires de notre communauté",
+        "viewAll": "Tout afficher",
+        "explore": "Explorer",
+        "newsletterTitle": "Votre voyage commence ici",
+        "newsletterSubtitle": "Inscrivez-vous pour recevoir de l'inspiration voyage, des offres exclusives et des conseils pour votre prochaine aventure.",
+        "emailPlaceholder": "Votre adresse email",
+        "subscribeParams": "En vous inscrivant, vous acceptez de recevoir des emails promotionnels. Vous pouvez vous désabonner à tout moment."
+    },
+    "topLists": {
+        "attractions": "Top attractions mondiales",
+        "destinations": "Top destinations",
+        "countries": "Top pays à visiter",
+        "categories": "Top catégories d'attractions",
+        "toursActivities": "visites & activités",
+        "viewOnMap": "Voir sur la carte interactive"
+    },
+    "topRated": {
+        "title": "Attractions à ne pas manquer",
+        "subtitle": "Expériences les mieux notées à travers le monde"
+    },
+    "faq": {
+        "title": "Foire Aux Questions",
+        "subtitle": "Tout ce que vous devez savoir sur TripVega",
+        "stillQuestions": "Encore des questions ?",
+        "contactSupport": "Contacter le Support",
+        "helpCenter": "Centre d'aide",
+        "items": [
+            {
+                "question": "Qu'est-ce que TripVega ?",
+                "answer": "TripVega est votre plateforme mondiale pour des expériences de voyage inoubliables, des visites et des activités dans le monde entier. Nous vous aidons à tirer le meilleur parti de chaque voyage."
+            },
+            {
+                "question": "Comment réserver une activité ?",
+                "answer": "Choisissez simplement votre destination, trouvez l'activité qui vous plaît et cliquez sur 'Réserver maintenant'. Vous serez redirigé en toute sécurité vers notre partenaire Viator pour finaliser votre réservation."
+            },
+            {
+                "question": "Puis-je annuler ma réservation ?",
+                "answer": "La plupart des activités offrent l'annulation gratuite jusqu'à 24 heures avant leur début. Vous trouverez les conditions spécifiques sur la page de détail de chaque activité."
+            },
+            {
+                "question": "Comment fonctionne l'AI Planner ?",
+                "answer": "Notre planificateur de voyage alimenté par l'IA crée un itinéraire personnalisé pour vous en quelques secondes. Entrez simplement votre destination et vos préférences, et l'IA s'occupe du reste."
+            },
+            {
+                "question": "Les paiements sont-ils sécurisés ?",
+                "answer": "Oui, tous les paiements sont traités par notre partenaire Viator selon les normes de sécurité les plus élevées. Vos données sont protégées à 100%."
+            }
+        ]
+    },
+    "aiPlan": {
+        "badge": "Voyage généré par l'IA",
+        "headerTitle": "Votre voyage à {destination}",
+        "saveButton": "Enregistrer le voyage",
+        "saving": "Enregistrement...",
+        "saved": "Voyage enregistré",
+        "loginToSave": "Veuillez vous connecter pour enregistrer le voyage",
+        "day": "Jour {number}",
+        "morning": "Matin",
+        "afternoon": "Après-midi",
+        "evening": "Soir",
+        "bookOnViator": "Réserver sur Viator",
+        "booked": "Réservé !",
+        "details": "Détails",
+        "proposed": "Proposé",
+        "pending": "En attente",
+        "confirmTitle": "Réservation terminée ?",
+        "confirmText": "Avez-vous terminé la réservation pour \"{title}\" sur Viator ?",
+        "yesBooked": "Oui, réservé !",
+        "notYet": "Pas encore",
+        "regeneratePlan": "Régénérer le plan",
+        "notSuitable": "Pas adapté ? Alternative",
+        "findingAlternative": "Recherche d'alternative...",
+        "noAlternatives": "Aucune alternative disponible",
+        "replaceError": "Échec de la recherche d'alternative"
+    },
+    "aiAdvanced": {
+        "whoIsTraveling": "Qui voyage ?",
+        "vibeAndStyle": "Vibe & Style",
+        "budget": "Budget",
+        "tempo": "Rythme",
+        "mobility": "Mobilité",
+        "closeSettings": "Fermer les paramètres",
+        "options": {
+            "solo": "Solo",
+            "couple": "Couple",
+            "family_kids": "Famille (Enfants)",
+            "family_teens": "Famille (Ados)",
+            "friends": "Amis",
+            "adventure": "Aventure",
+            "culture": "Culture",
+            "romance": "Romance",
+            "food": "Gastronomie",
+            "hidden_gems": "Pépites cachées",
+            "saver": "Économe",
+            "saverDesc": "Abordable",
+            "balanced": "Équilibré",
+            "balancedDesc": "Qualité-prix",
+            "luxury": "Luxe",
+            "luxuryDesc": "Premium",
+            "relaxed": "Relax",
+            "relaxedDesc": "Max 2 activités/jour.",
+            "balancedTempo": "Équilibré",
+            "balancedTempoDesc": "Mix parfait visites & loisirs.",
+            "fast": "Maximizer",
+            "fastDesc": "Tout voir ! Agenda complet.",
+            "active": "Actif",
+            "activeDesc": "Marche, vélo OK",
+            "accessible": "Accessible",
+            "accessibleDesc": "Fauteuil roulant, poussette"
+        }
+    }
+}

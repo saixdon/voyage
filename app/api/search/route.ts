@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get("q") || "";
     const dateParam = searchParams.get("date"); // YYYY-MM-DD
     const limit = parseInt(searchParams.get("limit") || "20");
+    const locale = searchParams.get("locale") || "en";
 
     let activities: Activity[] = [];
     let source = "none";
@@ -40,7 +41,13 @@ export async function GET(request: NextRequest) {
     if (activities.length === 0) {
         try {
             // Pass date if present. For a single date selection, we might want startDate = date, endDate = date
-            const viatorResult = await searchViatorProducts(query, limit, dateParam || undefined, dateParam || undefined);
+            const viatorResult = await searchViatorProducts(
+                query,
+                limit,
+                dateParam || undefined,
+                dateParam || undefined,
+                locale
+            );
             if (viatorResult.activities && viatorResult.activities.length > 0) {
                 activities = viatorResult.activities as unknown as Activity[];
                 source = "viator";

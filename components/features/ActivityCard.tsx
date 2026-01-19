@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { useFavorites } from "@/lib/favorites/favorites-context";
 
 interface ActivityCardProps {
     id: string;
@@ -74,53 +75,91 @@ export function ActivityCard({
         return stars;
     };
 
+    const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+    const isActivitySaved = isFavorite(id);
+
+    const handleFavoriteClick = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (isActivitySaved) {
+            await removeFavorite(id);
+        } else {
+            await addFavorite({
+                activity_id: id,
+                activity_title: title,
+                activity_image: image,
+                activity_location: location,
+                activity_price: price,
+                activity_currency: currency,
+                activity_rating: rating,
+                activity_review_count: reviewCount,
+                activity_duration: duration
+            });
+        }
+        onSave?.();
+    };
+
     return (
-        <Link href={`/activities/${id}`} className="block min-w-[300px] md:min-w-[340px] snap-center group">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl mb-4">
-                {badge && (
-                    <div
-                        className={`absolute top-3 left-3 ${badgeStyles[badge]} px-3 py-1 rounded-lg text-xs font-bold text-white border border-white/10 z-20`}
+        <Link href={`/activities/${id}`} className="block h-full group">
+            <div className="h-full bg-[#1a1a24] border border-white/15 rounded-2xl overflow-hidden shadow-lg transition-all duration-500 hover:shadow-[0_20px_40px_rgba(43,140,238,0.2)] hover:border-primary/50 hover:-translate-y-2">
+                <div className="relative aspect-[4/5] overflow-hidden">
+                    {badge && (
+                        <div
+                            className={`absolute top-4 left-4 ${badgeStyles[badge]} px-3 py-1.5 rounded-xl text-xs font-bold text-white border border-white/10 z-20`}
+                        >
+                            {badgeLabels[badge]}
+                        </div>
+                    )}
+                    <button
+                        onClick={handleFavoriteClick}
+                        className={`absolute top-4 right-4 bg-white/90 backdrop-blur-md text-black p-2 rounded-full z-20 ${isActivitySaved ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                            } transition-all duration-300 hover:scale-110`}
                     >
-                        {badgeLabels[badge]}
-                    </div>
-                )}
-                <button
-                    onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onSave?.();
-                    }}
-                    className={`absolute top-3 right-3 bg-white text-black p-1.5 rounded-full z-20 ${isSaved ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                        } transition-opacity`}
-                >
-                    <span className="material-symbols-outlined text-sm block">
-                        {isSaved ? "favorite" : "favorite_border"}
-                    </span>
-                </button>
-                <img
-                    alt={title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    src={image}
-                />
-            </div>
-            <div className="space-y-2">
-                <div className="flex items-center gap-1 text-yellow-400 text-sm">
-                    {renderStars()}
-                    <span className="text-gray-400 ml-1 text-xs">
-                        ({reviewCount.toLocaleString()})
-                    </span>
+                        <span className={`material-symbols-outlined text-base block ${isActivitySaved ? "text-red-500" : ""}`} style={isActivitySaved ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                            {isActivitySaved ? "favorite" : "favorite_border"}
+                        </span>
+                    </button>
+                    <img
+                        alt={title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        src={image}
+                    />
                 </div>
-                <h3 className="text-white text-lg font-bold leading-tight group-hover:text-primary transition-colors">
-                    {title}
-                </h3>
-                <p className="text-gray-400 text-sm">
-                    {location} • {duration}
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                    <span className="text-white font-bold">
-                        From {currency}
-                        {price}
-                    </span>
+                <div className="p-5 space-y-3">
+                    <div className="flex items-center gap-1.5">
+                        <div className="flex text-yellow-500">
+                            {renderStars()}
+                        </div>
+                        <span className="text-foreground font-bold text-sm ml-0.5">
+                            {rating > 0 ? rating.toFixed(1) : "N/A"}
+                        </span>
+                        <span className="text-muted-foreground text-xs">
+                            ({reviewCount.toLocaleString()})
+                        </span>
+                    </div>
+                    <h3 className="text-foreground text-lg font-bold leading-snug line-clamp-2 group-hover:text-primary transition-colors min-h-[3.5rem]">
+                        {title}
+                    </h3>
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                        <span className="material-symbols-outlined text-base">location_on</span>
+                        <span className="truncate">{location}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                        <span className="material-symbols-outlined text-base">schedule</span>
+                        <span>{duration}</span>
+                    </div>
+                    <div className="pt-4 flex items-center justify-between border-t border-theme-light">
+                        <div className="flex flex-col">
+                            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Ab</span>
+                            <span className="text-foreground text-xl font-black">
+                                {currency}{price}
+                            </span>
+                        </div>
+                        <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                            <span className="material-symbols-outlined">arrow_forward</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </Link>

@@ -3,9 +3,11 @@ import { getTrendingDestinations } from "@/lib/api/viator-client";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
-        const destinations = await getTrendingDestinations();
+        const { searchParams } = new URL(request.url);
+        const locale = searchParams.get("locale") || "en";
+        const destinations = await getTrendingDestinations(locale);
         return NextResponse.json({
             success: true,
             destinations,

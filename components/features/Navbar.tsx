@@ -1,18 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
+import React, { useState, useEffect, useTransition } from "react";
+// import Link from "next/link"; // Replaced by localized Link
 import { useTheme } from "next-themes";
 import { AuthModal } from "./AuthModal";
 import { supabase } from "@/lib/supabase/client";
+import { useCurrency } from "@/lib/currency/context";
+import { currencies } from "@/lib/currency/types";
+import { useTranslations, useLocale } from "next-intl";
+import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
-
-const currencies = [
-    { code: "EUR", symbol: "€", name: "Euro" },
-    { code: "USD", symbol: "$", name: "US Dollar" },
-    { code: "GBP", symbol: "£", name: "British Pound" },
-    { code: "CHF", symbol: "Fr", name: "Swiss Franc" },
-];
 
 const languages = [
     { code: "en", name: "English", flag: "🇬🇧" },
@@ -22,15 +20,37 @@ const languages = [
 ];
 
 export function Navbar() {
+    const t = useTranslations('nav');
+    const authT = useTranslations('auth');
+    const currentLocale = useLocale();
+    const router = useRouter();
+    const pathname = usePathname();
+    const [isPending, startTransition] = useTransition();
+
     const { theme, setTheme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [user, setUser] = useState<User | null>(null);
-    const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]);
-    const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
+    const { currency, setCurrency } = useCurrency();
+
+    // selectedLanguage is now derived from currentLocale
+    const selectedLanguage = languages.find(l => l.code === currentLocale) || languages[0];
+
     const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
     const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
+
+    const searchParams = useSearchParams(); // Add this hook
+
+    const handleLanguageChange = (code: string) => {
+        startTransition(() => {
+            // Construct the new path with existing search params
+            const params = searchParams.toString();
+            const newPath = params ? `${pathname}?${params}` : pathname;
+            router.replace(newPath, { locale: code });
+        });
+        setShowLanguageDropdown(false);
+    };
 
     useEffect(() => {
         setMounted(true);
@@ -75,24 +95,24 @@ export function Navbar() {
                     {/* Desktop Links */}
                     <div className="hidden md:flex items-center gap-8">
                         <Link
-                            className="text-sm font-medium text-white/80 hover:text-primary transition-colors relative group"
+                            className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors relative group"
                             href="/destinations"
                         >
-                            Destinations
+                            {t('destinations')}
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
                         </Link>
                         <Link
-                            className="text-sm font-medium text-white/80 hover:text-primary transition-colors relative group"
+                            className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors relative group"
                             href="/search"
                         >
-                            Activities
+                            {t('activities')}
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
                         </Link>
                         <Link
-                            className="text-sm font-medium text-white/80 hover:text-primary transition-colors relative group"
+                            className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors relative group"
                             href="/search"
                         >
-                            Culture
+                            {t('culture')}
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
                         </Link>
                     </div>
@@ -107,31 +127,31 @@ export function Navbar() {
                                     setShowLanguageDropdown(false);
                                     setShowUserMenu(false);
                                 }}
-                                className="h-10 px-3 flex items-center gap-1 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all text-sm font-medium"
+                                className="h-10 px-3 flex items-center gap-1 text-foreground/80 hover:text-foreground hover:bg-surface-elevated rounded-lg transition-all text-sm font-medium"
                             >
-                                <span>{selectedCurrency.symbol}</span>
-                                <span className="hidden sm:inline">{selectedCurrency.code}</span>
+                                <span>{currency.symbol}</span>
+                                <span className="hidden sm:inline">{currency.code}</span>
                                 <span className="material-symbols-outlined text-sm">
                                     expand_more
                                 </span>
                             </button>
 
                             {showCurrencyDropdown && (
-                                <div className="absolute top-full right-0 mt-2 w-40 bg-card-dark border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
-                                    {currencies.map((currency) => (
+                                <div className="absolute top-full right-0 mt-2 w-40 bg-surface border border-theme rounded-xl shadow-xl overflow-hidden z-50">
+                                    {currencies.map((curr) => (
                                         <button
-                                            key={currency.code}
+                                            key={curr.code}
                                             onClick={() => {
-                                                setSelectedCurrency(currency);
+                                                setCurrency(curr);
                                                 setShowCurrencyDropdown(false);
                                             }}
-                                            className={`w-full px-4 py-3 flex items-center gap-3 text-sm hover:bg-white/10 transition-colors ${selectedCurrency.code === currency.code
-                                                ? "text-primary bg-white/5"
-                                                : "text-white"
+                                            className={`w-full px-4 py-3 flex items-center gap-3 text-sm hover:bg-surface-elevated transition-colors ${currency.code === curr.code
+                                                ? "text-primary bg-primary/5"
+                                                : "text-foreground"
                                                 }`}
                                         >
-                                            <span className="font-medium">{currency.symbol}</span>
-                                            <span>{currency.name}</span>
+                                            <span className="font-medium">{curr.symbol}</span>
+                                            <span>{curr.name}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -146,7 +166,7 @@ export function Navbar() {
                                     setShowCurrencyDropdown(false);
                                     setShowUserMenu(false);
                                 }}
-                                className="h-10 px-3 flex items-center gap-1 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all text-sm font-medium"
+                                className="h-10 px-3 flex items-center gap-1 text-foreground/80 hover:text-foreground hover:bg-surface-elevated rounded-lg transition-all text-sm font-medium"
                             >
                                 <span className="text-lg">{selectedLanguage.flag}</span>
                                 <span className="hidden sm:inline">{selectedLanguage.code.toUpperCase()}</span>
@@ -156,17 +176,15 @@ export function Navbar() {
                             </button>
 
                             {showLanguageDropdown && (
-                                <div className="absolute top-full right-0 mt-2 w-44 bg-card-dark border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
+                                <div className="absolute top-full right-0 mt-2 w-44 bg-surface border border-theme rounded-xl shadow-xl overflow-hidden z-50">
                                     {languages.map((lang) => (
                                         <button
                                             key={lang.code}
-                                            onClick={() => {
-                                                setSelectedLanguage(lang);
-                                                setShowLanguageDropdown(false);
-                                            }}
-                                            className={`w-full px-4 py-3 flex items-center gap-3 text-sm hover:bg-white/10 transition-colors ${selectedLanguage.code === lang.code
-                                                ? "text-primary bg-white/5"
-                                                : "text-white"
+                                            onClick={() => handleLanguageChange(lang.code)}
+                                            disabled={isPending}
+                                            className={`w-full px-4 py-3 flex items-center gap-3 text-sm hover:bg-surface-elevated transition-colors ${selectedLanguage.code === lang.code
+                                                ? "text-primary bg-primary/5"
+                                                : "text-foreground"
                                                 }`}
                                         >
                                             <span className="text-lg">{lang.flag}</span>
@@ -181,7 +199,7 @@ export function Navbar() {
                         {mounted && (
                             <button
                                 onClick={() => setTheme(currentTheme === "dark" ? "light" : "dark")}
-                                className="h-10 w-10 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                                className="h-10 w-10 flex items-center justify-center text-foreground/80 hover:text-foreground hover:bg-surface-elevated rounded-lg transition-all"
                                 aria-label="Toggle theme"
                             >
                                 <span className="material-symbols-outlined">
@@ -205,47 +223,56 @@ export function Navbar() {
                                 </button>
 
                                 {showUserMenu && (
-                                    <div className="absolute top-full right-0 mt-2 w-56 bg-card-dark border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
-                                        <div className="px-4 py-3 border-b border-white/10">
-                                            <p className="text-sm text-white font-medium truncate">
+                                    <div className="absolute top-full right-0 mt-2 w-56 bg-surface border border-theme rounded-xl shadow-xl overflow-hidden z-50">
+                                        <div className="px-4 py-3 border-b border-theme">
+                                            <p className="text-sm text-foreground font-medium truncate">
                                                 {user.email}
                                             </p>
                                         </div>
                                         <Link
                                             href="/dashboard/bookings"
-                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm text-white hover:bg-white/10 transition-colors"
+                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm text-foreground hover:bg-surface-elevated transition-colors"
                                         >
                                             <span className="material-symbols-outlined text-lg">
                                                 confirmation_number
                                             </span>
-                                            My Bookings
+                                            {t('bookings')}
+                                        </Link>
+                                        <Link
+                                            href="/dashboard/trips"
+                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm text-foreground hover:bg-surface-elevated transition-colors"
+                                        >
+                                            <span className="material-symbols-outlined text-lg">
+                                                travel_explore
+                                            </span>
+                                            Meine Reisen
                                         </Link>
                                         <Link
                                             href="/dashboard/favorites"
-                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm text-white hover:bg-white/10 transition-colors"
+                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm text-foreground hover:bg-surface-elevated transition-colors"
                                         >
                                             <span className="material-symbols-outlined text-lg">
                                                 favorite
                                             </span>
-                                            Favorites
+                                            {t('favorites')}
                                         </Link>
                                         <Link
                                             href="/dashboard/settings"
-                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm text-white hover:bg-white/10 transition-colors"
+                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm text-foreground hover:bg-surface-elevated transition-colors"
                                         >
                                             <span className="material-symbols-outlined text-lg">
                                                 settings
                                             </span>
-                                            Settings
+                                            {t('settings')}
                                         </Link>
                                         <button
                                             onClick={handleLogout}
-                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm text-red-400 hover:bg-white/10 transition-colors border-t border-white/10"
+                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm text-red-500 hover:bg-surface-elevated transition-colors border-t border-theme"
                                         >
                                             <span className="material-symbols-outlined text-lg">
                                                 logout
                                             </span>
-                                            Sign Out
+                                            {t('logout')}
                                         </button>
                                     </div>
                                 )}
@@ -256,7 +283,7 @@ export function Navbar() {
                                 className="h-10 px-5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-full transition-all duration-300 hover:shadow-[0_0_20px_rgba(43,140,238,0.4)] hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
                             >
                                 <span className="material-symbols-outlined text-lg">person</span>
-                                <span className="hidden sm:inline">Login</span>
+                                <span className="hidden sm:inline">{authT('signIn')}</span>
                             </button>
                         )}
 
@@ -266,7 +293,7 @@ export function Navbar() {
                             className="hidden md:flex h-10 px-6 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-full transition-all duration-300 items-center justify-center gap-2 border border-white/10"
                         >
                             <span className="material-symbols-outlined text-lg">search</span>
-                            Explore
+                            {t('explore')}
                         </Link>
                     </div>
                 </div>

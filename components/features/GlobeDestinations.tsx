@@ -42,6 +42,14 @@ export default function GlobeDestinations() {
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
     const [trendingDestinations, setTrendingDestinations] = useState<any[]>([]);
 
+    // Tour Mode State
+    const [isTouring, setIsTouring] = useState(false);
+    const [tourIndex, setTourIndex] = useState(0);
+    const [tourPaused, setTourPaused] = useState(false);
+
+    // Navigation Animation State
+    const [navigatingTo, setNavigatingTo] = useState<{ name: string; query: string } | null>(null);
+
     useEffect(() => {
         // Fetch continent polygons
         fetch("https://raw.githubusercontent.com/highcharts/map-collection-dist/master/custom/world-continents.geo.json")
@@ -88,7 +96,36 @@ export default function GlobeDestinations() {
         };
     }, []);
 
+    // Tour Logic
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (isTouring && !tourPaused && trendingDestinations.length > 0) {
+            // Update view to current destination
+            const dest = trendingDestinations[tourIndex];
+            if (globeRef.current && dest) {
+                globeRef.current.pointOfView({ lat: dest.lat, lng: dest.lng, altitude: 2.0 }, 2000);
+
+                // After rotation, zoom in slightly
+                setTimeout(() => {
+                    if (isTouring && !tourPaused) {
+                        globeRef.current.pointOfView({ lat: dest.lat, lng: dest.lng, altitude: 1.5 }, 1500);
+                    }
+                }, 2000);
+            }
+
+            // Move to next destination after 10 seconds
+            timer = setTimeout(() => {
+                setTourIndex((prev) => (prev + 1) % trendingDestinations.length);
+            }, 10000);
+        }
+        return () => clearTimeout(timer);
+    }, [isTouring, tourIndex, tourPaused, trendingDestinations]);
+
+
     const handleContinentClick = (polygon: any) => {
+        // Stop tour if user interacts
+        setIsTouring(false);
+
         const name = polygon.properties.name;
         setSelectedContinent(polygon);
 
@@ -106,15 +143,66 @@ export default function GlobeDestinations() {
                 return a.localeCompare(b);
             });
         setContinentCountries(filtered);
+    };
 
-        // Auto-rotate globe to the clicked continent
-        if (globeRef.current && polygon.properties.hc_key) {
-            // Optional: recenter globe
+    // Simple navigation (without animation)
+    const navigateToSearch = (query: string) => {
+        router.push(`/search?q=${encodeURIComponent(query)}`);
+    };
+
+    // Animated navigation with globe fly-to effect
+    const navigateWithAnimation = (name: string, query: string) => {
+        // Find coordinates for this destination
+        const dest = trendingDestinations.find(d =>
+            d.name.toLowerCase() === name.toLowerCase() ||
+            d.country.toLowerCase() === name.toLowerCase()
+        );
+
+        if (dest && globeRef.current) {
+            // Stop any tour
+            setIsTouring(false);
+            // Close continent modal
+            setSelectedContinent(null);
+            // Set loading state
+            setNavigatingTo({ name, query });
+
+            // Animate globe to destination
+            globeRef.current.pointOfView({ lat: dest.lat, lng: dest.lng, altitude: 2.0 }, 1500);
+
+            // Zoom in after initial rotation
+            setTimeout(() => {
+                if (globeRef.current) {
+                    globeRef.current.pointOfView({ lat: dest.lat, lng: dest.lng, altitude: 1.2 }, 1000);
+                }
+            }, 1500);
+
+            // Navigate after animation completes
+            setTimeout(() => {
+                router.push(`/search?q=${encodeURIComponent(query)}`);
+                setNavigatingTo(null);
+            }, 3000);
+        } else {
+            // No coordinates found, navigate directly
+            router.push(`/search?q=${encodeURIComponent(query)}`);
         }
     };
 
-    const navigateToSearch = (query: string) => {
-        router.push(`/search?q=${encodeURIComponent(query)}`);
+    const toggleTour = () => {
+        if (!isTouring) {
+            setIsTouring(true);
+            setTourPaused(false);
+            setTourIndex(0);
+        } else {
+            setTourPaused(!tourPaused);
+        }
+    };
+
+    const nextTourStop = () => {
+        setTourIndex((prev) => (prev + 1) % trendingDestinations.length);
+    };
+
+    const prevTourStop = () => {
+        setTourIndex((prev) => (prev - 1 + trendingDestinations.length) % trendingDestinations.length);
     };
 
     return (
@@ -127,33 +215,35 @@ export default function GlobeDestinations() {
                     ref={globeRef}
                     width={dimensions.width}
                     height={dimensions.height}
-                    // Use dark earth texture
-                    globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
+                    // Use "Earth Night" texture for more color (city lights) instead of dark void
+                    globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
                     bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
                     backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
 
                     polygonsData={continents}
                     // Lift hovered continent slightly
-                    polygonAltitude={(d: any) => d === hoveredContinent || d === selectedContinent ? 0.04 : 0.005}
+                    polygonAltitude={(d: any) => d === hoveredContinent || d === selectedContinent ? 0.06 : 0.01}
 
-                    // Colors: Transparent by default, subtle blue on hover
+                    // Colors:
+                    // default: Slight visible tint for continents (so it's not just black)
+                    // hover/select: Bright Blue
                     polygonCapColor={(d: any) => {
                         if (d === hoveredContinent || d === selectedContinent) {
-                            return "rgba(43, 140, 238, 0.25)"; // Less opaque
+                            return "rgba(43, 140, 238, 0.2)"; // Visible on hover but still see-through
                         }
-                        return "rgba(255, 255, 255, 0)"; // Transparent otherwise
+                        return "rgba(0, 0, 0, 0)"; // Fully transparent - show earth texture
                     }}
                     polygonSideColor={(d: any) => {
                         if (d === hoveredContinent || d === selectedContinent) {
                             return "rgba(43, 140, 238, 0.6)";
                         }
-                        return "rgba(0,0,0,0)";
+                        return "rgba(0, 0, 0, 0)"; // Fully transparent
                     }}
                     polygonStrokeColor={(d: any) => {
                         if (d === hoveredContinent || d === selectedContinent) {
                             return "#2b8cee";
                         }
-                        return "rgba(255,255,255,0.1)";
+                        return "rgba(255, 255, 255, 0)"; // Removed visible lines
                     }}
                     polygonLabel={({ properties: d }: any) => `
                         <div class="px-4 py-3 bg-black/90 backdrop-blur-md border border-primary/40 rounded-xl text-white font-bold shadow-2xl">
@@ -163,68 +253,101 @@ export default function GlobeDestinations() {
                     `}
                     onPolygonHover={(polygon: any) => setHoveredContinent(polygon)}
                     onPolygonClick={handleContinentClick}
+                    onGlobeClick={() => setIsTouring(false)}
 
-                    atmosphereColor="#2b8cee"
-                    atmosphereAltitude={0.15}
+                    atmosphereColor="#3a228a"
+                    atmosphereAltitude={0.25}
 
                     // Pin markers for trending destinations
                     htmlElementsData={trendingDestinations}
                     htmlLat={(d: any) => d.lat}
                     htmlLng={(d: any) => d.lng}
-                    htmlAltitude={0.1}
-                    htmlTransitionDuration={0}
+                    htmlAltitude={0.02}
+                    htmlTransitionDuration={2000}
                     htmlElement={(d: any) => {
+                        const isActive = isTouring && trendingDestinations[tourIndex]?.id === d.id;
+
                         const el = document.createElement('div');
                         el.style.pointerEvents = 'auto';
                         el.style.cursor = 'pointer';
-                        el.style.zIndex = '1000';
+                        el.style.zIndex = isActive ? '2000' : '1000';
                         el.className = 'group';
 
+                        // "Stecknadel" (Pin) Design - Simplified for better visibility
                         el.innerHTML = `
-                            <!-- Large Pin Marker -->
-                            <div style="transform: translate(-50%, -100%); pointer-events: auto;" class="relative group-hover:scale-125 transition-transform duration-300">
-                                <svg width="48" height="64" viewBox="0 0 32 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 12px rgba(43,140,238,0.6));">
-                                    <path d="M16 0C7.163 0 0 7.163 0 16C0 26.5 16 42 16 42C16 42 32 26.5 32 16C32 7.163 24.837 0 16 0ZM16 22C12.686 22 10 19.314 10 16C10 12.686 12.686 10 16 10C19.314 10 22 12.686 22 16C22 19.314 19.314 22 16 22Z" fill="#2b8cee"/>
-                                    <circle cx="16" cy="16" r="5" fill="white"/>
-                                </svg>
-                                <!-- Pulse Ring -->
-                                <div style="position: absolute; top: 24px; left: 24px; transform: translate(-50%, -50%); width: 40px; height: 40px; background: rgba(43,140,238,0.3); border-radius: 50%; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; z-index: -1;"></div>
+                            <div class="pin-container" style="position: relative; width: 60px; height: 80px; transform: translate(-50%, -100%); cursor: pointer;">
                                 
-                                <!-- City Label -->
-                                <div style="position: absolute; top: 70px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: rgba(0,0,0,0.8); padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(43,140,238,0.5);">
-                                    <span style="color: white; font-weight: bold; font-size: 12px;">${d.name}</span>
+                                <!-- Pin Head (Glowing Sphere) -->
+                                <div style="position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 0 20px rgba(79,172,254,0.8), 0 0 40px rgba(79,172,254,0.4); border: 3px solid white; z-index: 20;">
+                                    <div style="position: absolute; top: 4px; left: 4px; width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.5);"></div>
+                                </div>
+                                
+                                <!-- Pin Stick -->
+                                <div style="position: absolute; left: 50%; top: 22px; transform: translateX(-50%); width: 3px; height: 30px; background: linear-gradient(to bottom, white, transparent); z-index: 10;"></div>
+                                
+                                <!-- Pulse Effect for Active -->
+                                ${isActive ? `<div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(43,140,238,0.5); animation: ping 1s cubic-bezier(0,0,0.2,1) infinite;"></div>` : ''}
+
+                                <!-- City Label (Always visible) -->
+                                <div style="position: absolute; top: 56px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); z-index: 25;">
+                                    <span style="color: white; font-size: 12px; font-weight: 600;">${d.name}</span>
                                 </div>
                             </div>
-                            
-                            <!-- Tooltip on Hover -->
-                            <div style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px); width: 280px; background: rgba(20,20,25,0.98); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; overflow: hidden; opacity: 0; pointer-events: none; transition: all 0.3s ease; box-shadow: 0 20px 60px rgba(0,0,0,0.6); z-index: 100;" class="group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0">
-                                <div style="position: relative; height: 140px;">
-                                    <img src="${d.highlightActivity?.image || d.image}" style="width: 100%; height: 100%; object-fit: cover;" />
+
+                            <!-- Tooltip Card (Shows on hover/active) -->
+                            <div class="pin-tooltip" style="position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); width: 280px; background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.8); z-index: 100; opacity: ${isActive ? '1' : '0'}; pointer-events: ${isActive ? 'auto' : 'none'}; transition: opacity 0.3s ease;">
+                                
+                                <!-- Image Area -->
+                                <div style="position: relative; height: 140px; overflow: hidden;">
+                                    <img src="${d.image}" style="width: 100%; height: 100%; object-fit: cover; ${isActive ? 'animation: ken-burns 10s ease-in-out infinite;' : ''}" onerror="this.src='https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400'" />
                                     <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%);"></div>
-                                    <div style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                                        <span style="font-size: 11px; font-weight: bold; color: white;">★ ${d.highlightActivity?.rating || '4.8'}</span>
-                                    </div>
-                                    <div style="position: absolute; bottom: 10px; left: 14px; right: 14px;">
-                                        <span style="font-size: 10px; color: #2b8cee; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Top Experience in ${d.name}</span>
-                                        <h4 style="color: white; font-weight: bold; font-size: 14px; line-height: 1.3; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${d.highlightActivity?.name || 'Discover Amazing Tours'}</h4>
+                                    
+                                    <div style="position: absolute; bottom: 12px; left: 16px; right: 16px;">
+                                        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                                            <span style="width: 8px; height: 8px; border-radius: 50%; background: #4facfe; animation: pulse 2s infinite;"></span>
+                                            <span style="color: #4facfe; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Live View</span>
+                                        </div>
+                                        <h3 style="color: white; font-size: 20px; font-weight: 700; margin: 0;">${d.name}</h3>
                                     </div>
                                 </div>
-                                <div style="padding: 14px;">
-                                    <p style="font-size: 12px; color: #9ca3af; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${d.highlightActivity?.description || 'Explore the best attractions and hidden gems in ' + d.name + '.'}</p>
-                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
-                                        <div>
-                                            <p style="font-size: 10px; color: #6b7280;">Starting from</p>
-                                            <p style="font-size: 18px; font-weight: bold; color: #2b8cee;">${d.highlightActivity?.price || 'View Price'}</p>
-                                        </div>
-                                        <div style="background: rgba(43,140,238,0.2); color: white; font-size: 12px; font-weight: bold; padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(43,140,238,0.4);">
-                                            Explore →
-                                        </div>
+
+                                <!-- Content -->
+                                <div style="padding: 16px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                        <span style="color: #9ca3af; font-size: 14px;">${d.country}</span>
+                                        <span style="color: #fbbf24; font-size: 14px;">★ 4.9</span>
+                                    </div>
+                                    <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-bottom: 12px;">
+                                        <div style="height: 100%; background: #4facfe; ${isActive ? 'animation: progress-bar 10s linear infinite;' : 'width: 0;'}"></div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="color: #6b7280; font-size: 12px;">Trending Now</span>
+                                        <span style="color: #4facfe; font-weight: 700; font-size: 13px;">View Details →</span>
                                     </div>
                                 </div>
                             </div>
                         `;
 
+                        // Add hover effect for non-active pins
+                        if (!isActive) {
+                            el.addEventListener('mouseenter', () => {
+                                const tooltip = el.querySelector('.pin-tooltip') as HTMLElement;
+                                if (tooltip) {
+                                    tooltip.style.opacity = '1';
+                                    tooltip.style.pointerEvents = 'auto';
+                                }
+                            });
+                            el.addEventListener('mouseleave', () => {
+                                const tooltip = el.querySelector('.pin-tooltip') as HTMLElement;
+                                if (tooltip) {
+                                    tooltip.style.opacity = '0';
+                                    tooltip.style.pointerEvents = 'none';
+                                }
+                            });
+                        }
+
                         el.addEventListener('click', (e) => {
+                            // If touching the card inside, we want navigation
                             e.preventDefault();
                             e.stopPropagation();
                             navigateToSearch(d.name);
@@ -236,13 +359,44 @@ export default function GlobeDestinations() {
             )}
 
             {/* UI Overlay */}
-            <div className="absolute top-10 left-10 z-10 pointer-events-none">
-                <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 tracking-tighter opacity-0 animate-fade-in-up">
+            <div className={`absolute top-10 left-10 z-10 pointer-events-none transition-opacity duration-1000 ${isTouring ? 'opacity-0' : 'opacity-100'}`}>
+                <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 tracking-tighter animate-fade-in-up">
                     EXPLORE THE <span className="text-primary">WORLD</span>
                 </h1>
-                <p className="text-gray-400 text-lg max-w-md opacity-0 animate-fade-in-up-delay-1 font-light">
-                    Select a continent on the interactive globe to discover breathtaking destinations and unique local experiences.
+                <p className="text-gray-400 text-lg max-w-md animate-fade-in-up-delay-1 font-light">
+                    Select a continent or start a virtual tour to discover breathtaking destinations.
                 </p>
+
+                {/* Tour Controls - MOVED OUTSIDE this div because they need to be clickable and visible during tour */}
+            </div>
+
+            {/* Tour Controls (Always visible when controls are needed, but we probably want "Start Tour" inside the main header when NOT touring, and "Stop" somewhere else?)
+                Actually, the user wants controls. Let's keep a dedicated controls area.
+             */}
+            <div className="absolute top-[300px] left-10 z-20 flex items-center gap-4">
+                {/* Only show "Start" when title is visible? No, let's make a persistent control bar or toggle. */}
+                {/* Re-implementing the controls to be independent of the fading title */}
+                <button
+                    onClick={toggleTour}
+                    className={`px-8 py-4 rounded-xl font-bold text-white flex items-center gap-3 transition-all ${isTouring && !tourPaused ? 'bg-red-500/80 hover:bg-red-600' : 'bg-primary hover:bg-primary/90 shadow-[0_0_30px_rgba(43,140,238,0.4)]'}`}
+                >
+                    <span className="material-symbols-outlined">{isTouring && !tourPaused ? 'pause' : 'play_arrow'}</span>
+                    {isTouring && !tourPaused ? 'Pause Tour' : 'Start World Tour'}
+                </button>
+
+                {isTouring && (
+                    <div className="flex bg-white/10 backdrop-blur-md rounded-xl p-2 border border-white/10">
+                        <button onClick={prevTourStop} className="p-3 hover:bg-white/10 rounded-lg text-white transition-colors">
+                            <span className="material-symbols-outlined">skip_previous</span>
+                        </button>
+                        <button onClick={() => { setIsTouring(false); }} className="p-3 hover:bg-white/10 rounded-lg text-white transition-colors">
+                            <span className="material-symbols-outlined">close</span>
+                        </button>
+                        <button onClick={nextTourStop} className="p-3 hover:bg-white/10 rounded-lg text-white transition-colors">
+                            <span className="material-symbols-outlined">skip_next</span>
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Country List / Selection Modal */}
@@ -275,7 +429,7 @@ export default function GlobeDestinations() {
                                     {continentCountries.map((country) => (
                                         <button
                                             key={country}
-                                            onClick={() => navigateToSearch(country)}
+                                            onClick={() => navigateWithAnimation(country, country)}
                                             className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/50 hover:bg-white/10 transition-all text-left group"
                                         >
                                             <div className="w-2 h-2 rounded-full bg-primary/40 group-hover:bg-primary transition-colors"></div>
@@ -317,6 +471,28 @@ export default function GlobeDestinations() {
                     <span>Select Continent</span>
                 </div>
             </div>
+
+            {/* Navigation Loading Overlay */}
+            {navigatingTo && (
+                <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md pointer-events-none">
+                    <div className="flex flex-col items-center gap-6 animate-fade-in-up">
+                        <div className="relative">
+                            <div className="w-20 h-20 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="material-symbols-outlined text-primary text-3xl">flight_takeoff</span>
+                            </div>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-gray-400 text-sm mb-2">Flying to</p>
+                            <h2 className="text-white text-3xl font-bold">{navigatingTo.name}</h2>
+                        </div>
+                        <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+                            <div className="h-full bg-primary animate-progress-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
+
 }
