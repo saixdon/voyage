@@ -26,7 +26,7 @@ export function AIPlannerSection() {
     };
 
     return (
-        <section className="relative rounded-3xl overflow-hidden bg-card-dark border border-white/5 py-12 px-6 md:px-12 mb-24">
+        <section className="relative rounded-3xl overflow-hidden bg-background-dark border border-theme py-12 px-6 md:px-12 mb-24 transition-colors">
             {/* Background Effects */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[120px] -z-10" />
 
@@ -35,10 +35,10 @@ export function AIPlannerSection() {
                     <span className="material-symbols-outlined text-sm">auto_awesome</span>
                     AI Powered
                 </div>
-                <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+                <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
                     Plan your perfect trip in seconds
                 </h2>
-                <p className="text-gray-400 text-lg">
+                <p className="text-muted-foreground text-lg">
                     Tell us where, when, and who with. Our AI will build a custom itinerary with real bookable experiences.
                 </p>
             </div>
@@ -47,13 +47,13 @@ export function AIPlannerSection() {
             <div className="max-w-2xl mx-auto relative mb-12">
                 <div className="relative group">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-                    <div className="relative bg-black rounded-2xl p-2 flex flex-col md:flex-row gap-2 border border-white/10">
+                    <div className="relative bg-surface rounded-2xl p-2 flex flex-col md:flex-row gap-2 border border-theme shadow-xl transition-colors">
                         <input
                             type="text"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder="e.g., Paris for a couple for 3 days..."
-                            className="flex-1 bg-transparent text-white px-4 py-3 outline-none placeholder-gray-500"
+                            className="flex-1 bg-transparent text-foreground px-4 py-3 outline-none placeholder-muted-foreground"
                             onKeyDown={(e) => e.key === "Enter" && handlePlan()}
                         />
                         <Button
@@ -74,7 +74,7 @@ export function AIPlannerSection() {
                 </div>
 
                 {/* Suggestions */}
-                <div className="flex flex-wrap justify-center gap-2 mt-4 text-xs text-gray-400">
+                <div className="flex flex-wrap justify-center gap-2 mt-4 text-xs text-muted-foreground">
                     <span>Try:</span>
                     <button onClick={() => setQuery("Romantic weekend in Rome")} className="hover:text-primary transition-colors cursor-pointer border-b border-transparent hover:border-primary">
                         "Romantic weekend in Rome"
@@ -90,10 +90,10 @@ export function AIPlannerSection() {
             {plan && (
                 <div className="animate-fade-in-up">
                     <div className="text-center mb-10">
-                        <h3 className="text-2xl font-bold text-white mb-2">
+                        <h3 className="text-2xl font-bold text-foreground mb-2">
                             Your trip to <span className="text-primary">{plan.destination}</span>
                         </h3>
-                        <p className="text-gray-400 max-w-2xl mx-auto italic">
+                        <p className="text-muted-foreground max-w-2xl mx-auto italic">
                             "{plan.summary}"
                         </p>
                     </div>
@@ -135,7 +135,7 @@ function TripActivityCard({ activity, index }: { activity: TripActivity, index: 
             {/* Content Side */}
             <div className={`w-full md:w-1/2 px-4 md:px-12 ${isLeft ? 'md:text-left' : 'md:text-right'}`}>
                 <div className={`inline-flex items-center gap-2 mb-2 text-xs font-bold uppercase tracking-wider ${activity.timeOfDay === 'morning' ? 'text-yellow-400' :
-                        activity.timeOfDay === 'afternoon' ? 'text-orange-400' : 'text-indigo-400'
+                    activity.timeOfDay === 'afternoon' ? 'text-orange-400' : 'text-indigo-400'
                     }`}>
                     <span className="material-symbols-outlined text-base">
                         {activity.timeOfDay === 'morning' ? 'wb_sunny' :
@@ -143,12 +143,12 @@ function TripActivityCard({ activity, index }: { activity: TripActivity, index: 
                     </span>
                     {activity.timeOfDay}
                 </div>
-                <h4 className="text-xl font-bold text-white mb-2">{activity.title}</h4>
-                <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+                <h4 className="text-xl font-bold text-foreground mb-2">{activity.title}</h4>
+                <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                     {activity.description}
                 </p>
                 <div className={`flex items-center gap-4 ${isLeft ? 'md:justify-start' : 'md:justify-end'}`}>
-                    <span className="text-white font-bold">{activity.currency}{activity.price}</span>
+                    <span className="text-foreground font-bold">{activity.currency}{activity.price}</span>
                     <Link href={activity.productUrl} className="text-primary hover:text-white text-sm font-bold flex items-center gap-1 group">
                         View Details
                         <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>

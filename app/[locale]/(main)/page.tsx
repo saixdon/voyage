@@ -58,7 +58,7 @@ export default function HomePage() {
             <div className="relative w-full min-h-screen flex items-center justify-center">
                 {/* Background Image with Overlay */}
                 <div className="absolute inset-0 z-0 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background-dark z-10"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-background z-10"></div>
                     <img
                         alt="Scenic view of mountains and lake with a boat in Switzerland"
                         className="w-full h-full object-cover"
@@ -67,14 +67,14 @@ export default function HomePage() {
                 </div>
                 {/* Content */}
                 <div className="relative z-40 flex flex-col items-center justify-center max-w-5xl px-4 text-center mt-10 w-full">
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white tracking-tighter leading-none mb-6 text-glow opacity-0 animate-fade-in-up">
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white tracking-tighter leading-none mb-6 drop-shadow-[0_4px_16px_rgba(0,0,0,0.4)] opacity-0 animate-fade-in-up">
                         {heroT('title1')}
                         <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-300">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">
                             {heroT('title2')}
                         </span>
                     </h1>
-                    <p className="text-lg md:text-xl text-gray-200 max-w-2xl mb-10 opacity-0 animate-fade-in-up-delay-1 font-light">
+                    <p className="text-lg md:text-xl text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] max-w-2xl mb-10 opacity-0 animate-fade-in-up-delay-1 font-medium">
                         {heroT('subtitle')}
                     </p>
 

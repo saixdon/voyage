@@ -138,14 +138,14 @@ export function SearchBar({
                     </DialogTrigger>
                     <DialogPortal>
                         <DialogOverlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]" />
-                        <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-[#0a0a0c] border border-white/10 rounded-[2rem] shadow-2xl z-[101] p-0 overflow-hidden focus:outline-none animate-scale-in">
+                        <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-surface border border-theme rounded-[2rem] shadow-2xl z-[101] p-0 overflow-hidden focus:outline-none animate-scale-in">
                             <div className="p-8">
                                 <div className="flex items-center justify-center mb-8 relative">
-                                    <h3 className="text-xl font-bold text-white">
+                                    <h3 className="text-xl font-bold text-foreground">
                                         {locale === 'de' ? "Datum auswählen" : "Select Date"}
                                     </h3>
                                     <DialogTrigger asChild>
-                                        <button className="absolute -right-2 top-0 p-1 text-white/50 hover:text-white transition-colors">
+                                        <button className="absolute -right-2 top-0 p-1 text-muted-foreground hover:text-foreground transition-colors">
                                             <X className="w-6 h-6" />
                                         </button>
                                     </DialogTrigger>

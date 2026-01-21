@@ -47,8 +47,8 @@ export function TopRatedSection() {
             <section className="mb-20">
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h2 className="text-3xl font-bold text-white">{t('title')}</h2>
-                        <p className="text-gray-400 mt-2">{t('subtitle')}</p>
+                        <h2 className="text-3xl font-bold text-foreground">{t('title')}</h2>
+                        <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
                     </div>
                 </div>
                 <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-4">
@@ -69,15 +69,15 @@ export function TopRatedSection() {
         <section className="mb-20">
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-white">{t('title')}</h2>
-                    <p className="text-gray-400 mt-2">{t('subtitle')}</p>
+                    <h2 className="text-3xl font-bold text-foreground">{t('title')}</h2>
+                    <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
                 </div>
                 <div className="flex gap-2">
                     <button
                         onClick={() => scroll("left")}
-                        className="size-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
+                        className="size-10 rounded-full border border-theme flex items-center justify-center hover:bg-surface-elevated transition-colors"
                     >
-                        <span className="material-symbols-outlined text-white">arrow_back</span>
+                        <span className="material-symbols-outlined text-foreground">arrow_back</span>
                     </button>
                     <button
                         onClick={() => scroll("right")}
