@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format, addDays } from "date-fns";
-import { Calendar as CalendarIcon, Search, MapPin, ArrowRight } from "lucide-react";
+import { Calendar as CalendarIcon, Search, ArrowRight } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import {
@@ -11,7 +11,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@radix-ui/react-popover";
-import { DayPicker } from "react-day-picker";
+import { Calendar } from "@/components/ui/calendar";
 import "react-day-picker/dist/style.css";
 import { de, enUS } from "date-fns/locale";
 import { useLocale, useTranslations } from "next-intl";
@@ -20,49 +20,68 @@ interface SearchBarProps {
     placeholder?: string;
     className?: string;
     initialValue?: string;
-    initialDate?: string; // YYYY-MM-DD
+    initialDateFrom?: string;
+    initialDateTo?: string;
+    initialDate?: string; // Legacy/simplicity
 }
 
-export function SearchBar({ placeholder, className, initialValue = "", initialDate }: SearchBarProps) {
+export function SearchBar({
+    placeholder,
+    className,
+    initialValue = "",
+    initialDateFrom,
+    initialDateTo,
+    initialDate
+}: SearchBarProps) {
     const router = useRouter();
     const locale = useLocale();
     const t = useTranslations('common');
 
-    const [query, setQuery] = React.useState(initialValue);
-    const [date, setDate] = React.useState<DateRange | undefined>(() => {
+    const [query, setQuery] = useState(initialValue);
+    const [date, setDate] = useState<DateRange | undefined>(() => {
+        if (initialDateFrom) {
+            const from = new Date(initialDateFrom);
+            if (!isNaN(from.getTime())) {
+                return {
+                    from,
+                    to: initialDateTo ? new Date(initialDateTo) : undefined
+                };
+            }
+        }
         if (initialDate) {
             const start = new Date(initialDate);
             if (!isNaN(start.getTime())) {
                 return {
                     from: start,
-                    to: addDays(start, 3) // Default to 3 days if single date provided
+                    to: undefined
                 };
             }
         }
-        return {
-            from: new Date(),
-            to: addDays(new Date(), 3),
-        };
+        return undefined;
     });
 
     const handleSearch = (e?: React.FormEvent) => {
         e?.preventDefault();
-        if (query.trim()) {
-            const params = new URLSearchParams();
-            params.set("q", query);
-            if (date?.from) params.set("from", date.from.toISOString());
-            if (date?.to) params.set("to", date.to.toISOString());
 
-            router.push(`/search?${params.toString()}`);
+        let url = `/search?q=${encodeURIComponent(query)}`;
+
+        if (date?.from) {
+            const fromStr = format(date.from, "yyyy-MM-dd");
+            url += `&from=${fromStr}`;
+
+            if (date.to) {
+                const toStr = format(date.to, "yyyy-MM-dd");
+                url += `&to=${toStr}`;
+            }
         }
+
+        router.push(url);
     };
 
-    // Format date specifically without year for short-term booking focus
-    // e.g. "18. Jan - 21. Jan"
     const formatDateDisplay = () => {
         if (!date?.from) return locale === 'de' ? "Datum wählen" : "Pick a date";
 
-        const formatStr = "d. MMM"; // No year!
+        const formatStr = "d. MMM";
         const localeObj = locale === 'de' ? de : enUS;
 
         let display = format(date.from, formatStr, { locale: localeObj });
@@ -114,20 +133,13 @@ export function SearchBar({ placeholder, className, initialValue = "", initialDa
                             </span>
                         </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto bg-surface border border-theme rounded-2xl shadow-2xl z-50 p-4 text-foreground" align="center">
-                        <DayPicker
+                    <PopoverContent className="w-auto bg-surface border border-theme rounded-2xl shadow-2xl z-50 p-4 text-white" align="center">
+                        <Calendar
                             mode="range"
                             defaultMonth={date?.from}
                             selected={date}
                             onSelect={setDate}
                             numberOfMonths={1}
-                            modifiersClassNames={{
-                                selected: "bg-primary text-white hover:bg-primary/90 rounded-md",
-                                today: "text-primary font-bold",
-                                range_middle: "bg-primary/20 text-foreground rounded-none",
-                                range_start: "bg-primary text-white rounded-l-md",
-                                range_end: "bg-primary text-white rounded-r-md"
-                            }}
                         />
                     </PopoverContent>
                 </Popover>
@@ -139,8 +151,7 @@ export function SearchBar({ placeholder, className, initialValue = "", initialDa
                     type="submit"
                     className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#3b82f6] hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98]"
                 >
-                    <span className="md:hidden">{t('search')}</span>
-                    <span className="hidden md:inline">{t('search')}</span>
+                    <span>{t('search')}</span>
                     <ArrowRight className="w-5 h-5" />
                 </button>
             </div>

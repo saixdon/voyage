@@ -6,7 +6,8 @@ import { Activity } from "@/types";
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q") || "";
-    const dateParam = searchParams.get("date"); // YYYY-MM-DD
+    const dateFrom = searchParams.get("from"); // YYYY-MM-DD
+    const dateTo = searchParams.get("to");     // YYYY-MM-DD
     const limit = parseInt(searchParams.get("limit") || "20");
     const locale = searchParams.get("locale") || "en";
 
@@ -40,12 +41,12 @@ export async function GET(request: NextRequest) {
     // 2. Try Viator if GYG failed or returned nothing
     if (activities.length === 0) {
         try {
-            // Pass date if present. For a single date selection, we might want startDate = date, endDate = date
+            // Pass date range if present
             const viatorResult = await searchViatorProducts(
                 query,
                 limit,
-                dateParam || undefined,
-                dateParam || undefined,
+                dateFrom || undefined,
+                dateTo || undefined,
                 locale
             );
             if (viatorResult.activities && viatorResult.activities.length > 0) {
