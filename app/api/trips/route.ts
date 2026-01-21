@@ -81,8 +81,12 @@ export async function POST(request: NextRequest) {
             .single();
 
         if (tripError) {
-            console.error("Error creating trip:", tripError);
-            return NextResponse.json({ error: "Failed to create trip" }, { status: 500 });
+            console.error("Supabase Trip Error:", tripError);
+            return NextResponse.json({
+                error: "Failed to create trip record",
+                details: tripError.message,
+                hint: tripError.hint
+            }, { status: 500 });
         }
 
         // Create trip items

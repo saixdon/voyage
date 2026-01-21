@@ -136,10 +136,14 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
                 setTrips(prev => [savedTrip, ...prev]);
                 setCurrentTrip(savedTrip);
                 return savedTrip;
+            } else {
+                const errorData = await response.json();
+                alert(`Fehler beim Speichern: ${errorData.error || response.statusText}\n${errorData.details || ''}`);
+                return null;
             }
-            return null;
         } catch (error) {
             console.error("Error saving trip:", error);
+            alert("Netzwerkfehler beim Speichern des Trips.");
             return null;
         }
     };
