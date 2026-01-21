@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { format } from "date-fns";
+import { startOfToday, isBefore, format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
@@ -39,14 +39,22 @@ export function TripBookingModal({ isOpen, onClose, activity, initialDate, trave
     // Reset state when opening
     useEffect(() => {
         if (isOpen) {
-            setSelectedDate(initialDate);
+            const today = startOfToday();
+
+            // Validate initialDate - if in past, reset to undefined
+            let validInitialDate = initialDate;
+            if (initialDate && isBefore(initialDate, today)) {
+                validInitialDate = undefined;
+            }
+
+            setSelectedDate(validInitialDate);
             setGuests(travelerCount || 2);
-            setStep(initialDate ? 'checking' : 'date');
+            setStep(validInitialDate ? 'checking' : 'date');
             setError(null);
 
             // Auto-check if date is already there
-            if (initialDate) {
-                checkAvailability(initialDate);
+            if (validInitialDate) {
+                checkAvailability(validInitialDate);
             }
         }
     }, [isOpen, initialDate, travelerCount]);
@@ -176,7 +184,8 @@ export function TripBookingModal({ isOpen, onClose, activity, initialDate, trave
                                         onSelect={handleDateSelect}
                                         numberOfMonths={1}
                                         locale={locale === 'de' ? de : enUS}
-                                        fromDate={new Date()}
+                                        disabled={{ before: startOfToday() }}
+                                        defaultMonth={selectedDate || startOfToday()}
                                         modifiersClassNames={{
                                             selected: "bg-primary text-white hover:bg-primary/90 rounded-md",
                                             today: "text-primary font-bold"

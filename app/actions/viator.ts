@@ -32,7 +32,13 @@ export async function checkAvailabilityAction(
 
         if (result.error) {
             console.error('Availability check failed:', result.error);
-            return { available: false, error: result.error };
+            let userError = result.error;
+            if (result.error.includes('401')) {
+                userError = "Viator API Key is invalid or not yet active. Please check your .env file and restart the server.";
+            } else if (result.error.includes('403')) {
+                userError = "Access denied by Viator API. Please check your API permissions.";
+            }
+            return { available: false, error: userError };
         }
 
         // Parse the response to determine simple availability status

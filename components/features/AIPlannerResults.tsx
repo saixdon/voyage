@@ -9,7 +9,7 @@ import { type TripPlanResponse, type TripActivity, replaceActivityAction } from 
 import { useTrips, type TripItem } from "@/lib/trips/trips-context";
 import { useAuth } from "@/lib/auth/auth-context";
 import { generateAffiliateLink } from "@/lib/api/viator-affiliate";
-import { format } from "date-fns";
+import { format, startOfToday, isBefore, addDays } from "date-fns";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { de, enUS } from "date-fns/locale";
@@ -248,8 +248,13 @@ function TripActivityCard({ activity, index, tripId, itemDbId, status, onStatusC
             try {
                 const d = new Date(startDate);
                 if (!isNaN(d.getTime())) {
-                    const newDate = new Date(d);
-                    newDate.setDate(d.getDate() + (activity.day - 1));
+                    const today = startOfToday();
+                    const newDate = addDays(d, activity.day - 1);
+
+                    // If the calculated date is in the past, don't use it as effective date
+                    if (isBefore(newDate, today)) {
+                        return undefined;
+                    }
                     return newDate;
                 }
             } catch (e) {
