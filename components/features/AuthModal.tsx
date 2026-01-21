@@ -29,26 +29,27 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         setError(null);
         setSuccess(null);
 
+        const formData = new FormData();
+        formData.append("email", email);
+        formData.append("password", password);
+
         try {
+            const { signInAction, signUpAction } = await import("@/app/actions/auth");
+
             if (mode === "login") {
-                const { error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password,
-                });
-                if (error) throw error;
+                const result = await signInAction(formData);
+                if (result.error) throw new Error(result.error);
+
                 setSuccess(t('loginSuccess') || "Login successful!");
                 setTimeout(() => {
                     onClose();
                     window.location.reload();
                 }, 1000);
             } else {
-                const { data, error } = await supabase.auth.signUp({
-                    email,
-                    password,
-                });
-                if (error) throw error;
+                const result = await signUpAction(formData);
+                if (result.error) throw new Error(result.error);
 
-                if (data.session) {
+                if (result.session) {
                     setSuccess(t('loginSuccess'));
                     setTimeout(() => {
                         onClose();
@@ -56,7 +57,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     }, 1000);
                 } else {
                     setSuccess(t('registerSuccess'));
-                    // Falls Email-Bestätigung nötig ist
                     setTimeout(() => {
                         onClose();
                     }, 2000);
