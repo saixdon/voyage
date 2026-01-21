@@ -64,10 +64,10 @@ export async function signUpAction(formData: FormData) {
             sameSite: "lax",
             maxAge: 60 * 60 * 24 * 7,
         });
-        return { success: true, session: true };
+        return { success: true, session: data.session };
     }
 
-    return { success: true, session: false };
+    return { success: true, session: null };
 }
 
 export async function signOutAction() {
