@@ -99,13 +99,18 @@ export function TopListsSection({ className = "" }: TopListProps) {
     };
 
     return (
-        <section className={cn("w-full py-32 px-6 relative overflow-hidden bg-black", className)}>
-            {/* --- COSMIC BACKGROUND --- */}
-            <StarBackground />
+        <section className={cn("relative rounded-[2.5rem] overflow-hidden bg-surface border border-theme py-20 px-6 md:px-12 my-24 transition-all duration-500", className)}>
+            {/* Background Blobs (Like Newsletter) */}
+            <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
+
+            <div className="dark:block hidden opacity-40">
+                <StarBackground />
+            </div>
 
             {/* Ambient Ambient Glows */}
-            <div className="absolute top-1/4 -left-24 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[160px] opacity-30 pointer-events-none" />
-            <div className="absolute bottom-1/4 -right-24 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[160px] opacity-30 pointer-events-none" />
+            <div className="absolute top-1/4 -left-24 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[160px] opacity-30 pointer-events-none" />
+            <div className="absolute bottom-1/4 -right-24 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[160px] opacity-30 pointer-events-none" />
 
             <div className="max-w-7xl mx-auto relative z-10">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-20 gap-10">
@@ -115,14 +120,14 @@ export function TopListsSection({ className = "" }: TopListProps) {
                         viewport={{ once: true }}
                         className="space-y-6 max-w-2xl"
                     >
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-primary text-[10px] font-black tracking-[0.2em] uppercase">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/10 text-primary text-[10px] font-black tracking-[0.2em] uppercase">
                             <Sparkles className="w-3.5 h-3.5" />
                             Premium Concierge Curations
                         </div>
-                        <h2 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-[0.9]">
+                        <h2 className="text-5xl md:text-6xl font-black text-foreground tracking-tighter leading-[0.9]">
                             Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-indigo-500">Next Story</span>
                         </h2>
-                        <p className="text-gray-400 text-lg font-light leading-relaxed max-w-xl">
+                        <p className="text-muted-foreground text-lg font-light leading-relaxed max-w-xl">
                             Our editors have hand-picked the world's most breathtaking experiences. From hidden gems to legendary landmarks.
                         </p>
                     </motion.div>
@@ -135,16 +140,16 @@ export function TopListsSection({ className = "" }: TopListProps) {
                         whileHover={{ y: -5 }}
                         className="relative group lg:max-w-sm w-full"
                     >
-                        <Link href="/destinations" className="block relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-8 backdrop-blur-3xl transition-all duration-500 hover:border-primary/50">
-                            <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700">
+                        <Link href="/destinations" className="block relative overflow-hidden rounded-[2.5rem] border border-theme bg-surface-elevated/50 p-8 backdrop-blur-3xl transition-all duration-500 hover:border-primary/50">
+                            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700">
                                 <Globe className="w-24 h-24 text-primary" />
                             </div>
                             <div className="relative z-20">
                                 <div className="p-3 bg-primary/20 rounded-2xl w-fit mb-6 shadow-[0_0_20px_rgba(43,140,238,0.3)]">
                                     <MapIcon className="w-6 h-6 text-primary" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight">Interactive Map</h3>
-                                <p className="text-gray-400 text-sm mb-6 leading-relaxed">Visualize all exclusive destinations and tours on our high-performance 3D interface.</p>
+                                <h3 className="text-2xl font-bold text-foreground mb-2 uppercase tracking-tight">Interactive Map</h3>
+                                <p className="text-muted-foreground text-sm mb-6 leading-relaxed">Visualize all exclusive destinations and tours on our high-performance 3D interface.</p>
                                 <div className="flex items-center gap-2 text-primary font-bold text-xs tracking-widest group-hover:gap-4 transition-all uppercase">
                                     {t('viewOnMap')} <ArrowRight className="w-4 h-4" />
                                 </div>
@@ -154,7 +159,7 @@ export function TopListsSection({ className = "" }: TopListProps) {
                 </div>
 
                 {/* Tab Navigation - Ultra-Clean Floating Pill */}
-                <div className="flex flex-wrap items-center gap-1.5 mb-16 p-2 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[3rem] w-fit mx-auto lg:mx-0 shadow-2xl">
+                <div className="flex flex-wrap items-center gap-1.5 mb-16 p-2 bg-surface-elevated/50 backdrop-blur-2xl border border-theme rounded-[3rem] w-fit mx-auto lg:mx-0 shadow-lg">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
@@ -163,7 +168,7 @@ export function TopListsSection({ className = "" }: TopListProps) {
                                 "px-8 py-3.5 rounded-[2.5rem] text-xs font-black tracking-widest uppercase transition-all duration-500 relative overflow-hidden",
                                 activeTab === tab.id
                                     ? "text-white"
-                                    : "text-gray-500 hover:text-white"
+                                    : "text-muted-foreground hover:text-foreground"
                             )}
                         >
                             {activeTab === tab.id && (
@@ -238,19 +243,19 @@ const ListItemListItem = motion(function ListItem({ title, subtitle, href }: { t
     return (
         <Link
             href={href}
-            className="group flex items-center justify-between py-6 px-4 rounded-[1.5rem] transition-all duration-500 hover:bg-white/[0.03] border-b border-white/[0.03] hover:border-white/10"
+            className="group flex items-center justify-between py-6 px-4 rounded-[1.5rem] transition-all duration-500 hover:bg-surface-elevated/50 border-b border-theme hover:border-primary/20"
         >
             <div className="flex flex-col gap-1.5">
-                <h3 className="text-gray-100 font-bold text-lg leading-tight group-hover:text-primary transition-colors duration-500 capitalize">
+                <h3 className="text-foreground font-bold text-lg leading-tight group-hover:text-primary transition-colors duration-500 capitalize">
                     {title.toLowerCase()}
                 </h3>
                 <div className="flex items-center gap-3">
-                    <div className="h-px w-6 bg-gray-800 group-hover:w-10 group-hover:bg-primary transition-all duration-500" />
-                    <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.15em]">{subtitle}</p>
+                    <div className="h-px w-6 bg-theme group-hover:w-10 group-hover:bg-primary transition-all duration-500" />
+                    <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.15em]">{subtitle}</p>
                 </div>
             </div>
-            <div className="w-10 h-10 rounded-full border border-white/5 flex items-center justify-center group-hover:border-primary/50 group-hover:bg-primary/10 transition-all duration-500">
-                <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+            <div className="w-10 h-10 rounded-full border border-theme flex items-center justify-center group-hover:border-primary/50 group-hover:bg-primary/10 transition-all duration-500">
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
             </div>
         </Link>
     );
