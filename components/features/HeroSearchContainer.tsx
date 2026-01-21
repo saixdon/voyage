@@ -16,7 +16,14 @@ import { Calendar } from "@/components/ui/calendar";
 import "react-day-picker/dist/style.css";
 import { de, enUS } from "date-fns/locale";
 import { useLocale } from "next-intl";
-import { Popover as RadixPopover, PopoverContent as RadixPopoverContent, PopoverTrigger as RadixPopoverTrigger, PopoverPortal as RadixPopoverPortal } from "@radix-ui/react-popover";
+import {
+    Dialog,
+    DialogContent,
+    DialogTrigger,
+    DialogPortal,
+    DialogOverlay,
+} from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
 
 interface HeroSearchContainerProps {
     className?: string;
@@ -165,9 +172,9 @@ export function HeroSearchContainer({ className }: HeroSearchContainerProps) {
 
                         {/* Extra Inputs Row (Date & Guests) - Only visible when AI mode is active */}
                         <div className="flex flex-wrap justify-center gap-4 mt-4 animate-fade-in-up">
-                            {/* Date Picker */}
-                            <RadixPopover>
-                                <RadixPopoverTrigger asChild>
+                            {/* Date Picker Modal */}
+                            <Dialog>
+                                <DialogTrigger asChild>
                                     <button className={cn(
                                         "flex items-center gap-2 px-4 py-2 rounded-full bg-black/40 border border-white/10 hover:border-primary/50 transition-all text-sm",
                                         date ? "text-white" : "text-white/60"
@@ -179,29 +186,37 @@ export function HeroSearchContainer({ className }: HeroSearchContainerProps) {
                                             t('searchPlaceholder') === "Search destinations..." ? "Any dates" : "Beliebiges Datum"
                                         )}
                                     </button>
-                                </RadixPopoverTrigger>
-                                <RadixPopoverPortal>
-                                    <RadixPopoverContent className="w-auto p-0 bg-surface border border-white/10 rounded-2xl z-[100] shadow-3xl" align="center" sideOffset={12}>
-                                        <div className="bg-surface border border-theme rounded-2xl shadow-2xl p-6 text-foreground min-w-[320px]">
-                                            <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-4">
-                                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                                                    <CalendarIcon className="w-5 h-5 text-primary" />
-                                                    {locale === 'de' ? "Reisezeitraum wählen" : "Select Travel Dates"}
+                                </DialogTrigger>
+                                <DialogPortal>
+                                    <DialogOverlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]" />
+                                    <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-[#0a0a0c] border border-white/10 rounded-[2rem] shadow-2xl z-[101] p-0 overflow-hidden focus:outline-none animate-scale-in">
+                                        <div className="p-8">
+                                            <div className="flex items-center justify-center mb-8 relative">
+                                                <h3 className="text-xl font-bold text-white">
+                                                    {locale === 'de' ? "Datum auswählen" : "Select Date"}
                                                 </h3>
+                                                <DialogTrigger asChild>
+                                                    <button className="absolute -right-2 top-0 p-1 text-white/50 hover:text-white transition-colors">
+                                                        <X className="w-6 h-6" />
+                                                    </button>
+                                                </DialogTrigger>
                                             </div>
-                                            <Calendar
-                                                mode="range"
-                                                defaultMonth={date?.from || startOfToday()}
-                                                selected={date}
-                                                onSelect={setDate}
-                                                numberOfMonths={1}
-                                                locale={locale === 'de' ? de : enUS}
-                                                disabled={{ before: startOfToday() }}
-                                            />
+                                            <div className="flex justify-center">
+                                                <Calendar
+                                                    mode="range"
+                                                    defaultMonth={date?.from || startOfToday()}
+                                                    selected={date}
+                                                    onSelect={setDate}
+                                                    numberOfMonths={1}
+                                                    locale={locale === 'de' ? de : enUS}
+                                                    disabled={{ before: startOfToday() }}
+                                                    className="mx-auto"
+                                                />
+                                            </div>
                                         </div>
-                                    </RadixPopoverContent>
-                                </RadixPopoverPortal>
-                            </RadixPopover>
+                                    </DialogContent>
+                                </DialogPortal>
+                            </Dialog>
 
                             {/* Guest Count - Only visible for Family/Friends */}
                             {['family_kids', 'family_teens', 'friends'].includes(prefs.travelers) && (

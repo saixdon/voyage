@@ -17,45 +17,45 @@ function Calendar({
     return (
         <DayPicker
             showOutsideDays={showOutsideDays}
-            className={cn("p-4", className)}
+            className={cn("p-0", className)}
             classNames={{
-                months: "flex flex-col",
+                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                 month: "space-y-4",
-                caption: "flex justify-center pt-1 relative items-center mb-6",
-                caption_label: "text-lg font-semibold text-white",
-                nav: "space-x-1 flex items-center",
-                nav_button: cn(
-                    "h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 rounded-full flex items-center justify-center hover:bg-white/10 transition-all"
+                month_caption: "flex justify-center pt-1 relative items-center mb-4",
+                caption_label: "text-lg font-bold text-white",
+                nav: "space-x-1 flex items-center absolute right-0 top-0",
+                button_previous: cn(
+                    "h-9 w-9 bg-transparent p-0 opacity-70 hover:opacity-100 rounded-full flex items-center justify-center hover:bg-white/10 transition-all text-blue-500"
                 ),
-                nav_button_previous: "absolute left-1",
-                nav_button_next: "absolute right-1",
-                table: "w-full border-separate border-spacing-3",
-                head_row: "",
-                head_cell:
-                    "text-gray-400 font-medium text-xs text-center p-2",
-                row: "",
-                cell: "text-center p-2",
+                button_next: cn(
+                    "h-9 w-9 bg-transparent p-0 opacity-70 hover:opacity-100 rounded-full flex items-center justify-center hover:bg-white/10 transition-all text-blue-500"
+                ),
+                month_grid: "w-full border-collapse space-y-1",
+                weekdays: "flex",
+                weekday: "text-gray-400 rounded-md w-11 font-medium text-[13px] text-center mb-2",
+                week: "flex w-full mt-2",
                 day: cn(
-                    "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-white/10 hover:text-white rounded-full flex items-center justify-center transition-all cursor-pointer text-sm mx-auto"
+                    "h-11 w-11 p-0 font-normal aria-selected:opacity-100 hover:bg-white/10 hover:text-white rounded-full flex items-center justify-center transition-all cursor-pointer text-[14px] text-white"
                 ),
-                day_range_end: "day-range-end",
-                day_selected:
-                    "bg-primary text-white hover:bg-primary/90 hover:text-white focus:bg-primary focus:text-white",
-                day_today: "bg-white/5 text-white border border-white/10",
-                day_outside:
-                    "day-outside text-gray-600 opacity-40 aria-selected:bg-primary/30 aria-selected:text-white aria-selected:opacity-40",
-                day_disabled: "text-gray-600 opacity-40",
-                day_range_middle:
-                    "aria-selected:bg-primary/20 aria-selected:text-white rounded-none",
-                day_hidden: "invisible",
+                range_start: "day-range-start",
+                range_end: "day-range-end",
+                selected:
+                    "bg-blue-600 text-white hover:bg-blue-500 hover:text-white rounded-full",
+                today: "text-blue-500 font-bold",
+                outside:
+                    "day-outside text-gray-600 opacity-40 aria-selected:bg-blue-600/30 aria-selected:text-white aria-selected:opacity-40",
+                disabled: "text-gray-600 opacity-20",
+                range_middle:
+                    "aria-selected:bg-blue-600/20 aria-selected:text-white rounded-none",
+                hidden: "invisible",
                 ...classNames,
             }}
             components={{
                 Chevron: ({ orientation }) => {
                     if (orientation === "left") {
-                        return <ChevronLeft className="h-5 w-5 text-white" />
+                        return <ChevronLeft className="h-6 w-6" />
                     }
-                    return <ChevronRight className="h-5 w-5 text-white" />
+                    return <ChevronRight className="h-6 w-6" />
                 },
             }}
             {...props}

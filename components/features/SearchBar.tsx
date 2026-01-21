@@ -7,11 +7,14 @@ import { Calendar as CalendarIcon, Search, ArrowRight } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@radix-ui/react-popover";
+    Dialog,
+    DialogContent,
+    DialogTrigger,
+    DialogPortal,
+    DialogOverlay,
+} from "@radix-ui/react-dialog";
 import { Calendar } from "@/components/ui/calendar";
+import { X } from "lucide-react";
 import "react-day-picker/dist/style.css";
 import { de, enUS } from "date-fns/locale";
 import { useLocale, useTranslations } from "next-intl";
@@ -113,10 +116,10 @@ export function SearchBar({
                 />
             </div>
 
-            {/* Date Picker */}
+            {/* Date Picker Modal */}
             <div className="relative flex items-center flex-1 w-full md:w-auto px-6 py-2">
-                <Popover>
-                    <PopoverTrigger asChild>
+                <Dialog>
+                    <DialogTrigger asChild>
                         <button
                             type="button"
                             className={cn(
@@ -132,27 +135,37 @@ export function SearchBar({
                                 {formatDateDisplay()}
                             </span>
                         </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-surface border border-theme rounded-2xl shadow-2xl z-50 animate-scale-in" align="center" sideOffset={12}>
-                        <div className="p-6 min-w-[320px]">
-                            <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-4">
-                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                                    <CalendarIcon className="w-5 h-5 text-primary" />
-                                    {locale === 'de' ? "Reisezeitraum wählen" : "Select Travel Dates"}
-                                </h3>
+                    </DialogTrigger>
+                    <DialogPortal>
+                        <DialogOverlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]" />
+                        <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-[#0a0a0c] border border-white/10 rounded-[2rem] shadow-2xl z-[101] p-0 overflow-hidden focus:outline-none animate-scale-in">
+                            <div className="p-8">
+                                <div className="flex items-center justify-center mb-8 relative">
+                                    <h3 className="text-xl font-bold text-white">
+                                        {locale === 'de' ? "Datum auswählen" : "Select Date"}
+                                    </h3>
+                                    <DialogTrigger asChild>
+                                        <button className="absolute -right-2 top-0 p-1 text-white/50 hover:text-white transition-colors">
+                                            <X className="w-6 h-6" />
+                                        </button>
+                                    </DialogTrigger>
+                                </div>
+                                <div className="flex justify-center">
+                                    <Calendar
+                                        mode="range"
+                                        defaultMonth={date?.from || startOfToday()}
+                                        selected={date}
+                                        onSelect={setDate}
+                                        numberOfMonths={1}
+                                        locale={locale === 'de' ? de : enUS}
+                                        disabled={{ before: startOfToday() }}
+                                        className="mx-auto"
+                                    />
+                                </div>
                             </div>
-                            <Calendar
-                                mode="range"
-                                defaultMonth={date?.from || startOfToday()}
-                                selected={date}
-                                onSelect={setDate}
-                                numberOfMonths={1}
-                                locale={locale === 'de' ? de : enUS}
-                                disabled={{ before: startOfToday() }}
-                            />
-                        </div>
-                    </PopoverContent>
-                </Popover>
+                        </DialogContent>
+                    </DialogPortal>
+                </Dialog>
             </div>
 
             {/* Search Button */}
