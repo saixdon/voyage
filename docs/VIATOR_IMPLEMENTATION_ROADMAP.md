@@ -29,10 +29,23 @@
 
 ---
 
+## ⚡️ Parallel-Workflow (Husein & Mert)
+
+Nach **Phase 1 (Setup)** können beide Entwickler parallel arbeiten:
+
+| Husein (Backend Focus) | Mert (Frontend Focus) |
+|------------------------|-----------------------|
+| Startet mit **Phase 2** (Ingestion) | Startet mit **Phase 4** (Booking Logic) |
+| Baut Cron-Jobs & Sync | Baut Checkout & Payment UI |
+| Ziel: DB mit Daten füllen | Ziel: Booking Flow mit *einem* Test-Produkt fertigstellen |
+| **Blocker**: Keine | **Workaround**: Nutzt Hardcoded Product-ID zum Testen |
+
+---
+
 ## PHASE 0: Entscheidungen & Questionnaire
 **Aufwand**: ~1 Stunde
-**Status**: 🟡 In Bearbeitung
-**Blockiert**: Weitere Phasen
+**Status**: ✅ Abgeschlossen
+**Blockiert**: Keine
 
 ### Aufgaben
 
@@ -226,8 +239,9 @@ Diese API-Calls **MÜSSEN entfernt** werden (verboten bei Ingestion):
 - [ ] **4.4.4** Buchung in DB speichern
 
 #### 4.5 Payment Integration (iframe)
-- [ ] **4.5.1** Viator Payment iframe einbinden
-- [ ] **4.5.2** `/v1/checkoutsessions/{sessionToken}/paymentaccounts` integrieren
+- [ ] **4.5.1** Viator Payment iFrame einbinden (JavaScript Library)
+- [ ] **4.5.2** SAQ A Self-Assessment Formular ausfüllen
+- [x] ~~`/v1/checkoutsessions/{sessionToken}/paymentaccounts`~~ → **NICHT verwendet** (nur bei API Payments)
 
 #### 4.6 Booking Status
 - [ ] **4.6.1** `/api/bookings/status` für pending Buchungen
@@ -354,9 +368,9 @@ Voucher anzeigen ✅
 
 | # | Entscheidung | Optionen | Status |
 |---|--------------|----------|--------|
-| 1 | Payment Solution | iframe / API | ⏳ TODO |
-| 2 | Product Catalog | Curated / Full | ⏳ TODO |
-| 3 | Google Places API | Ja / Nein | ⏳ TODO |
+| 1 | Payment Solution | ✅ **iframe** | ✅ Entschieden |
+| 2 | Product Catalog | ✅ **Full Catalog** | ✅ Entschieden |
+| 3 | Google Places API | ❌ **Nein** | ✅ Entschieden |
 
 ---
 

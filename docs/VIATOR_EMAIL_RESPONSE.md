@@ -1,18 +1,17 @@
-Subject: RE: Viator API Integration - Updated Endpoint Usage Plan (TripVega)
+Subject: RE: Viator API Integration - Switch to Iframe Solution (TripVega)
 
 Hi Ewelina,
 
-Thank you for the detailed feedback and for clarifying the distinction between the Ingestion and Search models.
+Thank you very much for pointing out the significant PCI compliance requirements for the API payments solution. We definitely want to avoid the full PCI DSS certification overhead at this stage.
 
-Based on your guidelines, we have updated our endpoint usage plan to strictly follow the **Ingestion Model**. Here are the key updates we made:
+Therefore, we have decided to **switch to the Iframe Solution** (instead of the direct API payments solution).
 
-1.  **Ingestion Model Confirmed**: We will strictly use `/products/modified-since` and `/availability/schedules/modified-since` for ingestion (running at least hourly).
-2.  **No Real-time Content Calls**: We have removed all real-time calls to `/products/{product-code}` and `/availability/schedules/{product-code}`, as this data will be served from our local database.
-3.  **No Bulk Ingestion**: We confirmed that `/products/bulk` will NOT be used for ingestion, but only reserved for rare edge cases as permitted.
-4.  **Endpoint Cleanup**: We removed the `/bookings/modified-since/acknowledge` endpoint as it does not apply to us.
-5.  **PCI Compliance**: We have confirmed that we will use Viator's hosted checkout solution, so Viator will handle all payment data handling.
+**Changes to our implementation plan:**
+1.  **Iframe Implementation**: We will use the Viator Javascript Library / Iframe to handle payment input.
+2.  **Endpoint Removed**: We have removed the `/v1/checkoutsessions/{sessionToken}/paymentaccounts` endpoint from our usage plan, as we will not collecting card data directly.
+3.  **Compliance**: We understand that with the Iframe solution, we only need to complete the **SAQ A (Self-Assessment)**, which fits our setup perfectly.
 
-Please find our updated answers in the attached document.
+Please find our updated endpoint usage plan attached, reflecting these changes.
 
 Best regards,
 Mert

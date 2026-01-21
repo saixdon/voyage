@@ -88,7 +88,7 @@ New products are automatically added via the hourly /products/modified-since del
 | `/availability/check` | - | Yes | When user selects date/pax + before booking |
 | `/bookings/cart/hold` | - | Yes | Before payment details |
 | `/bookings/cart/book` | - | Yes | At checkout |
-| `/v1/checkoutsessions/{sessionToken}/paymentaccounts` | - | Yes | For payment processing |
+| `/v1/checkoutsessions/{sessionToken}/paymentaccounts` | - | - | Not used (using Iframe Solution) |
 | `/bookings/status` | - | Yes | For pending bookings (hourly) |
 | `/bookings/modified-since` | Every 3 min | - | For supplier cancellations |
 | `/bookings/cancel-reasons` | Monthly | - | Cached |
@@ -233,14 +233,15 @@ Yes, we have implemented a 120 second timeout for all Viator API services, as re
 ### 17. Can you confirm your PCI compliance status for handling payment data?
 **Response**:
 ```
-We use Viator's hosted checkout/payment solution. 
-Payment card data is handled entirely by Viator's PCI-compliant infrastructure. 
-We do NOT store, process, or transmit cardholder data on our systems.
+We have chosen the **Iframe Solution** for payments.
 
-Viator manages:
-- Payment processing
-- Customer support for payment-related inquiries
-- Refunds and chargebacks
+Compliance Strategy:
+- We will NOT collect or store payment data directly.
+- We will use the Viator Iframe to securely handle payment input.
+- We will complete the SAQ A (Self-Assessment Questionnaire) as required for the Iframe implementation.
+- We do NOT use the /v1/checkoutsessions/.../paymentaccounts endpoint.
+
+This ensures we meet the security requirements without needing a full PCI DSS Attestation of Compliance from an external assessor.
 ```
 
 ---
