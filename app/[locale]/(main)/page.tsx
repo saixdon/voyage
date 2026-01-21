@@ -61,8 +61,13 @@ export default function HomePage() {
                     <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-background z-10"></div>
                     <img
                         alt="Scenic view of mountains and lake with a boat in Switzerland"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover block dark:hidden"
                         src="/swiss_alps_hero.png"
+                    />
+                    <img
+                        alt="New York City skyline at night with illuminated skyscrapers"
+                        className="w-full h-full object-cover hidden dark:block"
+                        src="/nyc_night_hero.png"
                     />
                 </div>
                 {/* Content */}
