@@ -40,6 +40,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 const result = await signInAction(formData);
                 if (result.error) throw new Error(result.error);
 
+                // Synchronize client-side auth state
+                if (result.session) {
+                    await supabase.auth.setSession(result.session);
+                }
+
                 setSuccess(t('loginSuccess') || "Login successful!");
                 setTimeout(() => {
                     onClose();
@@ -50,6 +55,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 if (result.error) throw new Error(result.error);
 
                 if (result.session) {
+                    // Synchronize client-side auth state
+                    if (result.session) {
+                        await supabase.auth.setSession(result.session);
+                    }
+
                     setSuccess(t('loginSuccess'));
                     setTimeout(() => {
                         onClose();

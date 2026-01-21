@@ -36,6 +36,7 @@ export async function signInAction(formData: FormData) {
             sameSite: "lax",
             maxAge: 60 * 60 * 24 * 7, // 1 week
         });
+        return { success: true, session: data.session };
     }
 
     return { success: true };

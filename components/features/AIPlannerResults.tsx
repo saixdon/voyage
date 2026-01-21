@@ -137,7 +137,7 @@ export function AIPlannerResults({ plan, tripId, savedItems, onSaveTrip, query, 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap items-center justify-center gap-4">
                     {/* Save Trip Button */}
-                    {!isSaved && user && (
+                    {!isSaved && (
                         <button
                             onClick={handleSaveTrip}
                             disabled={isSaving}
