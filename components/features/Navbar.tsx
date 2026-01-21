@@ -75,7 +75,7 @@ export function Navbar() {
                             <img
                                 src="/brand/logo_transparent.png"
                                 alt="TripVega"
-                                className="h-full w-auto object-contain"
+                                className="h-full w-auto object-contain dark:brightness-100 brightness-0 transition-all duration-300"
                             />
                         </div>
                     </Link>
