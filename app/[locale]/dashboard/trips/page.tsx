@@ -32,7 +32,7 @@ export default function DashboardTripsPage() {
         return (
             <div className="min-h-screen bg-background-dark pt-24 px-6">
                 <div className="max-w-7xl mx-auto">
-                    <h1 className="text-4xl font-bold text-white mb-8">Meine Reisen</h1>
+                    <h1 className="text-4xl font-bold text-white mb-8">Meine Planung</h1>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3].map((i) => (
                             <div key={i} className="aspect-[4/3] rounded-2xl bg-white/5 animate-pulse" />
@@ -48,7 +48,7 @@ export default function DashboardTripsPage() {
             <div className="max-w-7xl mx-auto">
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold text-white mb-2">Meine Reisen</h1>
+                        <h1 className="text-4xl font-bold text-white mb-2">Meine Planung</h1>
                         <p className="text-gray-400">Verwalten Sie Ihre KI-generierten Reisepläne</p>
                     </div>
                     <Link
@@ -56,7 +56,7 @@ export default function DashboardTripsPage() {
                         className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-purple-600 text-white font-bold rounded-full hover:from-primary/90 hover:to-purple-600/90 transition-all shadow-lg shadow-purple-500/20"
                     >
                         <span className="material-symbols-outlined text-sm">add</span>
-                        Neue Reise planen
+                        Neue Planung erstellen
                     </Link>
                 </div>
 
@@ -66,7 +66,7 @@ export default function DashboardTripsPage() {
                             travel_explore
                         </span>
                         <h2 className="text-xl font-bold text-white mb-2">
-                            Noch keine Reisen gespeichert
+                            Noch keine Planung gespeichert
                         </h2>
                         <p className="text-gray-400 mb-8 max-w-md mx-auto">
                             Nutzen Sie den KI-Planer auf der Startseite, um Ihre erste Traumreise zu erstellen.
@@ -76,7 +76,7 @@ export default function DashboardTripsPage() {
                             className="inline-flex items-center justify-center px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors"
                         >
                             <span className="material-symbols-outlined mr-2">auto_awesome</span>
-                            Reise mit KI planen
+                            Planung mit KI erstellen
                         </Link>
                     </div>
                 ) : (
@@ -167,7 +167,7 @@ export default function DashboardTripsPage() {
                                             href={`/dashboard/trips/${trip.id}`}
                                             className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-colors"
                                         >
-                                            Reise anzeigen
+                                            Planung anzeigen
                                             <span className="material-symbols-outlined text-sm">arrow_forward</span>
                                         </Link>
                                     </div>

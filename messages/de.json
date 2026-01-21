@@ -124,11 +124,11 @@
         ]
     },
     "aiPlan": {
-        "badge": "KI-generierte Reise",
-        "headerTitle": "Deine Reise nach {destination}",
-        "saveButton": "Reise speichern",
+        "badge": "KI-generierte Planung",
+        "headerTitle": "Deine Planung für {destination}",
+        "saveButton": "Planung speichern",
         "saving": "Speichern...",
-        "saved": "Reise gespeichert",
+        "saved": "Planung gespeichert",
         "loginToSave": "Bitte einloggen um die Reise zu speichern",
         "day": "Tag {number}",
         "morning": "Vormittag",

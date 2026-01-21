@@ -233,7 +233,7 @@ export function Navbar() {
                                             <span className="material-symbols-outlined text-lg">
                                                 travel_explore
                                             </span>
-                                            Meine Reisen
+                                            Meine Planung
                                         </Link>
                                         <Link
                                             href="/dashboard/favorites"
