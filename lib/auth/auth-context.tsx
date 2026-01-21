@@ -28,25 +28,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     useEffect(() => {
-        const setData = async () => {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (error) throw error;
-            setSession(session);
-            setUser(session?.user ?? null);
-            setLoading(false);
+        const checkUser = async () => {
+            try {
+                const response = await fetch("/api/auth/me");
+                if (response.ok) {
+                    const data = await response.json();
+                    setUser(data.user);
+                }
+            } catch (error) {
+                console.error("Failed to check auth:", error);
+            } finally {
+                setLoading(false);
+            }
         };
 
-        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setLoading(false);
-        });
-
-        setData();
-
-        return () => {
-            listener.subscription.unsubscribe();
-        };
+        checkUser();
     }, []);
 
     const signOut = async () => {

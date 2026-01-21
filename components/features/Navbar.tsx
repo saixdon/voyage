@@ -19,6 +19,8 @@ const languages = [
     { code: "es", name: "Español", flag: "🇪🇸" },
 ];
 
+import { useAuth } from "@/lib/auth/auth-context";
+
 export function Navbar() {
     const t = useTranslations('nav');
     const authT = useTranslations('auth');
@@ -30,7 +32,7 @@ export function Navbar() {
     const { theme, setTheme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
-    const [user, setUser] = useState<User | null>(null);
+    const { user, signOut: handleLogout } = useAuth(); // Modified this line
     const { currency, setCurrency } = useCurrency();
 
     // selectedLanguage is now derived from currentLocale
@@ -54,24 +56,10 @@ export function Navbar() {
 
     useEffect(() => {
         setMounted(true);
+    }, []); // Modified this useEffect
 
-        // Check for existing session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user ?? null);
-        });
-
-        // Listen for auth changes
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-        });
-
-        return () => subscription.unsubscribe();
-    }, []);
-
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
+    const handleUserLogout = async () => { // Renamed to avoid conflict with destructured handleLogout
+        await handleLogout(); // Call the signOut function from useAuth
         setShowUserMenu(false);
     };
 
@@ -266,7 +254,7 @@ export function Navbar() {
                                             {t('settings')}
                                         </Link>
                                         <button
-                                            onClick={handleLogout}
+                                            onClick={handleUserLogout}
                                             className="w-full px-4 py-3 flex items-center gap-3 text-sm text-red-500 hover:bg-surface-elevated transition-colors border-t border-theme"
                                         >
                                             <span className="material-symbols-outlined text-lg">
