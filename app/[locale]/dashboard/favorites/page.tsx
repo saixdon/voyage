@@ -44,7 +44,7 @@ export default function DashboardFavoritesPage() {
                             Speichern Sie Aktivitäten, die Ihnen gefallen, um sie hier wiederzufinden.
                         </p>
                         <Link
-                            href="/search"
+                            href="/search?q=popular"
                             className="inline-flex items-center justify-center px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors"
                         >
                             Aktivitäten entdecken
