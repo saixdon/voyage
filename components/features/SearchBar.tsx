@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { format, addDays } from "date-fns";
+import { format, addDays, startOfToday } from "date-fns";
 import { Calendar as CalendarIcon, Search, ArrowRight } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
@@ -133,14 +133,24 @@ export function SearchBar({
                             </span>
                         </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto bg-surface border border-theme rounded-2xl shadow-2xl z-50 p-4 text-white" align="center">
-                        <Calendar
-                            mode="range"
-                            defaultMonth={date?.from}
-                            selected={date}
-                            onSelect={setDate}
-                            numberOfMonths={1}
-                        />
+                    <PopoverContent className="w-auto p-0 bg-surface border border-theme rounded-2xl shadow-2xl z-50 animate-scale-in" align="center" sideOffset={12}>
+                        <div className="p-6 min-w-[320px]">
+                            <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-4">
+                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                    <CalendarIcon className="w-5 h-5 text-primary" />
+                                    {locale === 'de' ? "Reisezeitraum wählen" : "Select Travel Dates"}
+                                </h3>
+                            </div>
+                            <Calendar
+                                mode="range"
+                                defaultMonth={date?.from || startOfToday()}
+                                selected={date}
+                                onSelect={setDate}
+                                numberOfMonths={1}
+                                locale={locale === 'de' ? de : enUS}
+                                disabled={{ before: startOfToday() }}
+                            />
+                        </div>
                     </PopoverContent>
                 </Popover>
             </div>

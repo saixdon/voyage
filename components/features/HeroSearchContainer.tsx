@@ -9,10 +9,10 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 
 import { SearchBar } from "./SearchBar";
-import { format, addDays } from "date-fns";
+import { format, addDays, startOfToday } from "date-fns";
 import { Calendar as CalendarIcon, Users } from "lucide-react";
 import { DateRange } from "react-day-picker";
-import { DayPicker } from "react-day-picker";
+import { Calendar } from "@/components/ui/calendar";
 import "react-day-picker/dist/style.css";
 import { de, enUS } from "date-fns/locale";
 import { useLocale } from "next-intl";
@@ -181,21 +181,22 @@ export function HeroSearchContainer({ className }: HeroSearchContainerProps) {
                                     </button>
                                 </RadixPopoverTrigger>
                                 <RadixPopoverPortal>
-                                    <RadixPopoverContent className="w-auto p-0 bg-surface border border-white/10 rounded-xl z-[100]" align="center" sideOffset={5}>
-                                        <div className="bg-surface border border-theme rounded-2xl shadow-2xl p-4 text-foreground">
-                                            <DayPicker
+                                    <RadixPopoverContent className="w-auto p-0 bg-surface border border-white/10 rounded-2xl z-[100] shadow-3xl" align="center" sideOffset={12}>
+                                        <div className="bg-surface border border-theme rounded-2xl shadow-2xl p-6 text-foreground min-w-[320px]">
+                                            <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-4">
+                                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                                    <CalendarIcon className="w-5 h-5 text-primary" />
+                                                    {locale === 'de' ? "Reisezeitraum wählen" : "Select Travel Dates"}
+                                                </h3>
+                                            </div>
+                                            <Calendar
                                                 mode="range"
-                                                defaultMonth={date?.from}
+                                                defaultMonth={date?.from || startOfToday()}
                                                 selected={date}
                                                 onSelect={setDate}
                                                 numberOfMonths={1}
-                                                modifiersClassNames={{
-                                                    selected: "bg-primary text-white hover:bg-primary/90 rounded-md",
-                                                    today: "text-primary font-bold",
-                                                    range_middle: "bg-primary/20 text-foreground rounded-none",
-                                                    range_start: "bg-primary text-white rounded-l-md",
-                                                    range_end: "bg-primary text-white rounded-r-md"
-                                                }}
+                                                locale={locale === 'de' ? de : enUS}
+                                                disabled={{ before: startOfToday() }}
                                             />
                                         </div>
                                     </RadixPopoverContent>

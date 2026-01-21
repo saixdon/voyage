@@ -1,0 +1,10 @@
+﻿Testing Viator API...
+Key: fad9e3c8-ecad-446a-81fb-40281a8e3334
+
+GET https://api.sandbox.viator.com/partner/destinations
+Status: 401
+Error Body: {"code":"UNAUTHORIZED","message":"Invalid API Key","timestamp":"2026-01-21T09:14:59.418243909Z","trackingId":"4D0285BE:F37A_0A5D097A:01BB_69709913_5ABF9:33D1AC"}
+
+POST https://api.sandbox.viator.com/partner/products/search
+Status: 401
+Error Body: {"code":"UNAUTHORIZED","message":"Invalid API Key","timestamp":"2026-01-21T09:14:59.927976082Z","trackingId":"4D0285BE:E7FE_0A5D0FCE:01BB_69709913_5A1D3:3318B7"}
