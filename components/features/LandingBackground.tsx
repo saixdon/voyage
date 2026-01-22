@@ -138,7 +138,7 @@ function HotAirBalloon({ color1, color2, size, startX, speed, delay }: { color1:
             }}
             transition={{
                 y: { duration: speed, repeat: Infinity, ease: "linear", delay: delay },
-                x: { duration: speed, repeat: Infinity, ease: "easeInOut", yoyo: Infinity }
+                x: { duration: speed, repeat: Infinity, ease: "easeInOut", repeatType: "reverse" }
             }}
         >
             <svg width={size} height={size * 1.3} viewBox="0 0 100 130" fill="none">
