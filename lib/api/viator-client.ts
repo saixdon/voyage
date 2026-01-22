@@ -504,8 +504,16 @@ export async function searchViatorProducts(
         let destinationId = await resolveDestinationId(query, locale);
 
         if (!destinationId) {
-            console.warn(`Could not resolve destination for query: ${query}.`);
-            return { activities: [], error: `Could not resolve destination: ${query}` };
+            // FALLBACK: If query is generic (like "activities", "culture"), use a showcase destination (e.g. Europe: 8 or London: 737)
+            // This ensures we show REAL data instead of failing or showing mock data.
+            const lowerQ = query.toLowerCase();
+            if (lowerQ.includes('activit') || lowerQ.includes('culture') || lowerQ.includes('tour') || lowerQ === 'popular') {
+                console.log(`Using showcase destination (Europe/London) for generic query: ${query}`);
+                destinationId = "8"; // Try Europe first
+            } else {
+                console.warn(`Could not resolve destination for query: ${query}.`);
+                return { activities: [], error: `Could not resolve destination: ${query}` };
+            }
         }
 
         // 2. Search products with the found Destination ID
