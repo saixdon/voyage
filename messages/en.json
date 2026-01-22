@@ -101,7 +101,12 @@
         "countries": "Top countries to visit",
         "categories": "Top attraction categories",
         "toursActivities": "tours & activities",
-        "viewOnMap": "View on interactive map"
+        "viewOnMap": "View on interactive map",
+        "premiumConciergeLabel": "Premium Concierge Curations",
+        "findYourNextStoryTitle": "Find Your <highlight>Next Story</highlight>",
+        "handPickedDesc": "Our editors have hand-picked the world's most breathtaking experiences. From hidden gems to legendary landmarks.",
+        "interactiveMapTitle": "Interactive Map",
+        "interactiveMapDesc": "Visualize all exclusive destinations and tours on our high-performance 3D interface."
     },
     "topRated": {
         "title": "Attractions you can't miss",

@@ -101,7 +101,12 @@
         "countries": "Beste Reiseländer",
         "categories": "Beliebte Kategorien",
         "toursActivities": "Touren & Aktivitäten",
-        "viewOnMap": "Auf Karte ansehen"
+        "viewOnMap": "Auf Karte ansehen",
+        "premiumConciergeLabel": "Premium Concierge Kurationen",
+        "findYourNextStoryTitle": "Finde deine <highlight>nächste Geschichte</highlight>",
+        "handPickedDesc": "Unsere Redakteure haben die weltweit atemberaubendsten Erlebnisse handverlesen. Von Geheimtipps bis zu legendären Wahrzeichen.",
+        "interactiveMapTitle": "Interaktive Karte",
+        "interactiveMapDesc": "Visualisiere alle exklusiven Reiseziele und Touren auf unserem hochleistungsfähigen 3D-Interface."
     },
     "topRated": {
         "title": "Attraktionen, die du nicht verpassen solltest",

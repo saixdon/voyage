@@ -99,7 +99,7 @@ export function TopListsSection({ className = "" }: TopListProps) {
     };
 
     return (
-        <section className={cn("relative rounded-[2.5rem] overflow-hidden bg-surface border border-theme py-20 px-6 md:px-12 my-24 transition-all duration-500", className)}>
+        <section key={locale} className={cn("relative rounded-[2.5rem] overflow-hidden bg-surface border border-theme py-20 px-6 md:px-12 my-24 transition-all duration-500", className)}>
             {/* Background Blobs (Like Newsletter) */}
             <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
@@ -122,13 +122,15 @@ export function TopListsSection({ className = "" }: TopListProps) {
                     >
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/10 text-primary text-[10px] font-black tracking-[0.2em] uppercase">
                             <Sparkles className="w-3.5 h-3.5" />
-                            Premium Concierge Curations
+                            {t('premiumConciergeLabel')}
                         </div>
                         <h2 className="text-5xl md:text-6xl font-black text-foreground tracking-tighter leading-[0.9]">
-                            Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-indigo-500">Next Story</span>
+                            {t.rich('findYourNextStoryTitle', {
+                                highlight: (chunks) => <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-indigo-500">{chunks}</span>
+                            })}
                         </h2>
                         <p className="text-muted-foreground text-lg font-light leading-relaxed max-w-xl">
-                            Our editors have hand-picked the world's most breathtaking experiences. From hidden gems to legendary landmarks.
+                            {t('handPickedDesc')}
                         </p>
                     </motion.div>
 
@@ -148,8 +150,8 @@ export function TopListsSection({ className = "" }: TopListProps) {
                                 <div className="p-3 bg-primary/20 rounded-2xl w-fit mb-6 shadow-[0_0_20px_rgba(43,140,238,0.3)]">
                                     <MapIcon className="w-6 h-6 text-primary" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-foreground mb-2 uppercase tracking-tight">Interactive Map</h3>
-                                <p className="text-muted-foreground text-sm mb-6 leading-relaxed">Visualize all exclusive destinations and tours on our high-performance 3D interface.</p>
+                                <h3 className="text-2xl font-bold text-foreground mb-2 uppercase tracking-tight">{t('interactiveMapTitle')}</h3>
+                                <p className="text-muted-foreground text-sm mb-6 leading-relaxed">{t('interactiveMapDesc')}</p>
                                 <div className="flex items-center gap-2 text-primary font-bold text-xs tracking-widest group-hover:gap-4 transition-all uppercase">
                                     {t('viewOnMap')} <ArrowRight className="w-4 h-4" />
                                 </div>

@@ -4,6 +4,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./lib/i18n/request.ts');
 
 const nextConfig: NextConfig = {
+    // Force rebuild timestamp: 2026-01-22
     images: {
         remotePatterns: [
             {

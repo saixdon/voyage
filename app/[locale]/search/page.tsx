@@ -25,6 +25,7 @@ const CATEGORY_FILTERS = [
     { id: "nature", label: "Nature", icon: "park", keywords: ["nature", "park", "garden", "wildlife", "safari", "forest", "mountain", "lake", "beach", "waterfall", "eco"] },
     { id: "tours", label: "City Tours", icon: "location_city", keywords: ["city tour", "walking tour", "sightseeing", "hop-on", "bus tour", "guided tour"] },
     { id: "water", label: "Water Activities", icon: "sailing", keywords: ["boat", "cruise", "sailing", "snorkel", "diving", "swim", "water", "river", "canal", "yacht", "kayak", "paddle"] },
+    { id: "transport", label: "Transport", icon: "directions_bus", keywords: ["transport", "transfer", "airport", "shuttle", "driver", "taxi", "pickup", "bus", "train", "limousine"] },
 ];
 
 function SearchResults() {

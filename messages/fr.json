@@ -36,7 +36,20 @@
         "followUs": "Suivez-nous",
         "newsletter": "Newsletter",
         "subscribe": "S'abonner",
-        "desc": "Découvrez les meilleures expériences du monde avec TripVega."
+        "desc": "Découvrez les meilleures expériences du monde avec TripVega.",
+        "explore": "Explorer",
+        "allActivities": "Toutes les activités",
+        "germany": "Allemagne",
+        "europe": "Europe",
+        "asia": "Asie",
+        "aboutUs": "À propos de nous",
+        "contact": "Contact",
+        "partner": "Devenir partenaire",
+        "imprint": "Mentions légales",
+        "privacy": "Politique de confidentialité",
+        "terms": "Conditions générales",
+        "rightsReserved": "Tous droits réservés.",
+        "affiliateDisclaimer": "TripVega est un partenaire affilié de Viator. En cliquant sur \"Réserver\", vous serez redirigé vers viator.com. Nous recevons une commission pour les réservations réussies."
     },
     "hero": {
         "title1": "DÉCOUVREZ L'",
@@ -88,7 +101,12 @@
         "countries": "Top pays à visiter",
         "categories": "Top catégories d'attractions",
         "toursActivities": "visites & activités",
-        "viewOnMap": "Voir sur la carte interactive"
+        "viewOnMap": "Voir sur la carte interactive",
+        "premiumConciergeLabel": "Sélections Premium de Conciergerie",
+        "findYourNextStoryTitle": "Trouvez Votre <highlight>Prochaine Histoire</highlight>",
+        "handPickedDesc": "Nos éditeurs ont sélectionné les expériences les plus époustouflantes du monde. Des pépites cachées aux monuments légendaires.",
+        "interactiveMapTitle": "Carte Interactive",
+        "interactiveMapDesc": "Visualisez toutes les destinations et visites exclusives sur notre interface 3D haute performance."
     },
     "topRated": {
         "title": "Attractions à ne pas manquer",
