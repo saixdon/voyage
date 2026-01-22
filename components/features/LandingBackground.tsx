@@ -12,7 +12,7 @@ export function LandingBackground() {
             </div>
 
             {/* Light Mode: Visible Atmosphere with High Contrast Particles */}
-            <div className="block dark:hidden absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-100/40 via-transparent to-transparent">
+            <div className="block dark:hidden absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-50/50 via-white to-white">
                 <DayAtmosphere />
             </div>
         </div>
@@ -65,33 +65,56 @@ function NightStars() {
 }
 
 function DayAtmosphere() {
-    // 1. Visible Particles (Dark Grey/Blue)
-    // 2. Birds (Darker)
-    const [particles, setParticles] = useState<{ x: number; y: number; size: number; duration: number; delay: number }[]>([]);
+    const [particles, setParticles] = useState<{ x: number; y: number; size: number; duration: number; delay: number; color: string }[]>([]);
+    const [birds, setBirds] = useState<{ top: number; delay: number; duration: number; scale: number; startX: string }[]>([]);
 
     useEffect(() => {
-        const count = 60;
-        const newParticles = Array.from({ length: count }).map(() => ({
+        // 1. More Particles (150) & Colorful
+        const particleCount = 150;
+        const colors = [
+            "bg-amber-400/40",
+            "bg-sky-400/40",
+            "bg-rose-400/40",
+            "bg-emerald-400/40",
+            "bg-slate-500/30"
+        ];
+
+        const newParticles = Array.from({ length: particleCount }).map(() => ({
             x: Math.random() * 100,
             y: Math.random() * 100,
-            size: Math.random() * 5 + 3, // Larger particles (3-8px)
-            duration: 12 + Math.random() * 10,
-            delay: Math.random() * 5
+            size: Math.random() * 6 + 2, // 2-8px
+            duration: 10 + Math.random() * 15,
+            delay: Math.random() * 5,
+            color: colors[Math.floor(Math.random() * colors.length)]
         }));
         setParticles(newParticles);
+
+        // 2. More Birds (25)
+        const birdCount = 25;
+        const newBirds = Array.from({ length: birdCount }).map(() => ({
+            top: Math.random() * 90 + 5, // Spread across 5%-95% height
+            delay: Math.random() * 40,   // Staggered starts up to 40s
+            duration: 25 + Math.random() * 20, // Slow gliding
+            scale: Math.random() * 0.4 + 0.3, // Varied sizes
+            startX: Math.random() > 0.5 ? '-10vw' : '110vw' // Some fly left-to-right, some right-to-left?? actually let's keep consistent direction for now or handle logic below
+        }));
+        setBirds(newBirds);
+
     }, []);
 
     return (
         <>
-            {/* Background Blobs for specific mountain feel */}
-            <div className="absolute top-[10%] left-[5%] w-[500px] h-[500px] bg-blue-200/30 rounded-full blur-[120px]" />
-            <div className="absolute top-[40%] right-[10%] w-[600px] h-[600px] bg-indigo-200/20 rounded-full blur-[150px]" />
+            {/* Vibrant Background Blobs */}
+            <div className="absolute top-[5%] left-[10%] w-[600px] h-[600px] bg-blue-200/40 rounded-full blur-[120px] mix-blend-multiply" />
+            <div className="absolute top-[40%] right-[5%] w-[700px] h-[700px] bg-indigo-200/30 rounded-full blur-[150px] mix-blend-multiply" />
+            <div className="absolute bottom-[20%] left-[20%] w-[500px] h-[500px] bg-sky-200/40 rounded-full blur-[130px] mix-blend-multiply" />
+            <div className="absolute top-[20%] right-[30%] w-[400px] h-[400px] bg-rose-100/40 rounded-full blur-[100px] mix-blend-multiply" />
 
-            {/* Clearly Visible Floating Particles (Slate-500) */}
+            {/* Colorful Floating Particles */}
             {particles.map((p, i) => (
                 <motion.div
                     key={i}
-                    className="absolute rounded-full bg-slate-500/30"
+                    className={`absolute rounded-full ${p.color}`}
                     style={{
                         left: `${p.x}%`,
                         top: `${p.y}%`,
@@ -99,9 +122,9 @@ function DayAtmosphere() {
                         height: `${p.size}px`,
                     }}
                     animate={{
-                        y: [0, -150],
-                        x: [0, Math.random() * 50 - 25],
-                        opacity: [0, 0.8, 0] // Higher opacity
+                        y: [0, -100],
+                        x: [0, Math.random() * 40 - 20],
+                        opacity: [0, 0.8, 0]
                     }}
                     transition={{
                         duration: p.duration,
@@ -112,10 +135,16 @@ function DayAtmosphere() {
                 />
             ))}
 
-            {/* Dark Birds */}
-            <BirdAnimation duration={35} delay={0} top={12} scale={0.7} />
-            <BirdAnimation duration={40} delay={15} top={35} scale={0.5} />
-            <BirdAnimation duration={28} delay={8} top={20} scale={0.6} />
+            {/* Flock of Birds */}
+            {birds.map((bird, i) => (
+                <BirdAnimation
+                    key={i}
+                    duration={bird.duration}
+                    delay={bird.delay}
+                    top={bird.top}
+                    scale={bird.scale}
+                />
+            ))}
         </>
     );
 }
@@ -123,11 +152,12 @@ function DayAtmosphere() {
 function BirdAnimation({ duration, delay, top, scale }: { duration: number, delay: number, top: number, scale: number }) {
     return (
         <motion.div
-            className="absolute left-[-60px] text-slate-600/80 dark:hidden" // Darker color
+            className="absolute left-[-100px] text-slate-700/60 dark:hidden"
             style={{ top: `${top}%` }}
+            initial={{ x: '-10vw' }}
             animate={{
                 x: ['-10vw', '110vw'],
-                y: [0, -40, 10, -20]
+                y: [0, -30, 10, -15] // Gentle waving
             }}
             transition={{
                 duration: duration,
@@ -136,8 +166,8 @@ function BirdAnimation({ duration, delay, top, scale }: { duration: number, dela
                 delay: delay
             }}
         >
-            <div style={{ transform: `scale(${scale}) rotate(15deg)` }}>
-                <svg width="50" height="40" viewBox="0 0 50 40" fill="currentColor">
+            <div style={{ transform: `scale(${scale}) rotate(10deg)` }}>
+                <svg width="40" height="30" viewBox="0 0 50 40" fill="currentColor">
                     <path d="M5 20 Q 20 5 35 20 Q 20 15 5 20" />
                     <path d="M35 20 Q 42 15 48 20 Q 42 22 35 20" />
                 </svg>
