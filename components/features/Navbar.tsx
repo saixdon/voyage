@@ -278,7 +278,7 @@ export function Navbar() {
                         {/* Search Button */}
                         <Link
                             href="/search"
-                            className="hidden md:flex h-10 px-6 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-full transition-all duration-300 items-center justify-center gap-2 border border-white/10"
+                            className="hidden md:flex h-10 px-6 bg-foreground/10 hover:bg-foreground/20 text-foreground text-sm font-medium rounded-full transition-all duration-300 items-center justify-center gap-2 border border-foreground/10"
                         >
                             <span className="material-symbols-outlined text-lg">search</span>
                             {t('explore')}
