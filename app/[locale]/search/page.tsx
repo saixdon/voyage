@@ -30,7 +30,9 @@ const CATEGORY_FILTERS = [
 function SearchResults() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const query = searchParams.get("q") || "";
+    const rawQuery = searchParams.get("q") || "";
+    // Default to "activities" if no query provided to ensure we show something (like "All Activities")
+    const query = rawQuery || "activities";
     const dateFromParam = searchParams.get("from") || "";
     const dateToParam = searchParams.get("to") || "";
     const categoryParam = searchParams.get("category") || "all";
@@ -43,14 +45,10 @@ function SearchResults() {
 
     useEffect(() => {
         async function fetchResults() {
-            if (!query && !dateFromParam) {
-                setResults([]);
-                setTotal(0);
-                return;
-            }
-
             setLoading(true);
             try {
+                // If query is the default "activities", we might want to pass it or use a specific API param for "top rated"
+                // For now, passing "activities" as q to the API is a reasonable fallback
                 let url = `/api/search?q=${encodeURIComponent(query)}`;
                 if (dateFromParam) {
                     url += `&from=${encodeURIComponent(dateFromParam)}`;
@@ -116,7 +114,7 @@ function SearchResults() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12 pb-8 border-b border-theme">
                 <div>
                     <h1 className="text-5xl font-bold text-foreground mb-4">
-                        {query ? `Results for "${query}"` : dateFromParam ? `Experiences matching your dates` : "Discover Experiences"}
+                        {rawQuery ? `Results for "${rawQuery}"` : dateFromParam ? `Experiences matching your dates` : "Discover Experiences"}
                     </h1>
                     <p className="text-muted-foreground text-lg">
                         {loading ? "Searching..." : `${filteredResults.length} experiences found`}

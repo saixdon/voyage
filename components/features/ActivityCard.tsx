@@ -102,7 +102,7 @@ export function ActivityCard({
 
     return (
         <Link href={`/activities/${id}`} className="block h-full group">
-            <div className="h-full bg-[#1a1a24] border border-white/15 rounded-2xl overflow-hidden shadow-lg transition-all duration-500 hover:shadow-[0_20px_40px_rgba(43,140,238,0.2)] hover:border-primary/50 hover:-translate-y-2">
+            <div className="h-full bg-surface border border-theme rounded-2xl overflow-hidden shadow-lg transition-all duration-500 hover:shadow-[0_20px_40px_rgba(43,140,238,0.2)] hover:border-primary/50 hover:-translate-y-2">
                 <div className="relative aspect-[4/5] overflow-hidden">
                     {badge && (
                         <div

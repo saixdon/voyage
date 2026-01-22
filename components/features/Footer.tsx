@@ -28,7 +28,7 @@ export function Footer() {
                         <h3 className="text-foreground font-semibold mb-4">Explore</h3>
                         <ul className="space-y-2">
                             <li>
-                                <Link href="/search" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                                <Link href="/search?q=popular" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                                     All Activities
                                 </Link>
                             </li>

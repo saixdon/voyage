@@ -32,11 +32,11 @@ export default function ContactPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background-dark pt-32 pb-20 px-6">
+        <div className="min-h-screen bg-background pt-32 pb-20 px-6">
             <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold text-white mb-4">Contact</h1>
-                    <p className="text-gray-400 text-lg">
+                    <h1 className="text-4xl font-bold text-foreground mb-4">Contact</h1>
+                    <p className="text-muted-foreground text-lg">
                         Do you have any questions or suggestions? We look forward to hearing from you!
                     </p>
                 </div>
@@ -44,40 +44,40 @@ export default function ContactPage() {
                 <div className="grid md:grid-cols-2 gap-12">
                     {/* Contact Info */}
                     <div className="space-y-8">
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                        <div className="bg-surface border border-theme rounded-2xl p-6 shadow-sm">
                             <div className="flex items-start gap-4">
                                 <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
                                     <span className="material-symbols-outlined text-primary">mail</span>
                                 </div>
                                 <div>
-                                    <h3 className="text-white font-semibold mb-1">E-Mail</h3>
-                                    <p className="text-gray-400">contact@tripvega.com</p>
-                                    <p className="text-gray-400">support@tripvega.com</p>
+                                    <h3 className="text-foreground font-semibold mb-1">E-Mail</h3>
+                                    <p className="text-muted-foreground">contact@tripvega.com</p>
+                                    <p className="text-muted-foreground">support@tripvega.com</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                        <div className="bg-surface border border-theme rounded-2xl p-6 shadow-sm">
                             <div className="flex items-start gap-4">
                                 <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
                                     <span className="material-symbols-outlined text-primary">schedule</span>
                                 </div>
                                 <div>
-                                    <h3 className="text-white font-semibold mb-1">Availability</h3>
-                                    <p className="text-gray-400">Mon - Fri: 9:00 AM - 6:00 PM</p>
-                                    <p className="text-gray-400">Sat - Sun: Closed</p>
+                                    <h3 className="text-foreground font-semibold mb-1">Availability</h3>
+                                    <p className="text-muted-foreground">Mon - Fri: 9:00 AM - 6:00 PM</p>
+                                    <p className="text-muted-foreground">Sat - Sun: Closed</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                        <div className="bg-surface border border-theme rounded-2xl p-6 shadow-sm">
                             <div className="flex items-start gap-4">
                                 <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
                                     <span className="material-symbols-outlined text-primary">help</span>
                                 </div>
                                 <div>
-                                    <h3 className="text-white font-semibold mb-1">FAQ</h3>
-                                    <p className="text-gray-400">
+                                    <h3 className="text-foreground font-semibold mb-1">FAQ</h3>
+                                    <p className="text-muted-foreground">
                                         Many questions are already answered in our{" "}
                                         <Link href="/faq" className="text-primary hover:underline">
                                             frequently asked questions
@@ -90,14 +90,14 @@ export default function ContactPage() {
                     </div>
 
                     {/* Contact Form */}
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
+                    <div className="bg-surface border border-theme rounded-2xl p-8 shadow-sm">
                         {status === "success" ? (
                             <div className="text-center py-12">
                                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <span className="material-symbols-outlined text-green-500 text-3xl">check_circle</span>
                                 </div>
-                                <h3 className="text-xl font-semibold text-white mb-2">Message sent!</h3>
-                                <p className="text-gray-400 mb-6">
+                                <h3 className="text-xl font-semibold text-foreground mb-2">Message sent!</h3>
+                                <p className="text-muted-foreground mb-6">
                                     Thank you for your message. We will get back to you as soon as possible.
                                 </p>
                                 <button
@@ -110,7 +110,7 @@ export default function ContactPage() {
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div>
-                                    <label htmlFor="name" className="block text-white font-medium mb-2">
+                                    <label htmlFor="name" className="block text-foreground font-medium mb-2">
                                         Name *
                                     </label>
                                     <input
@@ -120,13 +120,13 @@ export default function ContactPage() {
                                         value={formData.name}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"
+                                        className="w-full px-4 py-3 bg-background border border-theme rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors"
                                         placeholder="Your Name"
                                     />
                                 </div>
 
                                 <div>
-                                    <label htmlFor="email" className="block text-white font-medium mb-2">
+                                    <label htmlFor="email" className="block text-foreground font-medium mb-2">
                                         E-Mail *
                                     </label>
                                     <input
@@ -136,13 +136,13 @@ export default function ContactPage() {
                                         value={formData.email}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"
+                                        className="w-full px-4 py-3 bg-background border border-theme rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors"
                                         placeholder="your@email.com"
                                     />
                                 </div>
 
                                 <div>
-                                    <label htmlFor="subject" className="block text-white font-medium mb-2">
+                                    <label htmlFor="subject" className="block text-foreground font-medium mb-2">
                                         Subject *
                                     </label>
                                     <select
@@ -151,20 +151,20 @@ export default function ContactPage() {
                                         value={formData.subject}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-colors"
+                                        className="w-full px-4 py-3 bg-background border border-theme rounded-xl text-foreground focus:outline-none focus:border-primary transition-colors appearance-none"
                                     >
-                                        <option value="" className="bg-gray-900">Please select...</option>
-                                        <option value="general" className="bg-gray-900">General Inquiry</option>
-                                        <option value="booking" className="bg-gray-900">Question about Booking</option>
-                                        <option value="partnership" className="bg-gray-900">Partnership / Cooperation</option>
-                                        <option value="technical" className="bg-gray-900">Technical Problem</option>
-                                        <option value="feedback" className="bg-gray-900">Feedback / Suggestions</option>
-                                        <option value="other" className="bg-gray-900">Other</option>
+                                        <option value="">Please select...</option>
+                                        <option value="general">General Inquiry</option>
+                                        <option value="booking">Question about Booking</option>
+                                        <option value="partnership">Partnership / Cooperation</option>
+                                        <option value="technical">Technical Problem</option>
+                                        <option value="feedback">Feedback / Suggestions</option>
+                                        <option value="other">Other</option>
                                     </select>
                                 </div>
 
                                 <div>
-                                    <label htmlFor="message" className="block text-white font-medium mb-2">
+                                    <label htmlFor="message" className="block text-foreground font-medium mb-2">
                                         Message *
                                     </label>
                                     <textarea
@@ -174,7 +174,7 @@ export default function ContactPage() {
                                         onChange={handleChange}
                                         required
                                         rows={5}
-                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors resize-none"
+                                        className="w-full px-4 py-3 bg-background border border-theme rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors resize-none"
                                         placeholder="Your message..."
                                     />
                                 </div>
@@ -201,7 +201,7 @@ export default function ContactPage() {
                     </div>
                 </div>
 
-                <div className="mt-12 pt-8 border-t border-white/10">
+                <div className="mt-12 pt-8 border-t border-theme">
                     <Link href="/" className="text-primary hover:underline">
                         ← Back to Home
                     </Link>
