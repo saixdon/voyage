@@ -395,12 +395,39 @@ async function fetchAllDestinations(locale = "en"): Promise<{ destinationId: num
     }
 }
 
+// Hardcoded mappings for continents and major countries to ensure they work
+// even if not in the cached top destinations list
+const HARDCODED_DESTINATION_IDS: Record<string, number> = {
+    "europe": 8,
+    "asia": 4,
+    "africa": 2,
+    "germany": 59,
+    "france": 49,
+    "italy": 37,
+    "spain": 53,
+    "usa": 684,
+    "united states": 684,
+    "uk": 46,
+    "united kingdom": 46,
+    "london": 737,
+    "paris": 479,
+    "rome": 711,
+    "dubai": 828,
+    "tokyo": 334,
+    "new york": 687
+};
+
 // Helper to find destination ID for a city name by searching cached destinations
 async function resolveDestinationId(query: string, locale = "en"): Promise<string | null> {
-    const destinations = await fetchAllDestinations(locale);
-    if (destinations.length === 0) return null;
-
     const queryLower = query.toLowerCase().trim();
+
+    // 0. Check hardcoded map first
+    if (HARDCODED_DESTINATION_IDS[queryLower]) {
+        console.log(`Resolved "${query}" via hardcoded map to ID: ${HARDCODED_DESTINATION_IDS[queryLower]}`);
+        return HARDCODED_DESTINATION_IDS[queryLower].toString();
+    }
+
+    const destinations = await fetchAllDestinations(locale);
 
     // 1. Try exact match first (case-insensitive)
     let match = destinations.find(d => d.name.toLowerCase() === queryLower);
