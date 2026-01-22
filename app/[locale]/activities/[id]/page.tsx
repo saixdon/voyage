@@ -273,16 +273,16 @@ export default function ActivityDetailPage({
                     {/* Left Column: Details */}
                     <div className="lg:col-span-2 space-y-8 pt-8 lg:pt-0">
                         {/* Highlights Section (Example) */}
-                        <div className="bg-card/50 border border-white/5 backdrop-blur-xl rounded-3xl p-6 md:p-8">
-                            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                        <div className="bg-surface border border-theme backdrop-blur-xl rounded-3xl p-6 md:p-8">
+                            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-foreground">
                                 <Star className="w-6 h-6 text-primary" />
                                 Experience Highlights
                             </h3>
                             <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {["Skip the long lines", "Local expert guide", "Hidden gems tour", "Small group size"].map((item, i) => (
-                                    <li key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5">
+                                    <li key={i} className="flex items-start gap-3 p-3 rounded-xl bg-surface-elevated hover:bg-surface-elevated/80 transition-colors border border-theme">
                                         <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                                        <span className="text-gray-200">{item}</span>
+                                        <span className="text-foreground">{item}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -290,54 +290,54 @@ export default function ActivityDetailPage({
 
                         {/* Features Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-card/30 rounded-2xl p-5 border border-white/5 flex items-start gap-4">
-                                <div className="p-3 bg-blue-500/20 rounded-xl text-blue-400">
+                            <div className="bg-surface rounded-2xl p-5 border border-theme flex items-start gap-4">
+                                <div className="p-3 bg-blue-500/10 dark:bg-blue-500/20 rounded-xl text-blue-600 dark:text-blue-400">
                                     <ShieldCheck className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold mb-1">Free Cancellation</h4>
+                                    <h4 className="font-bold mb-1 text-foreground">Free Cancellation</h4>
                                     <p className="text-sm text-muted-foreground">Up to 24 hours in advance.</p>
                                 </div>
                             </div>
-                            <div className="bg-card/30 rounded-2xl p-5 border border-white/5 flex items-start gap-4">
-                                <div className="p-3 bg-purple-500/20 rounded-xl text-purple-400">
+                            <div className="bg-surface rounded-2xl p-5 border border-theme flex items-start gap-4">
+                                <div className="p-3 bg-purple-500/10 dark:bg-purple-500/20 rounded-xl text-purple-600 dark:text-purple-400">
                                     <Smartphone className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold mb-1">Mobile Ticketing</h4>
+                                    <h4 className="font-bold mb-1 text-foreground">Mobile Ticketing</h4>
                                     <p className="text-sm text-muted-foreground">Use your phone to enter.</p>
                                 </div>
                             </div>
-                            <div className="bg-card/30 rounded-2xl p-5 border border-white/5 flex items-start gap-4">
-                                <div className="p-3 bg-orange-500/20 rounded-xl text-orange-400">
+                            <div className="bg-surface rounded-2xl p-5 border border-theme flex items-start gap-4">
+                                <div className="p-3 bg-orange-500/10 dark:bg-orange-500/20 rounded-xl text-orange-600 dark:text-orange-400">
                                     <Globe className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold mb-1">Multilingual Guide</h4>
+                                    <h4 className="font-bold mb-1 text-foreground">Multilingual Guide</h4>
                                     <p className="text-sm text-muted-foreground">English, German, French...</p>
                                 </div>
                             </div>
-                            <div className="bg-card/30 rounded-2xl p-5 border border-white/5 flex items-start gap-4">
-                                <div className="p-3 bg-green-500/20 rounded-xl text-green-400">
+                            <div className="bg-surface rounded-2xl p-5 border border-theme flex items-start gap-4">
+                                <div className="p-3 bg-green-500/10 dark:bg-green-500/20 rounded-xl text-green-600 dark:text-green-400">
                                     <Ticket className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold mb-1">Instant Confirmation</h4>
+                                    <h4 className="font-bold mb-1 text-foreground">Instant Confirmation</h4>
                                     <p className="text-sm text-muted-foreground">Tickets sent to email.</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="h-px bg-white/10 my-8" />
+                        <div className="h-px bg-theme my-8" />
 
-                        <div className="prose prose-invert max-w-none">
-                            <h3 className="text-2xl font-bold mb-4">Full Description</h3>
-                            <p className="text-gray-300 leading-relaxed">
+                        <div className="prose dark:prose-invert max-w-none text-foreground">
+                            <h3 className="text-2xl font-bold mb-4 text-foreground">Full Description</h3>
+                            <p className="text-muted-foreground leading-relaxed">
                                 {activity.title} offers an unforgettable journey through the heart of {activity.location}.
                                 Immerse yourself in the local culture, history, and vibrant atmosphere.
                                 Whether you're a history buff, a foodie, or an adventure seeker, this experience has something for everyone.
                             </p>
-                            <p className="text-gray-300 leading-relaxed mt-4">
+                            <p className="text-muted-foreground leading-relaxed mt-4">
                                 Our expert guides will take you off the beaten path to discover hidden gems that most tourists miss.
                                 Enjoy personalized attention in generic terms for this placeholder description, ensuring a memorable and intimate experience.
                             </p>
@@ -346,7 +346,7 @@ export default function ActivityDetailPage({
 
                     {/* Right Column: Booking Card */}
                     <div className="lg:col-span-1 relative">
-                        <div className="sticky top-28 bg-surface border border-white/10 rounded-3xl p-6 lg:p-8 shadow-2xl overflow-hidden ring-1 ring-white/5">
+                        <div className="sticky top-28 bg-surface border border-theme rounded-3xl p-6 lg:p-8 shadow-2xl overflow-hidden ring-1 ring-black/5 dark:ring-white/5">
                             {/* Decorative gradient blob */}
                             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] -z-10 rounded-full pointer-events-none" />
 
@@ -356,13 +356,13 @@ export default function ActivityDetailPage({
                                 <div className="flex items-baseline gap-2">
                                     {currentPrice > 0 ? (
                                         <>
-                                            <span className="text-3xl lg:text-4xl font-bold text-white">
+                                            <span className="text-3xl lg:text-4xl font-bold text-foreground">
                                                 {currentCurrency} {currentPrice}
                                             </span>
                                             <span className="text-muted-foreground text-sm">/ person</span>
                                         </>
                                     ) : (
-                                        <span className="text-2xl font-bold text-white">Check Availability</span>
+                                        <span className="text-2xl font-bold text-foreground">Check Availability</span>
                                     )}
                                 </div>
                             </div>
@@ -371,12 +371,13 @@ export default function ActivityDetailPage({
                             <div className="space-y-4">
                                 {/* Date Picker - Popover */}
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Date</label>
+                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Date</label>
                                     <RadixPopover>
                                         <RadixPopoverTrigger asChild>
                                             <button className={cn(
-                                                "w-full flex items-center justify-between px-4 py-3.5 bg-black/20 hover:bg-black/40 border border-white/10 hover:border-primary/50 rounded-xl transition-all text-left",
-                                                !selectedDate && "text-muted-foreground"
+                                                "w-full flex items-center justify-between px-4 py-3.5 bg-surface-elevated hover:bg-surface-elevated/80 border border-theme hover:border-primary/50 rounded-xl transition-all text-left",
+                                                !selectedDate && "text-muted-foreground",
+                                                selectedDate && "text-foreground"
                                             )}>
                                                 <div className="flex items-center gap-3">
                                                     <CalendarIcon className="w-5 h-5 text-primary" />
@@ -386,11 +387,11 @@ export default function ActivityDetailPage({
                                                             : "Select a date"}
                                                     </span>
                                                 </div>
-                                                <ChevronDown className="w-4 h-4 opacity-50" />
+                                                <ChevronDown className="w-4 h-4 opacity-50 text-foreground" />
                                             </button>
                                         </RadixPopoverTrigger>
                                         <RadixPopoverPortal>
-                                            <RadixPopoverContent className="w-auto p-0 bg-surface border border-white/10 rounded-2xl shadow-2xl z-[50]" align="start" sideOffset={8}>
+                                            <RadixPopoverContent className="w-auto p-0 bg-surface border border-theme rounded-2xl shadow-2xl z-[50]" align="start" sideOffset={8}>
                                                 <div className="p-3">
                                                     <DayPicker
                                                         mode="single"
@@ -404,6 +405,7 @@ export default function ActivityDetailPage({
                                                             selected: "bg-primary text-white hover:bg-primary/90",
                                                             today: "text-primary font-bold"
                                                         }}
+                                                        className="react-day-picker-theme-wrapper"
                                                     />
                                                 </div>
                                             </RadixPopoverContent>
@@ -413,35 +415,35 @@ export default function ActivityDetailPage({
 
                                 {/* Guest Selector - Popover */}
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Guests</label>
+                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Guests</label>
                                     <RadixPopover>
                                         <RadixPopoverTrigger asChild>
-                                            <button className="w-full flex items-center justify-between px-4 py-3.5 bg-black/20 hover:bg-black/40 border border-white/10 hover:border-primary/50 rounded-xl transition-all text-left">
+                                            <button className="w-full flex items-center justify-between px-4 py-3.5 bg-surface-elevated hover:bg-surface-elevated/80 border border-theme hover:border-primary/50 rounded-xl transition-all text-left">
                                                 <div className="flex items-center gap-3">
                                                     <Users className="w-5 h-5 text-primary" />
-                                                    <span className="font-medium">
+                                                    <span className="font-medium text-foreground">
                                                         {guestCount} {guestCount === 1 ? 'Adult' : 'Adults'}
                                                     </span>
                                                 </div>
-                                                <ChevronDown className="w-4 h-4 opacity-50" />
+                                                <ChevronDown className="w-4 h-4 opacity-50 text-foreground" />
                                             </button>
                                         </RadixPopoverTrigger>
                                         <RadixPopoverPortal>
-                                            <RadixPopoverContent className="w-64 p-4 bg-surface border border-white/10 rounded-2xl shadow-2xl z-[50]" align="start" sideOffset={8}>
+                                            <RadixPopoverContent className="w-64 p-4 bg-surface border border-theme rounded-2xl shadow-2xl z-[50]" align="start" sideOffset={8}>
                                                 <div className="flex items-center justify-between">
-                                                    <span className="font-medium">Adults</span>
-                                                    <div className="flex items-center gap-3 bg-black/20 rounded-lg p-1">
+                                                    <span className="font-medium text-foreground">Adults</span>
+                                                    <div className="flex items-center gap-3 bg-surface-elevated rounded-lg p-1">
                                                         <button
                                                             onClick={() => setGuestCount(Math.max(1, guestCount - 1))}
-                                                            className="p-1.5 hover:bg-white/10 rounded-md transition-colors"
+                                                            className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors text-foreground"
                                                             disabled={guestCount <= 1}
                                                         >
                                                             <Minus className="w-4 h-4" />
                                                         </button>
-                                                        <span className="w-4 text-center font-bold text-sm">{guestCount}</span>
+                                                        <span className="w-4 text-center font-bold text-sm text-foreground">{guestCount}</span>
                                                         <button
                                                             onClick={() => setGuestCount(Math.min(20, guestCount + 1))}
-                                                            className="p-1.5 hover:bg-white/10 rounded-md transition-colors"
+                                                            className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors text-foreground"
                                                         >
                                                             <Plus className="w-4 h-4" />
                                                         </button>
@@ -483,16 +485,16 @@ export default function ActivityDetailPage({
                             {/* RESULTS: Options List */}
                             {availability?.bookableItems && availability.bookableItems.length > 0 && (
                                 <div className="mt-6 space-y-3 animate-fade-in">
-                                    <div className="text-xs font-bold text-green-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                    <div className="text-xs font-bold text-green-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                                         <CheckCircle className="w-3.5 h-3.5" />
                                         Available Options
                                     </div>
                                     <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
                                         {availability.bookableItems.map((item: any, idx) => (
-                                            <div key={idx} className="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary/30 rounded-xl p-3 transition-all">
+                                            <div key={idx} className="group bg-surface-elevated hover:bg-surface-elevated/80 border border-theme hover:border-primary/30 rounded-xl p-3 transition-all">
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div>
-                                                        <div className="font-bold text-sm text-white mb-0.5">
+                                                        <div className="font-bold text-sm text-foreground mb-0.5">
                                                             {item.productOptionCode === 'DEFAULT' ? 'Standard Ticket' : item.productOptionCode}
                                                         </div>
                                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -519,12 +521,12 @@ export default function ActivityDetailPage({
                             )}
 
                             {/* Footer Trust */}
-                            <div className="mt-6 pt-6 border-t border-white/10 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                            <div className="mt-6 pt-6 border-t border-theme flex items-center justify-center gap-4 text-xs text-muted-foreground">
                                 <span className="flex items-center gap-1.5">
                                     <ShieldCheck className="w-3.5 h-3.5" />
                                     Secure Booking
                                 </span>
-                                <span className="w-1 h-1 rounded-full bg-white/10" />
+                                <span className="w-1 h-1 rounded-full bg-foreground/10" />
                                 <span className="flex items-center gap-1.5">
                                     <Globe className="w-3.5 h-3.5" />
                                     Viator Partner
