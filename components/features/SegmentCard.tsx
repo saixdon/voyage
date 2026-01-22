@@ -72,7 +72,7 @@ export function SegmentCard({
         // Suggest a pause based on transport mode
         const recommendedPause: Record<TransportMode, PauseDuration> = {
             walking: 30, // Walking take longer, need more rest
-            public: 45,  // Waiting for bus/train
+            public: 30,  // Waiting for bus/train
             taxi: 15,    // Fast
             car: 15      // Fast
         };
