@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { destination, summary, query, items } = body;
+        const { destination, summary, query, items, segments } = body;
 
         const supabase = getSupabaseAdmin();
 
@@ -75,7 +75,8 @@ export async function POST(request: NextRequest) {
                 user_id: user.id,
                 destination,
                 summary,
-                query
+                query,
+                segments: segments || {}
             })
             .select()
             .single();

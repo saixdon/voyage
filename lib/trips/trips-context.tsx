@@ -12,6 +12,7 @@ export interface SavedTrip {
     summary: string;
     query: string;
     created_at: string;
+    segments?: Record<string, any>;
 }
 
 export interface TripItem {
@@ -38,7 +39,7 @@ interface TripsContextType {
     trips: SavedTripWithItems[];
     currentTrip: SavedTripWithItems | null;
     isLoading: boolean;
-    saveTrip: (plan: TripPlanResponse, query: string) => Promise<SavedTripWithItems | null>;
+    saveTrip: (plan: TripPlanResponse, query: string, segments?: Record<string, any>) => Promise<SavedTripWithItems | null>;
     loadTrips: () => Promise<void>;
     loadTrip: (tripId: string) => Promise<void>;
     updateItemStatus: (tripId: string, itemId: string, status: 'proposed' | 'pending' | 'booked') => Promise<void>;
@@ -105,7 +106,7 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const saveTrip = async (plan: TripPlanResponse, query: string): Promise<SavedTripWithItems | null> => {
+    const saveTrip = async (plan: TripPlanResponse, query: string, segments: Record<string, any> = {}): Promise<SavedTripWithItems | null> => {
         if (!user) return null;
 
         try {
@@ -116,6 +117,7 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
                     destination: plan.destination,
                     summary: plan.summary,
                     query: query,
+                    segments: segments,
                     items: plan.itinerary.map(item => ({
                         activity_id: item.activityId,
                         day: item.day,

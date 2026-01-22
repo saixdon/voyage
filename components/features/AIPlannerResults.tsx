@@ -5,7 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { TripBookingModal } from "./TripBookingModal";
-import { type TripPlanResponse, type TripActivity, replaceActivityAction } from "@/app/actions/ai-planner";
+import { type TripPlanResponse, type TripActivity, replaceActivityAction, searchRestaurantsAction } from "@/app/actions/ai-planner";
+import { SegmentCard, type SegmentData, type FoodOption } from "./SegmentCard";
 import { useTrips, type TripItem } from "@/lib/trips/trips-context";
 import { useAuth } from "@/lib/auth/auth-context";
 import { generateAffiliateLink } from "@/lib/api/viator-affiliate";
@@ -34,6 +35,7 @@ export function AIPlannerResults({ plan, tripId, savedItems, onSaveTrip, query, 
     const [isSaved, setIsSaved] = useState(!!tripId);
     const [currentPlan, setCurrentPlan] = useState(plan);
     const [replacingActivityId, setReplacingActivityId] = useState<string | null>(null);
+    const [segments, setSegments] = useState<Record<string, SegmentData>>(plan.segments || {});
 
     if (!currentPlan || !currentPlan.itinerary || currentPlan.itinerary.length === 0) return null;
 
@@ -45,7 +47,7 @@ export function AIPlannerResults({ plan, tripId, savedItems, onSaveTrip, query, 
         }
         setIsSaving(true);
         try {
-            const saved = await saveTrip(currentPlan, query || "");
+            const saved = await saveTrip(currentPlan, query || "", segments);
             if (saved) {
                 setIsSaved(true);
                 onSaveTrip?.();
@@ -114,6 +116,22 @@ export function AIPlannerResults({ plan, tripId, savedItems, onSaveTrip, query, 
     const getItemDbId = (activityId: string): string | undefined => {
         if (!savedItems) return undefined;
         return savedItems.find(i => i.activity_id === activityId)?.id;
+    };
+
+    const handleSearchRestaurants = async () => {
+        try {
+            return await searchRestaurantsAction(currentPlan.destination, 5, currentPlan.destinationId);
+        } catch (error) {
+            console.error("Error searching restaurants:", error);
+            return [];
+        }
+    };
+
+    const handleSegmentChange = (segmentId: string, data: SegmentData) => {
+        setSegments(prev => ({
+            ...prev,
+            [segmentId]: data
+        }));
     };
 
     return (
@@ -189,23 +207,48 @@ export function AIPlannerResults({ plan, tripId, savedItems, onSaveTrip, query, 
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 gap-6">
-                                {dayActivities.map((activity, idx) => (
-                                    <TripActivityCard
-                                        key={activity.activityId}
-                                        activity={activity}
-                                        index={idx}
-                                        tripId={tripId}
-                                        itemDbId={getItemDbId(activity.activityId)}
-                                        status={getItemStatus(activity.activityId)}
-                                        onStatusChange={updateItemStatus}
-                                        isSaved={isSaved}
-                                        t={t}
-                                        onReplace={() => handleReplaceActivity(activity)}
-                                        isReplacing={replacingActivityId === activity.activityId}
-                                        startDate={currentPlan.startDate}
-                                        travelerCount={currentPlan.travelerCount}
-                                    />
-                                ))}
+                                {dayActivities.map((activity, idx) => {
+                                    const nextActivity = dayActivities[idx + 1];
+                                    const segmentId = nextActivity ? `${activity.activityId}-${nextActivity.activityId}` : null;
+
+                                    // Use state or default
+                                    const segmentData = segmentId ? (segments[segmentId] || {
+                                        fromActivityId: activity.activityId,
+                                        toActivityId: nextActivity.activityId,
+                                        transport: "walking",
+                                        pauseMinutes: 30,
+                                        includeFood: false
+                                    }) : null;
+
+                                    return (
+                                        <React.Fragment key={activity.activityId}>
+                                            <TripActivityCard
+                                                activity={activity}
+                                                index={idx}
+                                                tripId={tripId}
+                                                itemDbId={getItemDbId(activity.activityId)}
+                                                status={getItemStatus(activity.activityId)}
+                                                onStatusChange={updateItemStatus}
+                                                isSaved={isSaved}
+                                                t={t}
+                                                onReplace={() => handleReplaceActivity(activity)}
+                                                isReplacing={replacingActivityId === activity.activityId}
+                                                startDate={currentPlan.startDate}
+                                                travelerCount={currentPlan.travelerCount}
+                                            />
+
+                                            {segmentId && segmentData && (
+                                                <SegmentCard
+                                                    fromActivity={`${activity.title}, ${activity.location || ""}`}
+                                                    toActivity={`${nextActivity.title}, ${nextActivity.location || ""}`}
+                                                    segment={segmentData}
+                                                    onSegmentChange={(data) => handleSegmentChange(segmentId, data)}
+                                                    onSearchRestaurants={handleSearchRestaurants}
+                                                />
+                                            )}
+                                        </React.Fragment>
+                                    );
+                                })}
                             </div>
                         </div>
                     );

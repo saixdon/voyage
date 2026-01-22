@@ -33,12 +33,15 @@ export interface TripActivity {
     image: string;
     productUrl: string;
     productCode: string; // For regeneration and tracking
+    location?: string;
 }
 
 export interface TripPlanResponse {
     destination: string;
+    destinationId?: string;
     summary: string;
     itinerary: TripActivity[];
+    segments?: Record<string, any>;
     startDate?: string | null;
     travelerCount?: number | null;
     error?: string;
@@ -138,6 +141,7 @@ export async function generateTripPlanAction(query: string, preferences?: TripPl
         });
 
         const searchResults = await Promise.all(searchPromises);
+        const resolvedDestId = searchResults.find(r => r.resolvedDestinationId)?.resolvedDestinationId;
 
         // Flatten and deduplicate results
         const allActivities = new Map();
@@ -240,12 +244,14 @@ export async function generateTripPlanAction(query: string, preferences?: TripPl
                 currency: originalAct.currency,
                 image: originalAct.image,
                 productUrl: originalAct.productUrl || `/activities/${productCode}`, // Use API URL or fallback
-                productCode: productCode // Keep for internal reference
+                productCode: productCode, // Keep for internal reference
+                location: originalAct.location
             };
         }).filter(Boolean);
 
         return {
             destination: destination,
+            destinationId: resolvedDestId,
             summary: itineraryPlan.summary,
             itinerary: fullItinerary,
             startDate: preferences?.startDate || analysis.startDate || null,
@@ -303,7 +309,8 @@ export async function replaceActivityAction(
             currency: chosen.currency,
             image: chosen.image,
             productUrl: chosen.productUrl || `/activities/${chosen.id}`, // Use API URL or fallback
-            productCode: chosen.id
+            productCode: chosen.id,
+            location: chosen.location
         };
     } catch (error) {
         console.error("Replace activity error:", error);
@@ -312,4 +319,70 @@ export async function replaceActivityAction(
 }
 
 
+/**
+ * Searches for restaurant/food experiences in a destination.
+ * Used by SegmentCard to show food options between activities.
+ */
+export interface RestaurantResult {
+    id: string;
+    title: string;
+    image: string;
+    price: number;
+    currency: string;
+    productUrl: string;
+    rating?: number;
+}
 
+export async function searchRestaurantsAction(
+    destination: string,
+    limit: number = 5,
+    destinationId?: string
+): Promise<RestaurantResult[]> {
+    try {
+        // Search specifically for lunch and dinner experiences to get closer to "restaurants"
+        const searchResult = await searchViatorProducts(
+            `${destination} lunch dinner restaurant gourmet tasting`,
+            limit,
+            undefined,
+            undefined,
+            'de',
+            { destinationId } // Pass the exact ID to avoid location mismatches
+        );
+
+        if (!searchResult.activities || searchResult.activities.length === 0) {
+            // Fallback to more general food terms
+            const fallbackResult = await searchViatorProducts(
+                `${destination} culinary food experience`,
+                limit,
+                undefined,
+                undefined,
+                'de'
+            );
+
+            if (!fallbackResult.activities) return [];
+
+            return fallbackResult.activities.map(act => ({
+                id: act.id,
+                title: act.title,
+                image: act.image,
+                price: act.price,
+                currency: act.currency,
+                productUrl: act.productUrl || `/activities/${act.id}`,
+                rating: act.rating
+            }));
+        }
+
+        return searchResult.activities.map(act => ({
+            id: act.id,
+            title: act.title,
+            image: act.image,
+            price: act.price,
+            currency: act.currency,
+            productUrl: act.productUrl || `/activities/${act.id}`,
+            rating: act.rating
+        }));
+    } catch (error) {
+        console.error("Search restaurants error:", error);
+        return [];
+    }
+}

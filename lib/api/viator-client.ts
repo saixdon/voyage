@@ -466,8 +466,9 @@ export async function searchViatorProducts(
         priceMin?: number;
         priceMax?: number;
         tags?: number[];
+        destinationId?: string;
     }
-): Promise<{ activities: TransformedActivity[]; totalCount?: number; error?: string }> {
+): Promise<{ activities: TransformedActivity[]; totalCount?: number; error?: string; resolvedDestinationId?: string }> {
     if (!USE_MOCK && !VIATOR_API_KEY) {
         return { activities: [], error: "Viator API key not configured" };
     }
@@ -501,7 +502,7 @@ export async function searchViatorProducts(
     try {
         // 1. Resolve Destination ID mainly because /products/search REQUIRES a destination filter
         // We try to find a destination matching the query string.
-        let destinationId = await resolveDestinationId(query, locale);
+        let destinationId = filters?.destinationId || await resolveDestinationId(query, locale);
 
         if (!destinationId) {
             // FALLBACK: If query is generic (like "activities", "culture"), use a showcase destination (e.g. Europe: 8 or London: 737)
@@ -587,7 +588,7 @@ export async function searchViatorProducts(
             return b.reviewCount - a.reviewCount;
         });
 
-        return { activities, totalCount: data.totalCount };
+        return { activities, totalCount: data.totalCount, resolvedDestinationId: destinationId };
     } catch (error) {
         console.error("Viator API fetch error:", error);
         return { activities: [], totalCount: 0, error: "Failed to fetch from Viator API" };
