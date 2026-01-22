@@ -36,7 +36,20 @@
         "followUs": "Follow Us",
         "newsletter": "Newsletter",
         "subscribe": "Subscribe",
-        "desc": "Discover the world's best experiences with TripVega."
+        "desc": "Discover the world's best experiences with TripVega.",
+        "explore": "Explore",
+        "allActivities": "All Activities",
+        "germany": "Germany",
+        "europe": "Europe",
+        "asia": "Asia",
+        "aboutUs": "About Us",
+        "contact": "Contact",
+        "partner": "Become a Partner",
+        "imprint": "Imprint",
+        "privacy": "Privacy Policy",
+        "terms": "Terms & Conditions",
+        "rightsReserved": "All rights reserved.",
+        "affiliateDisclaimer": "TripVega is an affiliate partner of Viator. By clicking \"Book\" you will be redirected to viator.com. We receive a commission for successful bookings."
     },
     "hero": {
         "title1": "DISCOVER THE",

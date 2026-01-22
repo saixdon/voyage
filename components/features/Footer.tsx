@@ -1,7 +1,11 @@
 import React from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export function Footer() {
+    const t = useTranslations('footer');
+    const navT = useTranslations('nav');
+
     return (
         <footer className="bg-background-dark border-t border-theme">
             <div className="max-w-7xl mx-auto px-6 py-16">
@@ -19,37 +23,37 @@ export function Footer() {
                             <h2 className="text-xl font-bold tracking-tight text-foreground">TRIPVEGA</h2>
                         </Link>
                         <p className="text-muted-foreground text-sm">
-                            Discover the best tours, activities, and experiences worldwide. Your partner for unforgettable travels.
+                            {t('desc')}
                         </p>
                     </div>
 
                     {/* Explore */}
                     <div>
-                        <h3 className="text-foreground font-semibold mb-4">Explore</h3>
+                        <h3 className="text-foreground font-semibold mb-4">{t('explore')}</h3>
                         <ul className="space-y-2">
                             <li>
                                 <Link href="/search?q=popular" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                                    All Activities
+                                    {t('allActivities')}
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/destinations" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
-                                    Interactive World Map
+                                    {navT('destinations')}
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/search?q=Germany" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                                    Germany
+                                    {t('germany')}
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/search?q=Europe" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                                    Europe
+                                    {t('europe')}
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/search?q=Asia" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                                    Asia
+                                    {t('asia')}
                                 </Link>
                             </li>
                         </ul>
@@ -57,21 +61,21 @@ export function Footer() {
 
                     {/* Company */}
                     <div>
-                        <h3 className="text-foreground font-semibold mb-4">Company</h3>
+                        <h3 className="text-foreground font-semibold mb-4">{t('company')}</h3>
                         <ul className="space-y-2">
                             <li>
                                 <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                                    About Us
+                                    {t('aboutUs')}
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/kontakt" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                                    Contact
+                                    {t('contact')}
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/partner" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                                    Become a Partner
+                                    {t('partner')}
                                 </Link>
                             </li>
                         </ul>
@@ -79,21 +83,21 @@ export function Footer() {
 
                     {/* Legal */}
                     <div>
-                        <h3 className="text-foreground font-semibold mb-4">Legal</h3>
+                        <h3 className="text-foreground font-semibold mb-4">{t('legal')}</h3>
                         <ul className="space-y-2">
                             <li>
                                 <Link href="/impressum" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                                    Imprint
+                                    {t('imprint')}
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                                    Privacy Policy
+                                    {t('privacy')}
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/agb" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                                    Terms & Conditions
+                                    {t('terms')}
                                 </Link>
                             </li>
                         </ul>
@@ -103,7 +107,7 @@ export function Footer() {
                 {/* Bottom bar */}
                 <div className="mt-12 pt-8 border-t border-theme flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-muted-foreground text-sm">
-                        © {new Date().getFullYear()} TripVega. All rights reserved.
+                        © {new Date().getFullYear()} TripVega. {t('rightsReserved')}
                     </p>
                     <div className="flex items-center gap-6">
                         <a
@@ -142,8 +146,7 @@ export function Footer() {
                 {/* Affiliate Notice */}
                 <div className="mt-8 text-center">
                     <p className="text-muted-foreground text-xs">
-                        TripVega is an affiliate partner of Viator. By clicking "Book" you will be redirected to viator.com.
-                        We receive a commission for successful bookings.
+                        {t('affiliateDisclaimer')}
                     </p>
                 </div>
             </div>
