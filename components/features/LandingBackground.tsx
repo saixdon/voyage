@@ -7,13 +7,13 @@ export function LandingBackground() {
     return (
         <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10 select-none">
             {/* Dark Mode: Brighter, Faster Stars */}
-            <div className="hidden dark:block absolute inset-0">
+            <div className="hidden dark:block absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-black">
                 <NightStars />
             </div>
 
-            {/* Light Mode: Visible Atmosphere with High Contrast Particles */}
-            <div className="block dark:hidden absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-50/50 via-white to-white">
-                <DayAtmosphere />
+            {/* Light Mode: Vibrant Travel Theme (Ferris Wheel, Balloons, Sun) */}
+            <div className="block dark:hidden absolute inset-0 bg-gradient-to-b from-sky-400/30 via-sky-200/30 to-amber-100/40">
+                <DayTravelScene />
             </div>
         </div>
     );
@@ -64,100 +64,158 @@ function NightStars() {
     );
 }
 
-function DayAtmosphere() {
-    const [particles, setParticles] = useState<{ x: number; y: number; size: number; duration: number; delay: number; color: string }[]>([]);
-    const [birds, setBirds] = useState<{ top: number; delay: number; duration: number; scale: number; startX: string }[]>([]);
+function DayTravelScene() {
+    // Generate random clouds
+    const [clouds, setClouds] = useState<{ x: number; y: number; scale: number; speed: number }[]>([]);
 
     useEffect(() => {
-        // 1. More Particles (150) & Colorful
-        const particleCount = 150;
-        const colors = [
-            "bg-amber-400/40",
-            "bg-sky-400/40",
-            "bg-rose-400/40",
-            "bg-emerald-400/40",
-            "bg-slate-500/30"
-        ];
-
-        const newParticles = Array.from({ length: particleCount }).map(() => ({
+        setClouds(Array.from({ length: 6 }).map(() => ({
             x: Math.random() * 100,
-            y: Math.random() * 100,
-            size: Math.random() * 6 + 2, // 2-8px
-            duration: 10 + Math.random() * 15,
-            delay: Math.random() * 5,
-            color: colors[Math.floor(Math.random() * colors.length)]
-        }));
-        setParticles(newParticles);
-
-        // 2. More Birds (25)
-        const birdCount = 25;
-        const newBirds = Array.from({ length: birdCount }).map(() => ({
-            top: Math.random() * 90 + 5, // Spread across 5%-95% height
-            delay: Math.random() * 40,   // Staggered starts up to 40s
-            duration: 25 + Math.random() * 20, // Slow gliding
-            scale: Math.random() * 0.4 + 0.3, // Varied sizes
-            startX: Math.random() > 0.5 ? '-10vw' : '110vw' // Some fly left-to-right, some right-to-left?? actually let's keep consistent direction for now or handle logic below
-        }));
-        setBirds(newBirds);
-
+            y: Math.random() * 60,
+            scale: Math.random() * 0.8 + 1.2,
+            speed: Math.random() * 20 + 40
+        })));
     }, []);
 
     return (
-        <>
-            {/* Vibrant Background Blobs */}
-            <div className="absolute top-[5%] left-[10%] w-[600px] h-[600px] bg-blue-200/40 rounded-full blur-[120px] mix-blend-multiply" />
-            <div className="absolute top-[40%] right-[5%] w-[700px] h-[700px] bg-indigo-200/30 rounded-full blur-[150px] mix-blend-multiply" />
-            <div className="absolute bottom-[20%] left-[20%] w-[500px] h-[500px] bg-sky-200/40 rounded-full blur-[130px] mix-blend-multiply" />
-            <div className="absolute top-[20%] right-[30%] w-[400px] h-[400px] bg-rose-100/40 rounded-full blur-[100px] mix-blend-multiply" />
+        <div className="relative w-full h-full overflow-hidden">
+            {/* Sun Rays - Rotating */}
+            <SunRays />
 
-            {/* Colorful Floating Particles */}
-            {particles.map((p, i) => (
+            {/* Clouds */}
+            {clouds.map((cloud, i) => (
                 <motion.div
                     key={i}
-                    className={`absolute rounded-full ${p.color}`}
-                    style={{
-                        left: `${p.x}%`,
-                        top: `${p.y}%`,
-                        width: `${p.size}px`,
-                        height: `${p.size}px`,
-                    }}
-                    animate={{
-                        y: [0, -100],
-                        x: [0, Math.random() * 40 - 20],
-                        opacity: [0, 0.8, 0]
-                    }}
-                    transition={{
-                        duration: p.duration,
-                        repeat: Infinity,
-                        ease: "linear",
-                        delay: p.delay
-                    }}
-                />
+                    className="absolute text-white/50 blur-2xl"
+                    style={{ top: `${cloud.y}%`, transform: `scale(${cloud.scale})` }}
+                    initial={{ left: `${cloud.x}%` }}
+                    animate={{ left: ['100%', '-20%'] }}
+                    transition={{ duration: cloud.speed, repeat: Infinity, ease: "linear" }}
+                >
+                    <div className="w-96 h-32 bg-current rounded-full" />
+                </motion.div>
             ))}
 
-            {/* Flock of Birds */}
-            {birds.map((bird, i) => (
-                <BirdAnimation
-                    key={i}
-                    duration={bird.duration}
-                    delay={bird.delay}
-                    top={bird.top}
-                    scale={bird.scale}
-                />
-            ))}
-        </>
+            {/* Huge Ferris Wheel - Anchored Bottom Right */}
+            <div className="absolute bottom-[-15%] right-[-150px] md:right-[-250px] opacity-90 mix-blend-multiply z-10 w-[600px] h-[600px] md:w-[900px] md:h-[900px]">
+                <FerrisWheel />
+            </div>
+
+            {/* Massive Hot Air Balloons */}
+            <HotAirBalloon color1="#ef4444" color2="#ffffff" size={200} startX={5} speed={55} delay={0} />
+            <HotAirBalloon color1="#3b82f6" color2="#fcd34d" size={160} startX={80} speed={70} delay={8} />
+            <HotAirBalloon color1="#10b981" color2="#ffffff" size={140} startX={25} speed={65} delay={15} />
+
+            {/* Big Distinct Birds */}
+            <BirdAnimation duration={25} delay={0} top={25} scale={2.5} />
+            <BirdAnimation duration={30} delay={12} top={45} scale={2.0} />
+            <BirdAnimation duration={22} delay={5} top={15} scale={3.0} />
+            <BirdAnimation duration={28} delay={18} top={60} scale={2.2} />
+        </div>
+    );
+}
+
+function SunRays() {
+    return (
+        <motion.div
+            className="absolute -top-[50%] -left-[20%] w-[150vw] h-[150vw] opacity-30 pointer-events-none"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+        >
+            <div className="w-full h-full bg-[conic-gradient(from_0deg,transparent_0deg,transparent_20deg,#fbbf24_30deg,transparent_40deg,transparent_60deg,#fbbf24_70deg,transparent_80deg,transparent_100deg,#fbbf24_110deg,transparent_120deg)] blur-3xl" />
+        </motion.div>
+    );
+}
+
+function HotAirBalloon({ color1, color2, size, startX, speed, delay }: { color1: string, color2: string, size: number, startX: number, speed: number, delay: number }) {
+    return (
+        <motion.div
+            className="absolute z-0"
+            initial={{ y: '110vh', x: `${startX}vw` }}
+            animate={{
+                y: '-40vh',
+                x: [`${startX}vw`, `${startX + 10}vw`]
+            }}
+            transition={{
+                y: { duration: speed, repeat: Infinity, ease: "linear", delay: delay },
+                x: { duration: speed, repeat: Infinity, ease: "easeInOut", yoyo: Infinity }
+            }}
+        >
+            <svg width={size} height={size * 1.3} viewBox="0 0 100 130" fill="none">
+                {/* Balloon Body */}
+                <path d="M50 100C77.6142 100 100 77.6142 100 50C100 22.3858 77.6142 0 50 0C22.3858 0 0 22.3858 0 50C0 77.6142 22.3858 100 50 100Z" fill={color1} />
+                <path d="M50 0V100" stroke={color2} strokeWidth="3" />
+                <path d="M15 15C15 15 35 35 35 100" stroke={color2} strokeWidth="3" fill="none" />
+                <path d="M85 15C85 15 65 35 65 100" stroke={color2} strokeWidth="3" fill="none" />
+
+                {/* Stripes */}
+                <path d="M0 50H100" stroke={color2} strokeWidth="3" opacity="0.4" />
+
+                {/* Ropes */}
+                <path d="M30 95L40 120" stroke="#444" strokeWidth="2" />
+                <path d="M70 95L60 120" stroke="#444" strokeWidth="2" />
+
+                {/* Basket */}
+                <rect x="35" y="120" width="30" height="15" fill="#78350f" rx="3" />
+            </svg>
+        </motion.div>
+    );
+}
+
+function FerrisWheel() {
+    return (
+        <div className="relative w-full h-full">
+            {/* Stand */}
+            <svg className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-1/2" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M50 50L20 100H80L50 50Z" fill="none" stroke="#475569" strokeWidth="3" />
+            </svg>
+
+            {/* Wheel */}
+            <motion.div
+                className="w-full h-full origin-center"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+            >
+                <svg width="100%" height="100%" viewBox="0 0 200 200">
+                    <circle cx="100" cy="100" r="90" fill="none" stroke="#475569" strokeWidth="4" />
+                    <circle cx="100" cy="100" r="10" fill="#fbbf24" />
+
+                    {/* Spokes */}
+                    {[...Array(16)].map((_, i) => (
+                        <line
+                            key={i}
+                            x1="100" y1="100"
+                            x2={100 + 90 * Math.cos((i * 22.5 * Math.PI) / 180)}
+                            y2={100 + 90 * Math.sin((i * 22.5 * Math.PI) / 180)}
+                            stroke="#64748b" strokeWidth="2"
+                        />
+                    ))}
+
+                    {/* Cabins */}
+                    {[...Array(16)].map((_, i) => (
+                        <g key={i} transform={`translate(${100 + 90 * Math.cos((i * 22.5 * Math.PI) / 180)}, ${100 + 90 * Math.sin((i * 22.5 * Math.PI) / 180)})`}>
+                            {/* Counter-rotate cabin to keep it upright */}
+                            <motion.g animate={{ rotate: -360 }} transition={{ duration: 60, repeat: Infinity, ease: "linear" }}>
+                                <circle r="6" fill={i % 2 === 0 ? "#ef4444" : "#3b82f6"} stroke="white" strokeWidth="1" />
+                                <rect x="-3" y="-2" width="6" height="5" fill="white" rx="1" opacity="0.8" />
+                            </motion.g>
+                        </g>
+                    ))}
+                </svg>
+            </motion.div>
+        </div>
     );
 }
 
 function BirdAnimation({ duration, delay, top, scale }: { duration: number, delay: number, top: number, scale: number }) {
     return (
         <motion.div
-            className="absolute left-[-100px] text-slate-700/60 dark:hidden"
+            className="absolute left-[-150px] text-slate-900/80 dark:hidden drop-shadow-md z-20"
             style={{ top: `${top}%` }}
             initial={{ x: '-10vw' }}
             animate={{
                 x: ['-10vw', '110vw'],
-                y: [0, -30, 10, -15] // Gentle waving
+                y: [0, -50, 20, -40]
             }}
             transition={{
                 duration: duration,
@@ -166,10 +224,11 @@ function BirdAnimation({ duration, delay, top, scale }: { duration: number, dela
                 delay: delay
             }}
         >
-            <div style={{ transform: `scale(${scale}) rotate(10deg)` }}>
-                <svg width="40" height="30" viewBox="0 0 50 40" fill="currentColor">
-                    <path d="M5 20 Q 20 5 35 20 Q 20 15 5 20" />
-                    <path d="M35 20 Q 42 15 48 20 Q 42 22 35 20" />
+            <div style={{ transform: `scale(${scale}) rotate(5deg)` }}>
+                {/* Even clear, sharper bird SVG */}
+                <svg width="60" height="50" viewBox="0 0 60 50" fill="currentColor">
+                    <path d="M5 25 C 20 5, 30 5, 35 25 C 25 20, 15 20, 5 25 Z" />
+                    <path d="M35 25 C 50 15, 60 15, 55 30 C 50 25, 40 25, 35 25 Z" />
                 </svg>
             </div>
         </motion.div>

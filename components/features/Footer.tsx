@@ -13,7 +13,7 @@ export function Footer() {
                                 <img
                                     src="/brand/logo.png"
                                     alt="TripVega Logo"
-                                    className="w-full h-full object-cover scale-150 dark:brightness-100 brightness-0 transition-all duration-300"
+                                    className="w-full h-full object-cover scale-150 transition-all duration-300"
                                 />
                             </div>
                             <h2 className="text-xl font-bold tracking-tight text-foreground">TRIPVEGA</h2>
