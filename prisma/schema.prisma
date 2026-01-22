@@ -1,0 +1,418 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/client"
+  engineType      = "binary"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["public"]
+}
+
+/// User profile data linked to auth.users
+model Profile {
+  id        String   @id @db.Uuid
+  email     String?
+  fullName  String?  @map("full_name")
+  avatarUrl String?  @map("avatar_url")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  trips     Trip[]
+  favorites Favorite[]
+
+  @@map("profiles")
+  @@schema("public")
+}
+
+/// Saved Trip Plans
+model Trip {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  destination String
+  summary     String?
+  query       String?
+  segments    Json?    // Array of trip segments
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  user  Profile    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items TripItem[]
+
+  @@index([userId])
+  @@map("trips")
+  @@schema("public")
+}
+
+/// Activities within a Trip
+model TripItem {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tripId      String    @map("trip_id") @db.Uuid
+  activityId  String    @map("activity_id")
+  day         Int
+  timeOfDay   String    @map("time_of_day") // 'morning', 'afternoon', 'evening'
+  title       String
+  description String?
+  price       Decimal?  @db.Decimal(10, 2)
+  currency    String?   @default("EUR")
+  image       String?
+  productUrl  String?   @map("product_url")
+  status      String?   @default("proposed") // 'proposed', 'pending', 'booked'
+  bookedAt    DateTime? @map("booked_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId])
+  @@index([status])
+  @@map("trip_items")
+  @@schema("public")
+}
+
+/// User Favorites
+model Favorite {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  activityId  String   @map("activity_id")
+  title       String?
+  description String?
+  price       Decimal? @db.Decimal(10, 2)
+  currency    String?  @default("EUR")
+  image       String?
+  destination String?
+  rating      Decimal? @db.Decimal(3, 2)
+  reviewCount Int?     @map("review_count")
+  productUrl  String?  @map("product_url")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, activityId])
+  @@index([userId])
+  @@index([activityId])
+  @@map("favorites")
+  @@schema("public")
+}
+
+// ============================================
+// VIATOR INGESTION MODEL - Synced Data
+// ============================================
+
+/// Viator Products (synced every 20 minutes)
+model Product {
+  productCode       String   @id @map("product_code")
+  title             String
+  description       String?  @db.Text
+  shortDescription  String?  @map("short_description") @db.Text
+  duration          String?
+  durationMinutes   Int?     @map("duration_minutes")
+  
+  // Pricing
+  priceFrom         Decimal? @map("price_from") @db.Decimal(10, 2)
+  currency          String   @default("EUR")
+  
+  // Location
+  destinationId     Int?     @map("destination_id")
+  destinationName   String?  @map("destination_name")
+  locationRef       String?  @map("location_ref")
+  
+  // Media
+  images            Json?    // Array of image URLs
+  primaryImage      String?  @map("primary_image")
+  
+  // Ratings
+  rating            Decimal? @db.Decimal(3, 2)
+  reviewCount       Int      @default(0) @map("review_count")
+  
+  // Categories
+  productCategories Json?    @map("product_categories") // Array of category objects
+  tags              String[] @default([])
+  
+  // Booking Info
+  bookingType       String?  @map("booking_type") // INSTANT, REQUEST, etc.
+  cancellationPolicy String? @map("cancellation_policy")
+  confirmationMethod String? @map("confirmation_method")
+  
+  // Status
+  status            String   @default("ACTIVE") // ACTIVE, INACTIVE
+  
+  // Timestamps
+  viatorUpdatedAt   DateTime? @map("viator_updated_at") @db.Timestamptz(6)
+  syncedAt          DateTime  @default(now()) @map("synced_at") @db.Timestamptz(6)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  
+  // Relations
+  availabilitySchedules AvailabilitySchedule[]
+  reviews               Review[]
+  bookingQuestions      BookingQuestion[]
+  bookings              Booking[]
+  
+  @@index([destinationId])
+  @@index([destinationName])
+  @@index([rating])
+  @@index([priceFrom])
+  @@index([status])
+  @@map("products")
+  @@schema("public")
+}
+
+/// Availability Schedules (synced every 20 minutes)
+model AvailabilitySchedule {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  productCode     String   @map("product_code")
+  productOptionCode String @map("product_option_code")
+  
+  // Date range
+  startDate       DateTime @map("start_date") @db.Date
+  endDate         DateTime @map("end_date") @db.Date
+  
+  // Pricing
+  retailPrice     Decimal? @map("retail_price") @db.Decimal(10, 2)
+  partnerNetPrice Decimal? @map("partner_net_price") @db.Decimal(10, 2)
+  currency        String   @default("EUR")
+  
+  // Availability
+  available       Boolean  @default(true)
+  remainingSlots  Int?     @map("remaining_slots")
+  
+  // Time slots (JSON array of available times)
+  timeSlots       Json?    @map("time_slots")
+  
+  // Timestamps
+  viatorUpdatedAt DateTime? @map("viator_updated_at") @db.Timestamptz(6)
+  syncedAt        DateTime  @default(now()) @map("synced_at") @db.Timestamptz(6)
+  
+  // Relations
+  product         Product  @relation(fields: [productCode], references: [productCode], onDelete: Cascade)
+  
+  @@index([productCode])
+  @@index([startDate, endDate])
+  @@index([available])
+  @@map("availability_schedules")
+  @@schema("public")
+}
+
+/// Viator Destinations (synced weekly)
+model Destination {
+  destinationId   Int      @id @map("destination_id")
+  name            String
+  destinationType String   @map("destination_type") // CITY, REGION, COUNTRY
+  parentId        Int?     @map("parent_id")
+  countryCode     String?  @map("country_code") @db.VarChar(2)
+  timezone        String?
+  
+  // Location
+  latitude        Decimal? @db.Decimal(10, 7)
+  longitude       Decimal? @db.Decimal(10, 7)
+  
+  // Media
+  primaryImage    String?  @map("primary_image")
+  
+  // Stats
+  productCount    Int      @default(0) @map("product_count")
+  
+  // Timestamps
+  syncedAt        DateTime @default(now()) @map("synced_at") @db.Timestamptz(6)
+  
+  @@index([parentId])
+  @@index([countryCode])
+  @@index([destinationType])
+  @@map("destinations")
+  @@schema("public")
+}
+
+/// Product Tags (synced weekly)
+model Tag {
+  tagId           Int      @id @map("tag_id")
+  tagName         String   @map("tag_name")
+  parentTagId     Int?     @map("parent_tag_id")
+  
+  // Timestamps
+  syncedAt        DateTime @default(now()) @map("synced_at") @db.Timestamptz(6)
+  
+  @@index([parentTagId])
+  @@map("tags")
+  @@schema("public")
+}
+
+/// Product Reviews (synced weekly)
+model Review {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  productCode     String   @map("product_code")
+  
+  // Review content
+  rating          Int      // 1-5
+  title           String?
+  text            String?  @db.Text
+  
+  // Reviewer
+  reviewerName    String?  @map("reviewer_name")
+  reviewerCountry String?  @map("reviewer_country")
+  
+  // Provider
+  provider        String   @default("VIATOR") // VIATOR, TRIPADVISOR
+  externalId      String?  @map("external_id")
+  
+  // Timestamps
+  publishedAt     DateTime? @map("published_at") @db.Timestamptz(6)
+  syncedAt        DateTime  @default(now()) @map("synced_at") @db.Timestamptz(6)
+  
+  // Relations
+  product         Product  @relation(fields: [productCode], references: [productCode], onDelete: Cascade)
+  
+  @@index([productCode])
+  @@index([rating])
+  @@index([provider])
+  @@map("reviews")
+  @@schema("public")
+}
+
+/// Booking Questions (synced monthly)
+model BookingQuestion {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  productCode     String   @map("product_code")
+  
+  // Question details
+  questionId      String   @map("question_id")
+  question        String
+  questionType    String   @map("question_type") // STRING, DATE, NUMBER, SELECT, etc.
+  required        Boolean  @default(false)
+  
+  // Options (for SELECT type)
+  options         Json?
+  
+  // Scope
+  perBooking      Boolean  @default(true) @map("per_booking")
+  perTraveler     Boolean  @default(false) @map("per_traveler")
+  
+  // Timestamps
+  syncedAt        DateTime @default(now()) @map("synced_at") @db.Timestamptz(6)
+  
+  // Relations
+  product         Product  @relation(fields: [productCode], references: [productCode], onDelete: Cascade)
+  
+  @@unique([productCode, questionId])
+  @@index([productCode])
+  @@map("booking_questions")
+  @@schema("public")
+}
+
+/// Exchange Rates (synced daily)
+model ExchangeRate {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceCurrency  String   @map("source_currency") @db.VarChar(3)
+  targetCurrency  String   @map("target_currency") @db.VarChar(3)
+  rate            Decimal  @db.Decimal(16, 8)
+  
+  // Validity
+  validFrom       DateTime @map("valid_from") @db.Timestamptz(6)
+  validUntil      DateTime @map("valid_until") @db.Timestamptz(6)
+  
+  // Timestamps
+  syncedAt        DateTime @default(now()) @map("synced_at") @db.Timestamptz(6)
+  
+  @@unique([sourceCurrency, targetCurrency, validFrom])
+  @@index([sourceCurrency, targetCurrency])
+  @@map("exchange_rates")
+  @@schema("public")
+}
+
+/// Our Bookings (created on book, synced every 3 minutes)
+model Booking {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  productCode         String    @map("product_code")
+  
+  // Viator references
+  cartRef             String?   @map("cart_ref")
+  bookingRef          String?   @unique @map("booking_ref")
+  partnerBookingRef   String?   @map("partner_booking_ref")
+  
+  // Booking details
+  travelDate          DateTime  @map("travel_date") @db.Date
+  productOptionCode   String?   @map("product_option_code")
+  startTime           String?   @map("start_time")
+  
+  // Travelers
+  paxMix              Json?     @map("pax_mix") // Array of {ageBand, count}
+  totalTravelers      Int       @default(1) @map("total_travelers")
+  
+  // Pricing
+  totalPrice          Decimal?  @map("total_price") @db.Decimal(10, 2)
+  currency            String    @default("EUR")
+  
+  // Booker info
+  bookerEmail         String?   @map("booker_email")
+  bookerFirstName     String?   @map("booker_first_name")
+  bookerLastName      String?   @map("booker_last_name")
+  bookerPhone         String?   @map("booker_phone")
+  
+  // Status
+  status              String    @default("PENDING") // PENDING, CONFIRMED, CANCELLED, REJECTED
+  viatorStatus        String?   @map("viator_status")
+  
+  // Voucher
+  voucherUrl          String?   @map("voucher_url")
+  voucherInfo         Json?     @map("voucher_info")
+  
+  // Cancellation
+  cancellable         Boolean   @default(true)
+  cancellationCutoff  DateTime? @map("cancellation_cutoff") @db.Timestamptz(6)
+  cancelledAt         DateTime? @map("cancelled_at") @db.Timestamptz(6)
+  cancellationReason  String?   @map("cancellation_reason")
+  refundAmount        Decimal?  @map("refund_amount") @db.Decimal(10, 2)
+  
+  // Timestamps
+  viatorUpdatedAt     DateTime? @map("viator_updated_at") @db.Timestamptz(6)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  // Relations
+  product             Product   @relation(fields: [productCode], references: [productCode])
+  
+  @@index([productCode])
+  @@index([bookerEmail])
+  @@index([status])
+  @@index([travelDate])
+  @@index([createdAt])
+  @@map("bookings")
+  @@schema("public")
+}
+
+/// Sync Logs (for monitoring ingestion)
+model SyncLog {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  // Sync details
+  syncType        String   @map("sync_type") // PRODUCTS, AVAILABILITY, DESTINATIONS, etc.
+  status          String   @default("RUNNING") // RUNNING, SUCCESS, FAILED
+  
+  // Stats
+  itemsProcessed  Int      @default(0) @map("items_processed")
+  itemsCreated    Int      @default(0) @map("items_created")
+  itemsUpdated    Int      @default(0) @map("items_updated")
+  itemsDeleted    Int      @default(0) @map("items_deleted")
+  itemsFailed     Int      @default(0) @map("items_failed")
+  
+  // Cursor for pagination
+  cursor          String?
+  
+  // Error details
+  errorMessage    String?  @map("error_message") @db.Text
+  errorDetails    Json?    @map("error_details")
+  
+  // Timestamps
+  startedAt       DateTime @default(now()) @map("started_at") @db.Timestamptz(6)
+  completedAt     DateTime? @map("completed_at") @db.Timestamptz(6)
+  
+  @@index([syncType])
+  @@index([status])
+  @@index([startedAt])
+  @@map("sync_logs")
+  @@schema("public")
+}

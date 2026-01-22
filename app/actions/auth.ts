@@ -2,6 +2,9 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
+import { sendEmail } from "@/lib/email";
+import { WelcomeEmail } from "@/emails/welcome-email";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -45,16 +48,22 @@ export async function signInAction(formData: FormData) {
 export async function signUpAction(formData: FormData) {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const fullName = formData.get("name") as string | null;
 
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+            data: {
+                full_name: fullName || "",
+            }
+        }
     });
 
     if (error) return { error: error.message };
 
-    // If confirmation is disabled, we set cookie immediately
+    // Set cookie immediately (no email confirmation required)
     const cookieStore = await cookies();
     if (data.session) {
         cookieStore.set("sb-auth-token", data.session.access_token, {
@@ -67,11 +76,39 @@ export async function signUpAction(formData: FormData) {
         return { success: true, session: data.session };
     }
 
-    return { success: true, session: null };
+    // If no session, user was created but needs confirmation (shouldn't happen with current config)
+    return { success: true, session: data.session };
 }
 
 export async function signOutAction() {
     const cookieStore = await cookies();
     cookieStore.delete("sb-auth-token");
+    return { success: true };
+}
+
+export async function updateProfileAction(formData: FormData) {
+    const name = formData.get("name") as string;
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get("sb-auth-token")?.value;
+
+    if (!token) return { error: "Unauthorized" };
+
+    const supabase = getSupabaseAdmin();
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+
+    if (userError || !user) {
+        return { error: "Unauthorized" };
+    }
+
+    const { error } = await supabase.auth.updateUser({
+        data: { full_name: name }
+    });
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    revalidatePath("/account/settings");
     return { success: true };
 }

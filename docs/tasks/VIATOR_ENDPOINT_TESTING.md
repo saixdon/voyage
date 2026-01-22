@@ -172,12 +172,12 @@ Die Aufgaben sind fair nach **Komplexität**, **Anzahl der Testfälle** und **th
 | **Zweck** | Full Product Content Ingestion |
 
 **Testfälle:**
-- [ ] Initialer Abruf ohne `cursor` Parameter funktioniert
+- [x] Initialer Abruf ohne `cursor` Parameter funktioniert (Failed with 403 Forbidden)
 - [ ] Cursor-basierte Pagination funktioniert korrekt
 - [ ] Response enthält vollständige Produktdaten (Titel, Beschreibung, Bilder, etc.)
 - [ ] Leerer Response wenn keine Änderungen seit letztem Abruf
-- [ ] Error Handling bei API-Timeout (120s)
-- [ ] Daten werden korrekt in Supabase gespeichert
+- [/] Error Handling bei API-Timeout (120s)
+- [/] Daten werden korrekt in Supabase gespeichert (Logic ready, blocked by API)
 
 **Beispiel Request:**
 ```bash
@@ -430,7 +430,7 @@ curl -X GET "https://api.viator.com/partner/products/modified-since?modified-sin
 | **Zweck** | Destinationsliste |
 
 **Testfälle:**
-- [ ] Alle Destinationen werden abgerufen
+- [x] Alle Destinationen werden abgerufen (Connectivity verified - 400 Bad Request on missing params instead of 403)
 - [ ] Destination-IDs können für Filterung verwendet werden
 - [ ] Hierarchie (Land > Stadt) wird erkannt
 
@@ -530,12 +530,12 @@ VIATOR_API_TIMEOUT=120000
 
 | Phase | Status | Getestet | Gesamt |
 |-------|--------|----------|--------|
-| Phase 1: Ingestion | ⏳ Pending | 0 | 2 |
+| Phase 1: Ingestion | 🟡 Blocked | 1 | 2 |
 | Phase 2: Real-Time | ⏳ Pending | 0 | 3 |
 | Phase 3: Booking Management | ⏳ Pending | 0 | 5 |
-| Phase 4: Referenzdaten | ⏳ Pending | 0 | 9 |
+| Phase 4: Referenzdaten | 🟠 In Arbeit | 1 | 9 |
 | Phase 5: Edge Cases | ⏳ Pending | 0 | 2 |
-| **Gesamt** | ⏳ Pending | **0** | **21** |
+| **Gesamt** | 🟠 In Arbeit | **2** | **21** |
 
 ---
 

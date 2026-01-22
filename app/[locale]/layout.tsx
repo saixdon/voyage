@@ -44,7 +44,7 @@ export default async function LocaleLayout({
                 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
                 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet" />
             </head>
-            <body className="bg-background text-foreground font-display overflow-x-hidden selection:bg-primary selection:text-white">
+            <body className="bg-background text-foreground font-display overflow-x-hidden selection:bg-primary selection:text-white" suppressHydrationWarning>
                 <NextIntlClientProvider messages={messages} locale={locale}>
                     <ThemeProvider
                         attribute="class"

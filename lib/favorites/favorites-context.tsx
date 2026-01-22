@@ -33,12 +33,25 @@ const FavoritesContext = createContext<FavoritesContextType>({
     removeFavorite: async () => { },
 });
 
+import { AuthModal } from "@/components/features/AuthModal";
+
 export const useFavorites = () => useContext(FavoritesContext);
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     const { user } = useAuth();
     const [favorites, setFavorites] = useState<FavoriteActivity[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+
+    const [showAuthModal, setShowAuthModal] = useState(false);
+    const [pendingFavorite, setPendingFavorite] = useState<Omit<FavoriteActivity, "id" | "created_at" | "user_id"> | null>(null);
+
+    // Effect to handle pending favorite after login
+    useEffect(() => {
+        if (user && pendingFavorite) {
+            addFavorite(pendingFavorite);
+            setPendingFavorite(null);
+        }
+    }, [user, pendingFavorite]);
 
     // Laden der Favoriten beim Start oder wenn sich der User ändert
     useEffect(() => {
@@ -70,7 +83,11 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     };
 
     const addFavorite = async (activity: Omit<FavoriteActivity, "id" | "created_at" | "user_id">) => {
-        if (!user) return; // Oder Auth-Modal öffnen?
+        if (!user) {
+            setPendingFavorite(activity);
+            setShowAuthModal(true);
+            return;
+        }
 
         // Optimistisches Update
         const tempId = Math.random().toString(36).substring(7);
@@ -128,6 +145,13 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     return (
         <FavoritesContext.Provider value={{ favorites, isLoading, isFavorite, addFavorite, removeFavorite }}>
             {children}
+            <AuthModal
+                isOpen={showAuthModal}
+                onClose={() => setShowAuthModal(false)}
+                onSuccess={() => {
+                    // Triggers re-render via AuthContext update, which triggers the effect above
+                }}
+            />
         </FavoritesContext.Provider>
     );
 }

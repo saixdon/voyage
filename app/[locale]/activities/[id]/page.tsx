@@ -3,7 +3,7 @@
 import React, { use, useEffect, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import type { TransformedActivity } from "@/lib/api/viator-client";
 import { checkAvailabilityAction, type AvailabilityResult } from "@/app/actions/viator";
 import { format } from "date-fns";
@@ -27,15 +27,58 @@ import {
     ImageIcon,
     X,
     Minus,
-    Plus
+    Plus,
+    Zap,
+    Heart,
+    Share2,
+    Info,
+    MessageCircle,
+    Navigation,
+    User
 } from "lucide-react";
 import { Popover as RadixPopover, PopoverContent as RadixPopoverContent, PopoverTrigger as RadixPopoverTrigger, PopoverPortal as RadixPopoverPortal } from "@radix-ui/react-popover";
-import { cn } from "@/lib/utils"; // Assuming you have a cn utility
+import { cn } from "@/lib/utils";
 import { useLocale } from "next-intl";
 
 interface ActivityWithBadge extends TransformedActivity {
     badge?: string;
+    reviews?: {
+        id: string;
+        author: string;
+        rating: number;
+        date: string;
+        comment: string;
+        avatar?: string;
+    }[];
 }
+
+// Mock reviews for demonstration if not present in activity
+const DEFAULT_REVIEWS = [
+    {
+        id: "1",
+        author: "Sarah M.",
+        rating: 5,
+        date: "2024-01-15",
+        comment: "Absolutely incredible experience! The guide was so knowledgeable and the views were breathtaking. Highly recommend to anyone visiting.",
+        avatar: "https://lh3.googleusercontent.com/a/ACg8ocL8jXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjX=s96-c"
+    },
+    {
+        id: "2",
+        author: "Michael R.",
+        rating: 4,
+        date: "2023-12-20",
+        comment: "Very well organized. We saw everything we wanted to and the pace was just right. The only downside was the meeting point was a bit hard to find.",
+        avatar: "https://lh3.googleusercontent.com/a/ACg8ocL8jXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjX=s96-c"
+    },
+    {
+        id: "3",
+        author: "Elena G.",
+        rating: 5,
+        date: "2024-01-05",
+        comment: "One of the highlights of our trip. The small group size made it feel very personal. Excellent value for money!",
+        avatar: "https://lh3.googleusercontent.com/a/ACg8ocL8jXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjX=s96-c"
+    }
+];
 
 export default function ActivityDetailPage({
     params,
@@ -43,7 +86,8 @@ export default function ActivityDetailPage({
     params: Promise<{ id: string }>;
 }) {
     const { id } = use(params);
-    const locale = useLocale(); // 'de' or 'en'
+    const locale = useLocale();
+    const router = useRouter();
 
     // Data State
     const [activity, setActivity] = useState<ActivityWithBadge | null>(null);
@@ -59,11 +103,12 @@ export default function ActivityDetailPage({
     // UI State
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [isFavorite, setIsFavorite] = useState(false);
 
+    // Fetch Activity Details
     useEffect(() => {
         async function fetchActivity() {
             try {
-                // Fetch activity details from Viator API
                 const response = await fetch(`/api/activity/${id}`);
                 if (!response.ok) {
                     if (response.status === 404) {
@@ -83,6 +128,13 @@ export default function ActivityDetailPage({
         }
         fetchActivity();
     }, [id]);
+
+    // Auto-Check Availability when Date or Guests change
+    useEffect(() => {
+        if (selectedDate && activity) {
+            handleCheckAvailability();
+        }
+    }, [selectedDate, guestCount, activity?.productCode]);
 
     const handleCheckAvailability = async () => {
         if (!selectedDate || !activity) return;
@@ -104,34 +156,38 @@ export default function ActivityDetailPage({
     };
 
     const handleBookOption = (affiliateUrl?: string, productOptionCode?: string) => {
-        if (!affiliateUrl) return;
+        if (!activity || !selectedDate) return;
 
-        // Enhance URL with date and pax if possible (Viator often handles this via query params on their landing)
-        const dateStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
-        const separator = affiliateUrl.includes('?') ? '&' : '?';
-        let finalUrl = `${affiliateUrl}${separator}date=${dateStr}&pax=${guestCount}`;
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        const price = availability?.price?.amount || activity.price;
+        const currency = availability?.price?.currency || activity.currency;
 
-        if (productOptionCode && productOptionCode !== 'DEFAULT') {
-            finalUrl += `&productOptionCode=${productOptionCode}`;
-        }
+        const checkoutParams = new URLSearchParams({
+            productCode: activity.productCode,
+            title: encodeURIComponent(activity.title),
+            image: encodeURIComponent(activity.image),
+            date: dateStr,
+            pax: guestCount.toString(),
+            price: price.toString(),
+            currency: currency,
+            optionCode: productOptionCode || 'DEFAULT'
+        });
 
-        window.open(finalUrl, '_blank', 'noopener,noreferrer');
+        router.push(`/checkout?${checkoutParams.toString()}`);
     };
 
-    const allImages = activity ? [activity.image, ...(activity.images || [])] : [];
-
-    const nextImage = () => {
-        setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
-    };
-
-    const prevImage = () => {
-        setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
-    };
+    const allImages = activity ? [activity.image, ...(activity.images || [])].slice(0, 5) : [];
+    const reviews = activity?.reviews || DEFAULT_REVIEWS;
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background-dark flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="relative">
+                    <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-8 h-8 bg-primary rounded-full animate-pulse"></div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -141,397 +197,546 @@ export default function ActivityDetailPage({
         return null;
     }
 
-    // Determine fallback price display
-    const currentPrice = availability?.price ? availability.price.amount : activity.price;
-    const currentCurrency = availability?.price ? availability.price.currency : activity.currency;
+    const displayPrice = availability?.price ? availability.price.amount : activity.price;
+    const displayCurrency = availability?.price ? availability.price.currency : activity.currency;
 
     return (
-        <div className="min-h-screen bg-background text-foreground pb-20">
-            {/* Gallery Overlay (Lightbox) */}
+        <div className="min-h-screen bg-background text-foreground selection:bg-primary/20">
+            {/* Gallery Overlay */}
             {isGalleryOpen && (
-                <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center animate-fade-in backdrop-blur-md">
+                <div className="fixed inset-0 z-[100] bg-black/98 flex items-center justify-center animate-in fade-in duration-300 backdrop-blur-xl">
+                    <button onClick={() => setIsGalleryOpen(false)} className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all z-50 group">
+                        <X className="w-8 h-8 group-hover:rotate-90 transition-transform" />
+                    </button>
+
+                    <div className="absolute top-6 left-6 text-white/60 font-medium">
+                        {currentImageIndex + 1} / {allImages.length}
+                    </div>
+
                     <button
-                        onClick={() => setIsGalleryOpen(false)}
-                        className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-50"
+                        onClick={(e) => { e.stopPropagation(); setCurrentImageIndex((p) => (p - 1 + allImages.length) % allImages.length) }}
+                        className="absolute left-6 p-4 bg-white/5 hover:bg-white/10 rounded-full text-white transition-all z-50 hidden md:block"
                     >
-                        <X className="w-8 h-8" />
+                        <ChevronLeft className="w-10 h-10" />
                     </button>
 
                     <button
-                        onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                        className="absolute left-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-50 hidden md:block"
+                        onClick={(e) => { e.stopPropagation(); setCurrentImageIndex((p) => (p + 1) % allImages.length) }}
+                        className="absolute right-6 p-4 bg-white/5 hover:bg-white/10 rounded-full text-white transition-all z-50 hidden md:block"
                     >
-                        <ChevronLeft className="w-8 h-8" />
+                        <ChevronRight className="w-10 h-10" />
                     </button>
 
-                    <button
-                        onClick={(e) => { e.stopPropagation(); nextImage(); }}
-                        className="absolute right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-50 hidden md:block"
-                    >
-                        <ChevronRight className="w-8 h-8" />
-                    </button>
-
-                    <div className="relative w-full h-full max-w-7xl max-h-[90vh] p-4 flex flex-col items-center justify-center">
-                        <div className="relative w-full h-full rounded-lg overflow-hidden">
+                    <div className="relative w-full h-[80vh] flex items-center justify-center px-4">
+                        <div className="relative w-full max-w-6xl h-full rounded-2xl overflow-hidden shadow-2xl">
                             <Image
                                 src={allImages[currentImageIndex]}
-                                alt={`Gallery Image ${currentImageIndex + 1}`}
+                                alt={`Gallery ${currentImageIndex}`}
                                 fill
                                 className="object-contain"
                                 priority
-                                quality={100}
                             />
-                        </div>
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-black/50 rounded-full backdrop-blur-sm">
-                            {allImages.map((_, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => setCurrentImageIndex(idx)}
-                                    className={cn(
-                                        "w-2 h-2 rounded-full transition-all",
-                                        idx === currentImageIndex ? "bg-white w-4" : "bg-white/40 hover:bg-white/70"
-                                    )}
-                                />
-                            ))}
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Hero Section - Redesigned */}
-            <div className="relative h-[65vh] min-h-[500px] w-full group">
-                {/* Main Hero Image */}
-                <Image
-                    src={activity.image}
-                    alt={activity.title}
-                    fill
-                    className="object-cover transition-transform duration-1000 group-hover:scale-105"
-                    priority
-                    sizes="100vw"
-                />
+            {/* Sticky Header Mini (Shows on scroll - potentially implemented at layout level) */}
 
-                {/* Gradient Overlay for Text Readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* 1. Header Section */}
+                <div className="mb-8">
+                    <nav className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4">
+                        <span className="hover:text-primary cursor-pointer transition-colors">Activities</span>
+                        <ChevronRight className="w-3 h-3" />
+                        <span className="hover:text-primary cursor-pointer transition-colors">{activity.location}</span>
+                        <ChevronRight className="w-3 h-3" />
+                        <span className="text-foreground/40">{activity.badge || "Experience"}</span>
+                    </nav>
 
-                {/* Top Actions */}
-                <div className="absolute top-24 left-0 right-0 px-6 max-w-7xl mx-auto flex justify-between items-start z-10">
-                    <div /> {/* Spacer or Back Button could go here */}
-                    <button
-                        onClick={() => setIsGalleryOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full text-white text-sm font-medium transition-all border border-white/10 hover:border-white/30"
-                    >
-                        <ImageIcon className="w-4 h-4" />
-                        <span>View Photos</span>
-                    </button>
-                </div>
-
-                {/* Hero Content */}
-                <div className="absolute bottom-0 left-0 right-0 z-20 px-6 pb-12">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="max-w-4xl animate-fade-in-up">
-                            {/* Badges / Location */}
-                            <div className="flex flex-wrap items-center gap-3 mb-4">
-                                {activity.badge && (
-                                    <span className="bg-primary/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold text-white uppercase tracking-wider">
-                                        {activity.badge.replace(/-/g, " ")}
-                                    </span>
-                                )}
-                                <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 text-white text-xs font-medium">
-                                    <MapPin className="w-3.5 h-3.5 text-primary" />
-                                    {activity.location}
-                                </div>
-                            </div>
-
-                            {/* Title */}
-                            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tigher shadow-black/50 drop-shadow-lg">
+                    <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+                        <div className="flex-1">
+                            <h1 className="text-3xl md:text-5xl font-black text-foreground tracking-tight leading-[1.1] mb-6">
                                 {activity.title}
                             </h1>
 
-                            {/* Stats */}
-                            <div className="flex flex-wrap items-center gap-6 text-white/90 font-medium">
+                            <div className="flex flex-wrap items-center gap-6">
                                 <div className="flex items-center gap-2">
-                                    <Clock className="w-5 h-5 text-primary" />
-                                    <span>{activity.duration}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="flex items-center text-yellow-400">
-                                        <Star className="w-5 h-5 fill-current" />
-                                        <span className="ml-1 font-bold text-white">{activity.rating}</span>
+                                    <div className="flex text-yellow-500">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star key={i} className={cn("w-5 h-5", i < Math.floor(activity.rating) ? "fill-current" : "text-border")} />
+                                        ))}
                                     </div>
-                                    <span className="text-white/60 text-sm">({activity.reviewCount} reviews)</span>
+                                    <span className="font-bold text-lg">{activity.rating}</span>
+                                    <span className="text-muted-foreground font-medium">({activity.reviewCount} reviews)</span>
+                                </div>
+
+                                <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                                    <MapPin className="w-5 h-5 text-primary" />
+                                    {activity.location}
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 w-full md:w-auto">
+                            <button
+                                onClick={() => setIsFavorite(!isFavorite)}
+                                className={cn(
+                                    "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-full border transition-all font-bold",
+                                    isFavorite ? "bg-red-50 border-red-100 text-red-500" : "bg-surface border-theme hover:bg-surface-elevated"
+                                )}
+                            >
+                                <Heart className={cn("w-5 h-5", isFavorite && "fill-current")} />
+                                <span>{isFavorite ? "Saved" : "Save"}</span>
+                            </button>
+                            <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-surface border border-theme hover:bg-surface-elevated transition-all font-bold">
+                                <Share2 className="w-5 h-5" />
+                                <span>Share</span>
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Main Content Layout */}
-            <div className="max-w-7xl mx-auto px-6 -mt-8 relative z-30">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-
-                    {/* Left Column: Details */}
-                    <div className="lg:col-span-2 space-y-8 pt-8 lg:pt-0">
-                        {/* Highlights Section (Example) */}
-                        <div className="bg-surface border border-theme backdrop-blur-xl rounded-3xl p-6 md:p-8">
-                            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-foreground">
-                                <Star className="w-6 h-6 text-primary" />
-                                Experience Highlights
-                            </h3>
-                            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {["Skip the long lines", "Local expert guide", "Hidden gems tour", "Small group size"].map((item, i) => (
-                                    <li key={i} className="flex items-start gap-3 p-3 rounded-xl bg-surface-elevated hover:bg-surface-elevated/80 transition-colors border border-theme">
-                                        <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                                        <span className="text-foreground">{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        {/* Features Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-surface rounded-2xl p-5 border border-theme flex items-start gap-4">
-                                <div className="p-3 bg-blue-500/10 dark:bg-blue-500/20 rounded-xl text-blue-600 dark:text-blue-400">
-                                    <ShieldCheck className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-1 text-foreground">Free Cancellation</h4>
-                                    <p className="text-sm text-muted-foreground">Up to 24 hours in advance.</p>
-                                </div>
-                            </div>
-                            <div className="bg-surface rounded-2xl p-5 border border-theme flex items-start gap-4">
-                                <div className="p-3 bg-purple-500/10 dark:bg-purple-500/20 rounded-xl text-purple-600 dark:text-purple-400">
-                                    <Smartphone className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-1 text-foreground">Mobile Ticketing</h4>
-                                    <p className="text-sm text-muted-foreground">Use your phone to enter.</p>
-                                </div>
-                            </div>
-                            <div className="bg-surface rounded-2xl p-5 border border-theme flex items-start gap-4">
-                                <div className="p-3 bg-orange-500/10 dark:bg-orange-500/20 rounded-xl text-orange-600 dark:text-orange-400">
-                                    <Globe className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-1 text-foreground">Multilingual Guide</h4>
-                                    <p className="text-sm text-muted-foreground">English, German, French...</p>
-                                </div>
-                            </div>
-                            <div className="bg-surface rounded-2xl p-5 border border-theme flex items-start gap-4">
-                                <div className="p-3 bg-green-500/10 dark:bg-green-500/20 rounded-xl text-green-600 dark:text-green-400">
-                                    <Ticket className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-1 text-foreground">Instant Confirmation</h4>
-                                    <p className="text-sm text-muted-foreground">Tickets sent to email.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="h-px bg-theme my-8" />
-
-                        <div className="prose dark:prose-invert max-w-none text-foreground">
-                            <h3 className="text-2xl font-bold mb-4 text-foreground">Full Description</h3>
-                            <p className="text-muted-foreground leading-relaxed">
-                                {activity.title} offers an unforgettable journey through the heart of {activity.location}.
-                                Immerse yourself in the local culture, history, and vibrant atmosphere.
-                                Whether you're a history buff, a foodie, or an adventure seeker, this experience has something for everyone.
-                            </p>
-                            <p className="text-muted-foreground leading-relaxed mt-4">
-                                Our expert guides will take you off the beaten path to discover hidden gems that most tourists miss.
-                                Enjoy personalized attention in generic terms for this placeholder description, ensuring a memorable and intimate experience.
-                            </p>
-                        </div>
+                {/* 2. Photo Grid - Premium Layout */}
+                <div
+                    className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-3 h-[450px] md:h-[600px] mb-12 rounded-[2rem] overflow-hidden cursor-pointer group"
+                    onClick={() => setIsGalleryOpen(true)}
+                >
+                    <div className="md:col-span-2 md:row-span-2 relative h-full overflow-hidden">
+                        <Image
+                            src={activity.image}
+                            alt={activity.title}
+                            fill
+                            className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                            priority
+                        />
+                        <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-500" />
                     </div>
 
-                    {/* Right Column: Booking Card */}
-                    <div className="lg:col-span-1 relative">
-                        <div className="sticky top-28 bg-surface border border-theme rounded-3xl p-6 lg:p-8 shadow-2xl overflow-hidden ring-1 ring-black/5 dark:ring-white/5">
-                            {/* Decorative gradient blob */}
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] -z-10 rounded-full pointer-events-none" />
-
-                            {/* Price Header */}
-                            <div className="mb-6">
-                                <p className="text-sm text-muted-foreground mb-1">Price starts from</p>
-                                <div className="flex items-baseline gap-2">
-                                    {currentPrice > 0 ? (
-                                        <>
-                                            <span className="text-3xl lg:text-4xl font-bold text-foreground">
-                                                {currentCurrency} {currentPrice}
-                                            </span>
-                                            <span className="text-muted-foreground text-sm">/ person</span>
-                                        </>
-                                    ) : (
-                                        <span className="text-2xl font-bold text-foreground">Check Availability</span>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Booking Form */}
-                            <div className="space-y-4">
-                                {/* Date Picker - Popover */}
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Date</label>
-                                    <RadixPopover>
-                                        <RadixPopoverTrigger asChild>
-                                            <button className={cn(
-                                                "w-full flex items-center justify-between px-4 py-3.5 bg-surface-elevated hover:bg-surface-elevated/80 border border-theme hover:border-primary/50 rounded-xl transition-all text-left",
-                                                !selectedDate && "text-muted-foreground",
-                                                selectedDate && "text-foreground"
-                                            )}>
-                                                <div className="flex items-center gap-3">
-                                                    <CalendarIcon className="w-5 h-5 text-primary" />
-                                                    <span className="font-medium">
-                                                        {selectedDate
-                                                            ? format(selectedDate, "dd. MMM yyyy", { locale: locale === 'de' ? de : enUS })
-                                                            : "Select a date"}
-                                                    </span>
-                                                </div>
-                                                <ChevronDown className="w-4 h-4 opacity-50 text-foreground" />
-                                            </button>
-                                        </RadixPopoverTrigger>
-                                        <RadixPopoverPortal>
-                                            <RadixPopoverContent className="w-auto p-0 bg-surface border border-theme rounded-2xl shadow-2xl z-[50]" align="start" sideOffset={8}>
-                                                <div className="p-3">
-                                                    <DayPicker
-                                                        mode="single"
-                                                        selected={selectedDate}
-                                                        onSelect={(d) => {
-                                                            setSelectedDate(d);
-                                                            setAvailability(null); // Reset availability on date change
-                                                        }}
-                                                        disabled={{ before: new Date() }}
-                                                        modifiersClassNames={{
-                                                            selected: "bg-primary text-white hover:bg-primary/90",
-                                                            today: "text-primary font-bold"
-                                                        }}
-                                                        className="react-day-picker-theme-wrapper"
-                                                    />
-                                                </div>
-                                            </RadixPopoverContent>
-                                        </RadixPopoverPortal>
-                                    </RadixPopover>
-                                </div>
-
-                                {/* Guest Selector - Popover */}
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Guests</label>
-                                    <RadixPopover>
-                                        <RadixPopoverTrigger asChild>
-                                            <button className="w-full flex items-center justify-between px-4 py-3.5 bg-surface-elevated hover:bg-surface-elevated/80 border border-theme hover:border-primary/50 rounded-xl transition-all text-left">
-                                                <div className="flex items-center gap-3">
-                                                    <Users className="w-5 h-5 text-primary" />
-                                                    <span className="font-medium text-foreground">
-                                                        {guestCount} {guestCount === 1 ? 'Adult' : 'Adults'}
-                                                    </span>
-                                                </div>
-                                                <ChevronDown className="w-4 h-4 opacity-50 text-foreground" />
-                                            </button>
-                                        </RadixPopoverTrigger>
-                                        <RadixPopoverPortal>
-                                            <RadixPopoverContent className="w-64 p-4 bg-surface border border-theme rounded-2xl shadow-2xl z-[50]" align="start" sideOffset={8}>
-                                                <div className="flex items-center justify-between">
-                                                    <span className="font-medium text-foreground">Adults</span>
-                                                    <div className="flex items-center gap-3 bg-surface-elevated rounded-lg p-1">
-                                                        <button
-                                                            onClick={() => setGuestCount(Math.max(1, guestCount - 1))}
-                                                            className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors text-foreground"
-                                                            disabled={guestCount <= 1}
-                                                        >
-                                                            <Minus className="w-4 h-4" />
-                                                        </button>
-                                                        <span className="w-4 text-center font-bold text-sm text-foreground">{guestCount}</span>
-                                                        <button
-                                                            onClick={() => setGuestCount(Math.min(20, guestCount + 1))}
-                                                            className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors text-foreground"
-                                                        >
-                                                            <Plus className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </RadixPopoverContent>
-                                        </RadixPopoverPortal>
-                                    </RadixPopover>
-                                </div>
-
-                                {/* Check Button or Loader */}
-                                {!availability?.bookableItems ? (
-                                    <Button
-                                        size="lg"
-                                        className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90 mt-4 rounded-xl shadow-lg shadow-primary/20"
-                                        onClick={handleCheckAvailability}
-                                        disabled={!selectedDate || checkLoading}
-                                    >
-                                        {checkLoading ? (
-                                            <span className="flex items-center gap-2">
-                                                <span className="animate-spin rounded-full h-4 w-4 border-2 border-white/40 border-t-white"></span>
-                                                Checking Availability...
-                                            </span>
-                                        ) : (
-                                            "Check Availability"
-                                        )}
-                                    </Button>
-                                ) : null}
-                            </div>
-
-                            {/* RESULTS: Error Message */}
-                            {availability?.available === false && (
-                                <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-200 text-sm text-center animate-fade-in">
-                                    <div className="font-bold mb-1">Not Available</div>
-                                    <p className="text-red-300/70">Please try another date.</p>
+                    {allImages.slice(1, 5).map((img, i) => (
+                        <div key={i} className="hidden md:block relative h-full overflow-hidden">
+                            <Image
+                                src={img}
+                                alt={`Detail ${i + 1}`}
+                                fill
+                                className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                            />
+                            <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-500" />
+                            {i === 3 && (
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[2px] hover:backdrop-blur-0 transition-all">
+                                    <div className="flex items-center gap-2 text-white font-extrabold px-6 py-3 rounded-full border-2 border-white/30 bg-white/10">
+                                        <ImageIcon className="w-5 h-5" />
+                                        <span>Show all photos</span>
+                                    </div>
                                 </div>
                             )}
+                        </div>
+                    ))}
 
-                            {/* RESULTS: Options List */}
-                            {availability?.bookableItems && availability.bookableItems.length > 0 && (
-                                <div className="mt-6 space-y-3 animate-fade-in">
-                                    <div className="text-xs font-bold text-green-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                        <CheckCircle className="w-3.5 h-3.5" />
-                                        Available Options
+                    {/* Mobile Only: See All Photos Button */}
+                    <div className="md:hidden absolute bottom-4 right-4 z-10">
+                        <div className="flex items-center gap-2 text-white font-bold px-4 py-2 rounded-xl bg-black/60 backdrop-blur-md">
+                            <ImageIcon className="w-4 h-4" />
+                            <span className="text-sm">1 / {allImages.length}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Main Content Area */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+
+                    {/* Left Side: Details */}
+                    <div className="lg:col-span-8 space-y-16">
+
+                        {/* Quick Info Bar */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-8 rounded-[2rem] bg-surface border border-theme">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2 text-primary font-bold">
+                                    <Clock className="w-5 h-5" />
+                                    <span className="text-sm uppercase tracking-wider">Duration</span>
+                                </div>
+                                <p className="font-extrabold text-foreground">{activity.duration}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2 text-primary font-bold">
+                                    <ShieldCheck className="w-5 h-5" />
+                                    <span className="text-sm uppercase tracking-wider">Cancellation</span>
+                                </div>
+                                <p className="font-extrabold text-foreground">Free (24h)</p>
+                            </div>
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2 text-primary font-bold">
+                                    <Ticket className="w-5 h-5" />
+                                    <span className="text-sm uppercase tracking-wider">Mobile</span>
+                                </div>
+                                <p className="font-extrabold text-foreground">Instant Ticket</p>
+                            </div>
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2 text-primary font-bold">
+                                    <Globe className="w-5 h-5" />
+                                    <span className="text-sm uppercase tracking-wider">Languages</span>
+                                </div>
+                                <p className="font-extrabold text-foreground">EN, DE, FR</p>
+                            </div>
+                        </div>
+
+                        {/* Experience Highlights */}
+                        <section>
+                            <h3 className="text-2xl md:text-3xl font-black mb-8 text-foreground flex items-center gap-3">
+                                <Zap className="w-8 h-8 text-yellow-500 fill-yellow-500/20" />
+                                Experience Highlights
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {[
+                                    "Bypassing the long entrance lines with our priority tickets",
+                                    "Learn fascinating historical facts from a certified local expert",
+                                    "Limited group size for a more intimate and personal experience",
+                                    "Access to exclusive areas not open to the general public"
+                                ].map((item, i) => (
+                                    <div key={i} className="group flex items-start gap-4 p-5 rounded-2xl bg-surface/50 border border-transparent hover:border-primary/20 hover:bg-surface transition-all">
+                                        <div className="mt-1 bg-primary text-white p-1.5 rounded-full">
+                                            <CheckCircle className="w-4 h-4" />
+                                        </div>
+                                        <span className="text-foreground/80 font-medium leading-relaxed">{item}</span>
                                     </div>
-                                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
-                                        {availability.bookableItems.map((item: any, idx) => (
-                                            <div key={idx} className="group bg-surface-elevated hover:bg-surface-elevated/80 border border-theme hover:border-primary/30 rounded-xl p-3 transition-all">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div>
-                                                        <div className="font-bold text-sm text-foreground mb-0.5">
-                                                            {item.productOptionCode === 'DEFAULT' ? 'Standard Ticket' : item.productOptionCode}
-                                                        </div>
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                            <Clock className="w-3 h-3" />
-                                                            {item.startTime || 'Flexible Time'}
-                                                        </div>
-                                                    </div>
-                                                    {item.price?.totalPrice?.price?.value && (
-                                                        <div className="font-bold text-primary">
-                                                            {item.price.totalPrice.price.currency} {item.price.totalPrice.price.value}
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* Full Description */}
+                        <section>
+                            <h3 className="text-2xl md:text-3xl font-black mb-8 text-foreground">Full Description</h3>
+                            <div className="prose prose-lg dark:prose-invert max-w-none text-muted-foreground/90 leading-relaxed font-medium">
+                                <p className="mb-6 first-letter:text-5xl first-letter:font-black first-letter:text-primary first-letter:mr-3 first-letter:float-left">
+                                    Prepare for an extraordinary journey as you explore the most iconic landmarks of {activity.location}.
+                                    This meticulously curated experience is designed to immerse you in the rich tapestry of local life,
+                                    combining historical depth with modern comfort and style.
+                                </p>
+                                <p className="mb-4">
+                                    Your professional guide will meeting you at the designated starting point, ready to share insider
+                                    stories and hidden details that you won't find in any guidebook. We pride ourselves on offering
+                                    more than just a tour; it's a deep dive into the heart and soul of the city.
+                                </p>
+                                <div className="p-6 my-8 rounded-2xl bg-primary/5 border-l-4 border-primary italic text-foreground/80">
+                                    "Every corner reveals a new story. Our goal is to make sure you return home with more than just photos, but with a true connection to our culture."
+                                </div>
+                                <p>
+                                    As we move through the itinerary, we'll take time for questions and breaks at carefully chosen
+                                    spots that offer the best photo opportunities away from the heavy crowds. This experience is
+                                    fully optimized for comfort, ensuring you can focus entirely on the wonders unfolding before you.
+                                </p>
+                            </div>
+                        </section>
+
+                        {/* Location Details */}
+                        <section className="scroll-mt-24" id="location">
+                            <h3 className="text-2xl md:text-3xl font-black mb-8 text-foreground flex items-center gap-3">
+                                <Navigation className="w-8 h-8 text-blue-500" />
+                                Meeting Point & Location
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-6">
+                                    <div className="p-6 rounded-2xl bg-surface border border-theme">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="p-2 bg-primary/10 rounded-xl text-primary font-bold">
+                                                <MapPin className="w-5 h-5" />
+                                            </div>
+                                            <h4 className="font-black text-foreground">Exact Address</h4>
+                                        </div>
+                                        <p className="text-muted-foreground font-medium mb-4">
+                                            {activity.location}, Central Square Plaza, Area 5.<br />
+                                            Look for the guide holding a blue TripVega flag.
+                                        </p>
+                                        <Button variant="secondary" className="w-full rounded-xl font-bold gap-2">
+                                            <Navigation className="w-4 h-4" />
+                                            Get Directions
+                                        </Button>
+                                    </div>
+                                    <div className="p-6 rounded-2xl bg-surface/50 border border-theme flex gap-4">
+                                        <Info className="w-6 h-6 text-primary shrink-0" />
+                                        <p className="text-sm text-muted-foreground font-medium">
+                                            Please arrive at least 15 minutes before the start time to ensure a smooth check-in process.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="relative aspect-square md:aspect-auto h-full rounded-[2rem] overflow-hidden border border-theme shadow-inner bg-surface-elevated flex items-center justify-center">
+                                    {/* Placeholder for Map - typically an iframe or map component */}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
+                                        <div className="w-16 h-16 bg-white dark:bg-black/40 rounded-full flex items-center justify-center mb-4 shadow-xl">
+                                            <MapPin className="w-8 h-8 text-primary animate-bounce" />
+                                        </div>
+                                        <span className="font-black text-xl text-foreground mb-2">Map View</span>
+                                        <p className="text-sm">Contact support for high-resolution interactive coordination</p>
+                                    </div>
+                                    {/* Optional: Static map image could be placed here */}
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Customer Reviews Section */}
+                        <section className="scroll-mt-24" id="reviews">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+                                <div>
+                                    <h3 className="text-2xl md:text-3xl font-black text-foreground flex items-center gap-3 mb-2">
+                                        <MessageCircle className="w-8 h-8 text-green-500" />
+                                        Customer Opinions
+                                    </h3>
+                                    <p className="text-muted-foreground font-medium">Based on over {activity.reviewCount} verified travelers</p>
+                                </div>
+                                <div className="flex items-center gap-4 p-4 rounded-2xl bg-surface border border-theme">
+                                    <div className="text-center">
+                                        <div className="text-3xl font-black text-foreground">{activity.rating}</div>
+                                        <div className="flex text-yellow-500 justify-center">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} className={cn("w-3 h-3", i < Math.floor(activity.rating) ? "fill-current" : "text-border")} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="w-[1px] h-10 bg-theme mx-2" />
+                                    <div className="font-extrabold text-green-500 text-sm uppercase tracking-tighter">Excellent Choice</div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {reviews.map((review) => (
+                                    <div key={review.id} className="p-8 rounded-3xl bg-surface border border-theme hover:border-primary/30 transition-all flex flex-col h-full">
+                                        <div className="flex items-center justify-between mb-6">
+                                            <div className="flex items-center gap-4">
+                                                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20">
+                                                    {review.avatar ? (
+                                                        <Image src={review.avatar} alt={review.author} fill className="object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary">
+                                                            <User className="w-6 h-6" />
                                                         </div>
                                                     )}
                                                 </div>
-                                                <Button
-                                                    className="w-full h-9 text-sm bg-primary/20 hover:bg-primary text-primary hover:text-white border border-primary/20 hover:border-primary transition-all"
-                                                    onClick={() => handleBookOption(availability.affiliateUrl, item.productOptionCode)}
-                                                >
-                                                    Book Now
-                                                </Button>
+                                                <div>
+                                                    <h4 className="font-black text-foreground">{review.author}</h4>
+                                                    <p className="text-xs text-muted-foreground font-bold uppercase">{format(new Date(review.date), 'MMMM yyyy')}</p>
+                                                </div>
                                             </div>
-                                        ))}
+                                            <div className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-xs font-black flex items-center gap-1">
+                                                {review.rating} <Star className="w-3 h-3 fill-current" />
+                                            </div>
+                                        </div>
+                                        <p className="text-muted-foreground font-medium leading-relaxed italic mb-4 flex-1">
+                                            "{review.comment}"
+                                        </p>
+                                        <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase cursor-pointer hover:gap-3 transition-all">
+                                            Helpful? Yes (12)
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <Button variant="ghost" className="w-full mt-8 rounded-2xl h-14 font-black text-foreground border border-theme hover:bg-surface-elevated">
+                                Read all {activity.reviewCount} reviews
+                            </Button>
+                        </section>
+
+                    </div>
+
+                    {/* Right Side: Sticky Booking Widget */}
+                    <aside className="lg:col-span-4 relative">
+                        <div className="sticky top-28 bg-surface border-2 border-primary/10 rounded-[2.5rem] p-8 shadow-2xl shadow-primary/5 ring-1 ring-black/5 overflow-hidden transition-all">
+
+                            <div className="absolute top-0 right-0 p-4">
+                                <span className="bg-primary/10 text-primary text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Best Price Guarantee</span>
+                            </div>
+
+                            <div className="mb-8">
+                                <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-1">Total Price from</p>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-4xl font-black text-foreground">{displayCurrency} {displayPrice}</span>
+                                    <span className="text-muted-foreground font-bold">per adult</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6 mb-8">
+                                {/* Date Selection */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Travel Date</label>
+                                    <RadixPopover>
+                                        <RadixPopoverTrigger asChild>
+                                            <button className={cn(
+                                                "w-full flex items-center justify-between px-6 py-4 bg-surface-elevated border-2 border-transparent hover:border-primary/30 rounded-2xl transition-all text-left group",
+                                                !selectedDate && "text-muted-foreground",
+                                                selectedDate && "text-foreground font-bold shadow-sm"
+                                            )}>
+                                                <div className="flex items-center gap-4">
+                                                    <CalendarIcon className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
+                                                    <span>
+                                                        {selectedDate
+                                                            ? format(selectedDate, "dd. MMM yyyy", { locale: locale === 'de' ? de : enUS })
+                                                            : "Select date"}
+                                                    </span>
+                                                </div>
+                                                <ChevronDown className="w-5 h-5 opacity-40 group-hover:opacity-100" />
+                                            </button>
+                                        </RadixPopoverTrigger>
+                                        <RadixPopoverPortal>
+                                            <RadixPopoverContent className="w-auto p-4 bg-surface border border-theme rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] z-[100] animate-in slide-in-from-top-2" align="end" sideOffset={12}>
+                                                <DayPicker
+                                                    mode="single"
+                                                    selected={selectedDate}
+                                                    onSelect={setSelectedDate}
+                                                    disabled={{ before: new Date() }}
+                                                    className="p-2"
+                                                    modifiersClassNames={{
+                                                        selected: "bg-primary text-white font-bold rounded-xl",
+                                                        today: "text-primary border-b-2 border-primary"
+                                                    }}
+                                                />
+                                            </RadixPopoverContent>
+                                        </RadixPopoverPortal>
+                                    </RadixPopover>
+                                </div>
+
+                                {/* Participants */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Quantity</label>
+                                    <div className="flex items-center justify-between px-6 py-4 bg-surface-elevated rounded-2xl border-2 border-transparent">
+                                        <div className="flex items-center gap-4">
+                                            <Users className="w-5 h-5 text-primary" />
+                                            <span className="font-bold text-foreground">{guestCount} {guestCount === 1 ? 'Person' : 'People'}</span>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <button
+                                                onClick={() => setGuestCount(Math.max(1, guestCount - 1))}
+                                                className="w-10 h-10 flex items-center justify-center bg-surface border border-theme rounded-xl hover:bg-primary hover:text-white hover:border-primary transition-all disabled:opacity-30"
+                                                disabled={guestCount <= 1}
+                                            >
+                                                <Minus className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => setGuestCount(Math.min(20, guestCount + 1))}
+                                                className="w-10 h-10 flex items-center justify-center bg-surface border border-theme rounded-xl hover:bg-primary hover:text-white hover:border-primary transition-all"
+                                            >
+                                                <Plus className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            )}
-
-                            {/* Footer Trust */}
-                            <div className="mt-6 pt-6 border-t border-theme flex items-center justify-center gap-4 text-xs text-muted-foreground">
-                                <span className="flex items-center gap-1.5">
-                                    <ShieldCheck className="w-3.5 h-3.5" />
-                                    Secure Booking
-                                </span>
-                                <span className="w-1 h-1 rounded-full bg-foreground/10" />
-                                <span className="flex items-center gap-1.5">
-                                    <Globe className="w-3.5 h-3.5" />
-                                    Viator Partner
-                                </span>
                             </div>
+
+                            {/* Action Area */}
+                            <div className="space-y-4">
+                                {!selectedDate ? (
+                                    <div className="p-6 bg-primary/5 rounded-3xl border-2 border-primary/10 border-dashed text-center">
+                                        <p className="text-sm font-bold text-primary">Choose a date to confirm prices</p>
+                                    </div>
+                                ) : checkLoading ? (
+                                    <div className="py-6 flex flex-col items-center gap-4">
+                                        <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                                        <span className="text-xs font-black text-primary uppercase animate-pulse">Checking Availability...</span>
+                                    </div>
+                                ) : availability ? (
+                                    <div className="space-y-4 animate-in fade-in duration-500">
+                                        {availability.available ? (
+                                            <>
+                                                <div className="p-4 bg-green-50 border border-green-100 rounded-2xl flex items-center gap-3 text-green-700 font-bold text-sm">
+                                                    <CheckCircle className="w-5 h-5 shrink-0" />
+                                                    <span>Limited spots left! Booking highly recommended.</span>
+                                                </div>
+
+                                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                                                    {availability.bookableItems?.map((item, idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            onClick={() => handleBookOption(availability.affiliateUrl, item.productOptionCode)}
+                                                            className="group p-5 bg-surface-elevated hover:bg-primary/5 border-2 border-transparent hover:border-primary/20 rounded-2xl transition-all cursor-pointer relative overflow-hidden"
+                                                        >
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <h5 className="font-extrabold text-sm pr-12">{item.productOptionCode === 'DEFAULT' ? 'Standard Ticket' : item.productOptionCode}</h5>
+                                                                <div className="text-right">
+                                                                    <div className="text-foreground font-black">{item.price?.totalPrice?.price?.currency} {item.price?.totalPrice?.price?.value}</div>
+                                                                    <div className="text-[10px] text-muted-foreground font-bold uppercase">All Incl.</div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center justify-between mt-4">
+                                                                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+                                                                    <Clock className="w-4 h-4 text-primary" />
+                                                                    {item.startTime || 'Flexible Start'}
+                                                                </div>
+                                                                <div className="flex items-center gap-1 text-primary font-black text-xs uppercase opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+                                                                    Book <ChevronRight className="w-4 h-4" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <Button
+                                                    onClick={() => handleBookOption(availability.affiliateUrl)}
+                                                    className="w-full h-16 rounded-[2rem] bg-primary text-white text-lg font-black shadow-xl shadow-primary/30 hover:shadow-primary/50 hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                                >
+                                                    Confirm Booking
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <div className="p-8 bg-red-50 border border-red-100 rounded-3xl text-center">
+                                                <X className="w-10 h-10 text-red-500 mx-auto mb-3" />
+                                                <p className="font-black text-red-700 mb-1">Sold Out</p>
+                                                <p className="text-sm text-red-600/70 font-bold">Try another date or travelers count.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : null}
+                            </div>
+
+                            {/* Trust & Policy */}
+                            <div className="mt-8 pt-8 border-t border-theme-dark/10 space-y-4">
+                                <div className="flex items-center gap-3 text-muted-foreground/60 transition-colors">
+                                    <Smartphone className="w-5 h-5" />
+                                    <span className="text-xs font-bold">Mobile tickets accepted</span>
+                                </div>
+                                <div className="flex items-center gap-3 text-muted-foreground/60 transition-colors">
+                                    <Users className="w-5 h-5" />
+                                    <span className="text-xs font-bold">Small group (max 15)</span>
+                                </div>
+                                <div className="flex items-center gap-3 text-muted-foreground/60 transition-colors">
+                                    <ShieldCheck className="w-5 h-5" />
+                                    <span className="text-xs font-bold">Secure payment & checkout</span>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </main>
+
+            {/* Recommendations / Why Us Section (Optional but premium) */}
+            <div className="bg-surface border-t border-theme mt-20 py-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16 px-4">
+                        <h2 className="text-4xl md:text-5xl font-black mb-4">You're in good hands.</h2>
+                        <p className="text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
+                            Join millions of world travelers planning their dream trips with TripVega.
+                            We carefully vet every activity for quality and safety.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                        <div className="text-center group">
+                            <div className="w-20 h-20 bg-primary/10 rounded-[2rem] flex items-center justify-center text-primary mx-auto mb-6 group-hover:bg-primary group-hover:text-white transition-all duration-500 rotate-3 group-hover:rotate-0">
+                                <Zap className="w-10 h-10" />
+                            </div>
+                            <h3 className="text-2xl font-black mb-3">Instant Confirmation</h3>
+                            <p className="text-muted-foreground font-medium leading-relaxed">No waiting. Once you pay, your tickets land in your inbox immediately. Focus on the fun.</p>
+                        </div>
+                        <div className="text-center group">
+                            <div className="w-20 h-20 bg-green-500/10 rounded-[2rem] flex items-center justify-center text-green-500 mx-auto mb-6 group-hover:bg-green-500 group-hover:text-white transition-all duration-500 -rotate-3 group-hover:rotate-0">
+                                <ShieldCheck className="w-10 h-10" />
+                            </div>
+                            <h3 className="text-2xl font-black mb-3">Verified Quality</h3>
+                            <p className="text-muted-foreground font-medium leading-relaxed">Every partner is checked by our team. If it's not excellent, it's not on TripVega.</p>
+                        </div>
+                        <div className="text-center group">
+                            <div className="w-20 h-20 bg-blue-500/10 rounded-[2rem] flex items-center justify-center text-blue-500 mx-auto mb-6 group-hover:bg-blue-500 group-hover:text-white transition-all duration-500 rotate-6 group-hover:rotate-0">
+                                <Star className="w-10 h-10" />
+                            </div>
+                            <h3 className="text-2xl font-black mb-3">Customer Support</h3>
+                            <p className="text-muted-foreground font-medium leading-relaxed">Travel doesn't always go to plan. That's why we're here 24/7 to help you out.</p>
                         </div>
                     </div>
                 </div>

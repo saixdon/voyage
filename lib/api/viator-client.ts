@@ -639,12 +639,22 @@ export async function getViatorProductDetails(productCode: string, locale = "en"
     }
 }
 
-// Get availability for a product
+// Pax Mix Interface
+export interface PaxMixItem {
+    ageBand: string;
+    numberOfTravelers: number;
+}
+
+// Get availability for a product (with optional paxMix for booking)
 export async function getViatorAvailability(
     productCode: string,
-    travelDate: string // Format: YYYY-MM-DD
+    travelDate: string, // Format: YYYY-MM-DD
+    paxMix?: PaxMixItem[]
 ) {
-    if (!USE_MOCK && !VIATOR_API_KEY) {
+    // Read env dynamically to allow testing
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!USE_MOCK && !API_KEY) {
         return { error: "Viator API key not configured" };
     }
 
@@ -669,18 +679,24 @@ export async function getViatorAvailability(
             };
         }
 
+        const body: Record<string, unknown> = {
+            productCode,
+            travelDate,
+            currency: "EUR",
+        };
+
+        if (paxMix && paxMix.length > 0) {
+            body.paxMix = paxMix;
+        }
+
         const response = await fetch(`${VIATOR_API_BASE}/availability/check`, {
             method: "POST",
             headers: {
                 "Accept": "application/json;version=2.0",
-                "exp-api-key": VIATOR_API_KEY!,
+                "exp-api-key": API_KEY!,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                productCode,
-                travelDate,
-                currency: "EUR",
-            }),
+            body: JSON.stringify(body),
         });
 
         if (!response.ok) {
@@ -693,3 +709,309 @@ export async function getViatorAvailability(
         return { error: "Failed to check availability" };
     }
 }
+
+// Get availability schedules for multiple products (Bulk)
+export async function getViatorAvailabilitySchedulesBulk(productCodes: string[]) {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!USE_MOCK && !API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(`${VIATOR_API_BASE}/availability/schedules/bulk`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json;version=2.0",
+                "exp-api-key": API_KEY!,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ productCodes }),
+        });
+
+        if (!response.ok) {
+            return { error: `API Error: ${response.status}` };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to fetch availability schedules" };
+    }
+}
+
+// Get cancellation reasons
+export async function getViatorCancellationReasons(locale = "en") {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!USE_MOCK && !API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(`${VIATOR_API_BASE}/bookings/cancel-reasons`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json;version=2.0",
+                "Accept-Language": locale,
+                "exp-api-key": API_KEY!,
+            },
+        });
+
+        if (!response.ok) {
+            return { error: `API Error: ${response.status}` };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to fetch cancellation reasons" };
+    }
+}
+
+// Booking Interfaces
+export interface BookerInfo {
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone?: string;
+}
+
+export interface BookingRequest {
+    cartRef: string;
+    booker: BookerInfo;
+    paymentToken?: string;
+    currency?: string;
+    partnerBookingRef?: string;
+    items?: BookingItem[];
+}
+
+// Create a booking
+export async function createViatorBooking(request: BookingRequest) {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!USE_MOCK && !API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(`${VIATOR_API_BASE}/bookings/cart/book`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json;version=2.0",
+                "exp-api-key": API_KEY!,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(request),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Booking failed:", response.status, errorText);
+            return { error: `API Error: ${response.status}`, details: errorText };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to create booking" };
+    }
+}
+
+// Cart Hold Interfaces
+export interface BookingItem {
+    productCode: string;
+    productOptionCode?: string;
+    travelDate: string;
+    startTime?: string;
+    paxMix: PaxMixItem[];
+}
+
+export interface CartHoldRequest {
+    items: BookingItem[];
+    currency?: string;
+}
+
+// Create a cart hold
+export async function createViatorCartHold(request: CartHoldRequest) {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!USE_MOCK && !API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(`${VIATOR_API_BASE}/bookings/cart/hold`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json;version=2.0",
+                "exp-api-key": API_KEY!,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(request),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Cart Hold failed:", response.status, errorText);
+            return { error: `API Error: ${response.status}`, details: errorText };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to create cart hold" };
+    }
+}
+
+// Get bookings modified since
+export async function getBookingsModifiedSince(modifiedSince: string) {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!USE_MOCK && !API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(`${VIATOR_API_BASE}/bookings/modified-since?modified-since=${modifiedSince}`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json;version=2.0",
+                "exp-api-key": API_KEY!,
+            },
+        });
+
+        if (!response.ok) {
+            return { error: `API Error: ${response.status}` };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to fetch modified bookings" };
+    }
+}
+
+// Get booking status
+export async function getBookingStatus(filter = {}) {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!USE_MOCK && !API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(`${VIATOR_API_BASE}/bookings/status`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json;version=2.0",
+                "exp-api-key": API_KEY!,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(filter),
+        });
+
+        if (!response.ok) {
+            return { error: `API Error: ${response.status}` };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to fetch booking status" };
+    }
+}
+
+// Get cancellation quote
+export async function cancelBookingQuote(bookingRef: string) {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!USE_MOCK && !API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(`${VIATOR_API_BASE}/bookings/${bookingRef}/cancel-quote`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json;version=2.0",
+                "exp-api-key": API_KEY!,
+            },
+        });
+
+        if (!response.ok) {
+            return { error: `API Error: ${response.status}` };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to fetch cancel quote" };
+    }
+}
+
+// Cancel booking
+export async function cancelBooking(bookingRef: string, reasonCode?: string) {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!USE_MOCK && !API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const body: Record<string, unknown> = {};
+        if (reasonCode) body.reasonCode = reasonCode;
+
+        const response = await fetch(`${VIATOR_API_BASE}/bookings/${bookingRef}/cancel`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json;version=2.0",
+                "exp-api-key": API_KEY!,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+            return { error: `API Error: ${response.status}` };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to cancel booking" };
+    }
+}
+
+// Get product reviews
+export async function getProductReviews(productCode: string, locale = "en", count = 5) {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!USE_MOCK && !API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(
+            `${VIATOR_API_BASE}/reviews/product?productCode=${productCode}&count=${count}&sortOrder=REVIEW_RATING_D`,
+            {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json;version=2.0",
+                    "Accept-Language": locale,
+                    "exp-api-key": API_KEY!,
+                },
+            }
+        );
+
+        if (!response.ok) {
+            return { error: `API Error: ${response.status}` };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to fetch reviews" };
+    }
+}
+

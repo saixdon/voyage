@@ -28,22 +28,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     useEffect(() => {
-        const checkUser = async () => {
-            try {
-                const response = await fetch("/api/auth/me");
-                if (response.ok) {
-                    const data = await response.json();
-                    setUser(data.user);
-                }
-            } catch (error) {
-                console.error("Failed to check auth:", error);
-            } finally {
+        const initializeAuth = async () => {
+            // Initial session check
+            const { data: { session } } = await supabase.auth.getSession();
+            setSession(session);
+            setUser(session?.user ?? null);
+            setLoading(false);
+
+            // Listen for changes
+            const {
+                data: { subscription },
+            } = supabase.auth.onAuthStateChange(async (_event, session) => {
+                setSession(session);
+                setUser(session?.user ?? null);
                 setLoading(false);
-            }
+
+                // Refresh Next.js router on sign in/out to update server components if needed
+                if (_event === 'SIGNED_IN' || _event === 'SIGNED_OUT') {
+                    router.refresh();
+                }
+            });
+
+            return () => subscription.unsubscribe();
         };
 
-        checkUser();
-    }, []);
+        initializeAuth();
+    }, [router]);
 
     const signOut = async () => {
         await supabase.auth.signOut();

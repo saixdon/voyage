@@ -11,8 +11,15 @@ https://docs.viator.com/partner-api/technical/
 - **Sandbox**: `https://api.sandbox.viator.com/partner`
 - **Production**: `https://api.viator.com/partner`
 
-## Zugangs-Level (Basic Access Affiliate)
-Mit Basic Access haben wir Zugriff auf:
+## Zugangs-Level: Full + Booking Access ✅
+
+> **Status Update (Januar 2026)**: Viator hat unseren Antrag auf Full + Booking Access genehmigt!
+> - Sandbox-Schlüssel mit vollem Zugang erhalten
+> - Nach Zertifizierung wird ein Produktions-Schlüssel bereitgestellt
+
+### Verfügbare Endpoints (Full + Booking Access)
+
+**Produkte & Suche:**
 - `/products/modified-since` - Alle Produkte abrufen (mit Änderungsdatum)
 - `/products/bulk` - Mehrere Produkte auf einmal abrufen
 - `/products/{product-code}` - Einzelnes Produkt abrufen
@@ -20,18 +27,30 @@ Mit Basic Access haben wir Zugriff auf:
 - `/products/search` - Produktsuche
 - `/products/recommendations` - Empfehlungen
 - `/attractions/search` - Attraktionen suchen
+- `/search/freetext` - Freitext-Suche
+
+**Verfügbarkeit:**
 - `/availability/check` - Verfügbarkeit prüfen
 - `/availability/schedules/{product-code}` - Verfügbarkeits-Schedule
-- `/search/freetext` - Freitext-Suche
+- `/availability/schedules/bulk` - Mehrere Schedules auf einmal
+
+**Buchungen (NEU mit Full Access):**
+- `/bookings/cart/hold` - Warenkorb erstellen und Preis sichern
+- `/bookings/cart/book` - Buchung abschließen
+- `/bookings/cart/cancel` - Buchung stornieren
+- `/bookings/status` - Buchungsstatus abrufen
+- `/bookings/{bookingRef}/voucher` - Voucher/Ticket abrufen ⭐
+
+**Stornierung:**
+- `/bookings/{bookingRef}/cancel` - Buchung stornieren
+- `/bookings/{bookingRef}/cancel/reasons` - Stornierungsgründe
+- `/bookings/{bookingRef}/cancel/quote` - Stornierungs-Quote
+
+**Sonstiges:**
 - `/destinations` - Reiseziele
 - `/locations/bulk` - Orte abrufen
 - `/exchange-rates` - Wechselkurse
 - `/reviews/product` - Produkt-Bewertungen
-
-## KEIN Zugang zu (Basic Access):
-- Booking-Endpoints (`/bookings/*`)
-- Cart-Endpoints (`/bookings/cart/*`)
-- Amendment-Endpoints (`/amendment/*`)
 
 ## Wichtige Headers für alle Requests
 ```
@@ -67,6 +86,33 @@ POST /partner/search/freetext
 }
 ```
 
+## Beispiel: Buchung erstellen (Hold + Book Flow)
+```
+# 1. Hold - Warenkorb erstellen
+POST /partner/bookings/cart/hold
+{
+  "items": [{
+    "productCode": "12345P1",
+    "productOptionCode": "TG1",
+    "travelDate": "2026-03-15",
+    "paxMix": [{ "ageBand": "ADULT", "numberOfTravelers": 2 }]
+  }],
+  "currency": "EUR"
+}
+
+# 2. Book - Buchung abschließen
+POST /partner/bookings/cart/book
+{
+  "cartRef": "CART_REF_FROM_HOLD",
+  "booker": {
+    "email": "kunde@email.de",
+    "firstName": "Max",
+    "lastName": "Mustermann"
+  },
+  "paymentToken": "PAYMENT_TOKEN"
+}
+```
+
 ## Product Response Struktur
 ```json
 {
@@ -89,9 +135,22 @@ POST /partner/search/freetext
 }
 ```
 
-## Affiliate Deep Links
-Da wir Basic Access haben, müssen Buchungen über Viator erfolgen.
-Affiliate-Link Format: `https://www.viator.com/tours/{destination}/{product-title}/d{destination-id}-{product-code}`
+## Voucher-Handling
+Mit Full + Booking Access können wir Vouchers selbst abrufen und an Kunden senden:
+```
+GET /partner/bookings/{bookingRef}/voucher
+```
+
+**Vorteile:**
+- Eigenes Branding auf E-Mails möglich
+- Volle Kontrolle über Kundenkommunikation
+- Tickets/Vouchers direkt in TripVega anzeigen
+
+## Zertifizierungs-Prozess
+1. ✅ Sandbox-Schlüssel mit Full + Booking Access erhalten
+2. 🔄 Integration gemäß API-Dokumentation erstellen (in Arbeit)
+3. ⏳ Zertifizierung bei affiliateapi@tripadvisor.com anfordern
+4. ⏳ Produktionsschlüssel erhalten und live gehen
 
 ## Rate Limiting
 - HTTP 429 = Rate Limit erreicht

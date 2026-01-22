@@ -74,7 +74,7 @@ Nach **Phase 1 (Setup)** können beide Entwickler parallel arbeiten:
 ## PHASE 1: Supabase Database Setup
 **Aufwand**: ~4 Stunden
 **Abhängigkeit**: Phase 0 abgeschlossen
-**Status**: ⏳ Ausstehend
+**Status**: ✅ Abgeschlossen (2026-01-23)
 
 ### Aufgaben
 
@@ -121,13 +121,13 @@ Nach **Phase 1 (Setup)** können beide Entwickler parallel arbeiten:
 ## PHASE 2: Ingestion Pipeline (Sync Jobs)
 **Aufwand**: ~2 Tage
 **Abhängigkeit**: Phase 1 abgeschlossen
-**Status**: ⏳ Ausstehend
+**Status**: 🟠 In Arbeit (Blocked by API Permissions)
 
 ### Aufgaben
 
 #### 2.1 Products Sync (Alle 20 Minuten)
-- [ ] **2.1.1** `/products/modified-since` Endpoint aufrufen
-- [ ] **2.1.2** `cursor` Parameter korrekt verwenden (nicht `modified-since`)
+- [x] **2.1.1** `/products/modified-since` Endpoint aufrufen (403 Forbidden)
+- [/] **2.1.2** `cursor` Parameter korrekt verwenden
 - [ ] **2.1.3** Produkte in DB upserten
 - [ ] **2.1.4** Sync-Log schreiben
 - [ ] **2.1.5** Cron-Job einrichten (alle 20 min)

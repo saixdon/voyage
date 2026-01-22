@@ -21,139 +21,112 @@
 
 ## 📊 ACCESS LEVELS
 
-### Current Status: Requested `Full + Booking Access`
+### Current Status: ✅ Full + Booking Access APPROVED
+
+> **Status Update (Januar 2026)**: Viator hat unseren Antrag genehmigt!
+> - ✅ Sandbox-Schlüssel mit Full + Booking Access erhalten
+> - 🔄 Integration gemäß Questionnaire in `docs/VIATOR_QUESTIONNAIRE_DRAFT.md` in Arbeit
+> - ⏳ Nach Fertigstellung: Zertifizierung bei affiliateapi@tripadvisor.com
+> - ⏳ Produktions-Schlüssel nach erfolgreicher Zertifizierung
 
 | Level | Description | Our Status |
 |-------|-------------|------------|
-| Basic | Redirect to Viator.com | ✅ Currently Implemented |
-| Full | Cache product data locally | 🔄 Required for upgrade |
-| Full + Booking | Complete checkout on our site | 🎯 Requested |
+| Basic | Redirect to Viator.com | ❌ Nicht mehr verwendet |
+| Full | Cache product data locally | ✅ Approved |
+| Full + Booking | Complete checkout on our site | ✅ Approved (Sandbox) |
 
-### Requirements for Full + Booking Access:
-1. ⏳ Booking Questions Flow implementation
-2. ⏳ PCI Compliance proof
-3. ⏳ Certification with Viator team
-4. ⏳ Database for caching (Supabase planned)
+### Approved Configuration (see VIATOR_QUESTIONNAIRE_DRAFT.md):
+- **Data Model**: Ingestion Model (`/products/modified-since`)
+- **Payment Solution**: Iframe (SAQ A Self-Assessment)
+- **Product Catalog**: Full catalog (alle Produkte)
+- **Voucher Access**: ✅ Können Vouchers selbst abrufen und versenden
 
 ---
 
-## ✅ ACTION ITEMS (From Viator Email - 2026-01-15)
+## ✅ ACTION ITEMS (COMPLETED - Januar 2026)
 
-> **Contact**: Chris - Viator API Integrations
-> **Status**: Awaiting our responses before sandbox access is granted
+> **Status**: ✅ Viator hat unsere Antworten akzeptiert und Sandbox-Zugang gewährt!
+> **Reference**: Siehe `docs/VIATOR_QUESTIONNAIRE_DRAFT.md` für alle Details
 
-### 📋 REQUIRED RESPONSES TO VIATOR
+### 📋 COMPLETED DECISIONS (Approved by Viator)
 
-#### 1. Payment Solution Selection
+#### 1. Payment Solution Selection ✅
 `PAYMENT_API` `IFRAME` `CHECKOUT`
 
-**Question**: Which payment solution will you implement?
-
-| Option | Description | PCI Requirement |
-|--------|-------------|-----------------|
-| **API Payments** | Full control, custom checkout | PCI DSS AOC (by certified assessor) |
-| **iframe** | Viator-hosted payment form | SAQ A (self-assessment) |
-
-**Documentation**: https://partnerresources.viator.com/travel-commerce/api-payments/
-
-**Our Decision**: ⏳ TODO - Choose one
-- [ ] API Payments (more work, full control)
-- [ ] iframe (easier, less control)
-
-**Recommendation**: Start with **iframe** (SAQ A self-assessment is much easier than full PCI DSS audit)
+**Our Decision**: ✅ **Iframe Solution**
+- Viator-hosted payment form
+- SAQ A Self-Assessment (einfacher als PCI DSS Audit)
+- Endpoint `/v1/checkoutsessions/.../paymentaccounts` wird NICHT verwendet
 
 ---
 
-#### 2. PCI Compliance Certificate
+#### 2. PCI Compliance ✅
 `PCI_COMPLIANCE` `CERTIFICATION` `AOC`
 
-**Requirement**: Provide valid PCI DSS compliance certificate
-
-| Solution | Certificate Required | How to Get |
-|----------|---------------------|------------|
-| API Payments | PCI DSS AOC | Certified assessor (expensive, complex) |
-| iframe | SAQ A AOC | Self-assessment questionnaire |
-
-**⚠️ WARNING**: Certificate must be kept current. Expiration = Service deactivation!
-
-**Our Status**: ⏳ TODO - Obtain certificate after payment solution decision
+**Our Status**: ✅ SAQ A Self-Assessment (für Iframe-Lösung)
+- Wir speichern KEINE Zahlungsdaten
+- Viator handled alle Zahlungen über Iframe
 
 ---
 
-#### 3. Endpoint Usage Questionnaire
+#### 3. Endpoint Usage Questionnaire ✅
 `ENDPOINT_USAGE` `BACKEND_CHECKS`
 
-**Requirement**: Fill out attached file "Viator Affiliate API with booking access - back-end checks"
-
-**Our Status**: ⏳ TODO - Waiting for PDF attachment from user
-
-**Action**: Document our planned endpoint usage:
-- [ ] Which endpoints will we use?
-- [ ] How will we cache data?
-- [ ] What is our sync frequency?
+**Our Status**: ✅ Ausgefüllt und genehmigt
+- **Data Model**: Ingestion Model
+- **Sync Frequency**: Hourly für Products/Availability
+- Details in `docs/VIATOR_QUESTIONNAIRE_DRAFT.md`
 
 ---
 
-#### 4. Certification Requirements Confirmation
+#### 4. Certification Requirements ✅
 `CERTIFICATION` `FRONTEND` `BACKEND`
 
-**Requirement**: Confirm compliance with all certification requirements
-
-**Documentation**: https://partnerresources.viator.com/travel-commerce/certification/
-
-**What gets checked**:
-- Frontend implementation
-- Backend implementation
-- Data integrity
-- API usage correctness
-
-**Our Status**: ⏳ TODO - Review requirements and confirm
+**Our Status**: ✅ Bestätigt
+- Wir implementieren gemäß Viator-Richtlinien
+- Zertifizierung nach Fertigstellung der Integration
 
 ---
 
-#### 5. Product Catalog Decision
+#### 5. Product Catalog Decision ✅
 `PRODUCT_CATALOG` `CURATED` `FULL_CATALOG`
 
-**Question**: Do you want the curated subset or full catalog?
-
-| Option | Pros | Cons |
-|--------|------|------|
-| **Curated Subset** | Higher conversion, simpler integration, maintained by Viator | Limited selection |
-| **Full Catalog** | Access to all products | Complex filtering needed, more maintenance |
-
-**Our Decision**: ⏳ TODO - Choose one
-- [ ] Curated subset (recommended for faster start)
-- [ ] Full catalog (more products, more work)
+**Our Decision**: ✅ **Full Catalog**
+- Alle Viator-Produkte und -Destinationen
+- Automatische Updates via `/products/modified-since`
 
 ---
 
-### 📊 SUMMARY: REQUIRED ACTIONS
+### 📊 SUMMARY: CURRENT STATUS
 
-| # | Action | Status | Owner |
+| # | Action | Status | Notes |
 |---|--------|--------|-------|
-| 1 | Choose Payment Solution (API vs iframe) | ⏳ TODO | User Decision |
-| 2 | Obtain PCI Compliance Certificate | ⏳ TODO | User |
-| 3 | Fill Endpoint Usage Questionnaire | ⏳ Waiting for PDF | User + Dev |
-| 4 | Confirm Certification Requirements | ⏳ TODO | Dev (review docs) |
-| 5 | Choose Product Catalog (curated vs full) | ⏳ TODO | User Decision |
-| 6 | Send responses to Chris @ Viator | ⏳ Blocked | After above complete |
+| 1 | Payment Solution | ✅ Done | Iframe |
+| 2 | PCI Compliance | ✅ Done | SAQ A |
+| 3 | Endpoint Questionnaire | ✅ Done | Ingestion Model |
+| 4 | Certification Confirmation | ✅ Done | Bestätigt |
+| 5 | Product Catalog | ✅ Done | Full Catalog |
+| 6 | **Sandbox Access** | ✅ **GRANTED** | Schlüssel erhalten |
+| 7 | Integration bauen | 🔄 In Progress | Aktuell in Arbeit |
+| 8 | Zertifizierung anfordern | ⏳ Pending | Nach Fertigstellung |
+| 9 | Production Access | ⏳ Pending | Nach Zertifizierung |
 
-### 📍 NEXT STEPS (Viator's Process)
+### 📍 NEXT STEPS
 
 ```
-Current Stage
+✅ DONE
      ↓
-[1] Answer Questions → Send to Viator
+[1] ✅ Questionnaire beantwortet
      ↓
-[2] Receive Sandbox Booking Access
+[2] ✅ Sandbox Booking Access erhalten
      ↓
-[3] Implement Integration
+[3] 🔄 Integration implementieren ← WIR SIND HIER
      ↓
-[4] Frontend + Backend Certification Checks
+[4] ⏳ Frontend + Backend Certification Checks
      ↓
-[5] Receive Production Access
+[5] ⏳ Production Access erhalten
      ↓
-[6] Go Live! 🚀
+[6] ⏳ Go Live! 🚀
 ```
 
 ---
