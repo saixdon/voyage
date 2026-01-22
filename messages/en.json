@@ -9,6 +9,7 @@
     "nav": {
         "destinations": "Interactive World Map",
         "activities": "Activities",
+        "transport": "Transport",
         "culture": "Culture",
         "login": "Login",
         "logout": "Sign Out",
