@@ -59,7 +59,7 @@ export default async function LocaleLayout({
                                         <Suspense fallback={<div className="h-20" />}>
                                             <Navbar />
                                         </Suspense>
-                                        <main className="min-h-screen">{children}</main>
+                                        <main className="min-h-screen pt-20">{children}</main>
                                         <Footer />
                                     </CurrencyProvider>
                                 </FavoritesProvider>

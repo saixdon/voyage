@@ -11,7 +11,8 @@
     "sync:products": "tsx scripts/sync/sync-products.ts",
     "sync:destinations": "tsx scripts/sync/sync-destinations.ts",
     "sync:tags": "tsx scripts/sync/sync-tags.ts",
-    "sync:exchange-rates": "tsx scripts/sync/sync-exchange-rates.ts"
+    "sync:exchange-rates": "tsx scripts/sync/sync-exchange-rates.ts",
+    "sync:booking-questions": "tsx scripts/sync/sync-booking-questions.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -21,11 +22,13 @@
     "@react-email/render": "^2.0.4",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.90.1",
+    "@types/leaflet": "^1.9.21",
     "@types/pg": "^8.16.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.27.0",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.562.0",
     "next": "^16.1.3",
     "next-intl": "^4.7.0",
@@ -36,6 +39,7 @@
     "react-day-picker": "^9.13.0",
     "react-dom": "^19.2.3",
     "react-globe.gl": "^2.37.0",
+    "react-leaflet": "^5.0.0",
     "resend": "^6.8.0",
     "tailwind-merge": "^3.4.0",
     "three": "^0.182.0",

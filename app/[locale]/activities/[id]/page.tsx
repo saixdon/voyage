@@ -39,46 +39,35 @@ import {
 import { Popover as RadixPopover, PopoverContent as RadixPopoverContent, PopoverTrigger as RadixPopoverTrigger, PopoverPortal as RadixPopoverPortal } from "@radix-ui/react-popover";
 import { cn } from "@/lib/utils";
 import { useLocale } from "next-intl";
+import { ActivityMap } from "@/components/features/ActivityMap";
 
 interface ActivityWithBadge extends TransformedActivity {
     badge?: string;
-    reviews?: {
-        id: string;
-        author: string;
-        rating: number;
-        date: string;
-        comment: string;
-        avatar?: string;
-    }[];
 }
 
-// Mock reviews for demonstration if not present in activity
-const DEFAULT_REVIEWS = [
-    {
-        id: "1",
-        author: "Sarah M.",
-        rating: 5,
-        date: "2024-01-15",
-        comment: "Absolutely incredible experience! The guide was so knowledgeable and the views were breathtaking. Highly recommend to anyone visiting.",
-        avatar: "https://lh3.googleusercontent.com/a/ACg8ocL8jXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjX=s96-c"
-    },
-    {
-        id: "2",
-        author: "Michael R.",
-        rating: 4,
-        date: "2023-12-20",
-        comment: "Very well organized. We saw everything we wanted to and the pace was just right. The only downside was the meeting point was a bit hard to find.",
-        avatar: "https://lh3.googleusercontent.com/a/ACg8ocL8jXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjX=s96-c"
-    },
-    {
-        id: "3",
-        author: "Elena G.",
-        rating: 5,
-        date: "2024-01-05",
-        comment: "One of the highlights of our trip. The small group size made it feel very personal. Excellent value for money!",
-        avatar: "https://lh3.googleusercontent.com/a/ACg8ocL8jXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjXjX=s96-c"
-    }
-];
+// Interface for Viator review from API
+interface ViatorReview {
+    reviewReference?: string;
+    rating?: number;
+    text?: string;
+    title?: string;
+    publishedDate?: string;
+    travelerType?: string;
+    userName?: string;
+    ownerProviderPhotoId?: string;
+    photos?: { photoUrl: string; caption?: string }[];
+}
+
+// Transformed review for UI
+interface DisplayReview {
+    id: string;
+    author: string;
+    rating: number;
+    date: string;
+    comment: string;
+    avatar?: string;
+    photos?: string[];
+}
 
 export default function ActivityDetailPage({
     params,
@@ -105,6 +94,10 @@ export default function ActivityDetailPage({
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isFavorite, setIsFavorite] = useState(false);
 
+    // Reviews State
+    const [reviews, setReviews] = useState<DisplayReview[]>([]);
+    const [reviewsLoading, setReviewsLoading] = useState(false);
+
     // Fetch Activity Details
     useEffect(() => {
         async function fetchActivity() {
@@ -128,6 +121,35 @@ export default function ActivityDetailPage({
         }
         fetchActivity();
     }, [id]);
+
+    // Fetch reviews when activity is loaded
+    useEffect(() => {
+        if (activity?.productCode) {
+            setReviewsLoading(true);
+            fetch(`/api/reviews?productCode=${activity.productCode}&count=6`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.reviews && Array.isArray(data.reviews)) {
+                        const transformedReviews: DisplayReview[] = data.reviews.map((r: ViatorReview, idx: number) => ({
+                            id: r.reviewReference || `review-${idx}`,
+                            author: r.userName || "Anonymous Traveler",
+                            rating: r.rating || 5,
+                            date: r.publishedDate || new Date().toISOString(),
+                            comment: r.text || r.title || "Great experience!",
+                            avatar: undefined, // Viator doesn't provide user avatars
+                            photos: r.photos?.map(p => p.photoUrl) || []
+                        }));
+                        setReviews(transformedReviews);
+                    }
+                })
+                .catch(err => {
+                    console.error("Failed to fetch reviews:", err);
+                })
+                .finally(() => {
+                    setReviewsLoading(false);
+                });
+        }
+    }, [activity?.productCode]);
 
     // Auto-Check Availability when Date or Guests change
     useEffect(() => {
@@ -176,8 +198,7 @@ export default function ActivityDetailPage({
         router.push(`/checkout?${checkoutParams.toString()}`);
     };
 
-    const allImages = activity ? [activity.image, ...(activity.images || [])].slice(0, 5) : [];
-    const reviews = activity?.reviews || DEFAULT_REVIEWS;
+    const allImages = activity ? [activity.image, ...(activity.images || [])] : [];
 
     if (loading) {
         return (
@@ -459,17 +480,10 @@ export default function ActivityDetailPage({
                                         </p>
                                     </div>
                                 </div>
-                                <div className="relative aspect-square md:aspect-auto h-full rounded-[2rem] overflow-hidden border border-theme shadow-inner bg-surface-elevated flex items-center justify-center">
-                                    {/* Placeholder for Map - typically an iframe or map component */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
-                                        <div className="w-16 h-16 bg-white dark:bg-black/40 rounded-full flex items-center justify-center mb-4 shadow-xl">
-                                            <MapPin className="w-8 h-8 text-primary animate-bounce" />
-                                        </div>
-                                        <span className="font-black text-xl text-foreground mb-2">Map View</span>
-                                        <p className="text-sm">Contact support for high-resolution interactive coordination</p>
-                                    </div>
-                                    {/* Optional: Static map image could be placed here */}
-                                </div>
+                                <ActivityMap
+                                    location={activity.location}
+                                    className="h-full min-h-[300px]"
+                                />
                             </div>
                         </section>
 
@@ -497,38 +511,60 @@ export default function ActivityDetailPage({
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {reviews.map((review) => (
-                                    <div key={review.id} className="p-8 rounded-3xl bg-surface border border-theme hover:border-primary/30 transition-all flex flex-col h-full">
-                                        <div className="flex items-center justify-between mb-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20">
-                                                    {review.avatar ? (
-                                                        <Image src={review.avatar} alt={review.author} fill className="object-cover" />
-                                                    ) : (
-                                                        <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary">
-                                                            <User className="w-6 h-6" />
+                            {reviewsLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                                </div>
+                            ) : reviews.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {reviews.map((review) => (
+                                        <div key={review.id} className="group p-6 rounded-3xl bg-gradient-to-br from-surface to-surface-elevated border border-theme hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 flex flex-col h-full">
+                                            <div className="flex items-center justify-between mb-5">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border-2 border-primary/10">
+                                                        <span className="text-lg font-black text-primary">
+                                                            {review.author.charAt(0).toUpperCase()}
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-bold text-foreground">{review.author}</h4>
+                                                        <p className="text-xs text-muted-foreground font-medium">
+                                                            {format(new Date(review.date), 'MMMM yyyy', { locale: locale === 'de' ? de : enUS })}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-1 px-3 py-1.5 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-full text-sm font-bold">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Star key={i} className={cn("w-3.5 h-3.5", i < review.rating ? "fill-current" : "opacity-30")} />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <p className="text-foreground/80 font-medium leading-relaxed mb-4 flex-1 line-clamp-4 group-hover:line-clamp-none transition-all">
+                                                "{review.comment}"
+                                            </p>
+                                            {review.photos && review.photos.length > 0 && (
+                                                <div className="flex gap-2 mt-2 mb-4 overflow-x-auto">
+                                                    {review.photos.slice(0, 3).map((photo, idx) => (
+                                                        <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
+                                                            <Image src={photo} alt="Review photo" fill className="object-cover" />
                                                         </div>
-                                                    )}
+                                                    ))}
                                                 </div>
-                                                <div>
-                                                    <h4 className="font-black text-foreground">{review.author}</h4>
-                                                    <p className="text-xs text-muted-foreground font-bold uppercase">{format(new Date(review.date), 'MMMM yyyy')}</p>
-                                                </div>
-                                            </div>
-                                            <div className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-xs font-black flex items-center gap-1">
-                                                {review.rating} <Star className="w-3 h-3 fill-current" />
+                                            )}
+                                            <div className="flex items-center gap-4 pt-4 border-t border-theme/50">
+                                                <button className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors">
+                                                    👍 Helpful
+                                                </button>
                                             </div>
                                         </div>
-                                        <p className="text-muted-foreground font-medium leading-relaxed italic mb-4 flex-1">
-                                            "{review.comment}"
-                                        </p>
-                                        <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase cursor-pointer hover:gap-3 transition-all">
-                                            Helpful? Yes (12)
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 text-muted-foreground">
+                                    <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                                    <p className="font-medium">No reviews available yet</p>
+                                </div>
+                            )}
 
                             <Button variant="ghost" className="w-full mt-8 rounded-2xl h-14 font-black text-foreground border border-theme hover:bg-surface-elevated">
                                 Read all {activity.reviewCount} reviews

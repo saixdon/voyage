@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useTransition } from "react";
 // import Link from "next/link"; // Replaced by localized Link
 import { useTheme } from "next-themes";
-import { AuthModal } from "./AuthModal";
+// AuthModal removed - using /login page directly
 import { supabase } from "@/lib/supabase/client";
 import { useCurrency } from "@/lib/currency/context";
 import { currencies } from "@/lib/currency/types";
@@ -31,7 +31,7 @@ export function Navbar() {
 
     const { theme, setTheme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
-    const [showAuthModal, setShowAuthModal] = useState(false);
+    // AuthModal removed - using /login page directly
     const { user, signOut: handleLogout } = useAuth(); // Modified this line
     const { currency, setCurrency } = useCurrency();
 
@@ -273,13 +273,13 @@ export function Navbar() {
                                 )}
                             </div>
                         ) : (
-                            <button
-                                onClick={() => setShowAuthModal(true)}
+                            <Link
+                                href="/login"
                                 className="h-10 px-5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-full transition-all duration-300 hover:shadow-[0_0_20px_rgba(43,140,238,0.4)] hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
                             >
                                 <span className="material-symbols-outlined text-lg">person</span>
                                 <span className="hidden sm:inline">{authT('signIn')}</span>
-                            </button>
+                            </Link>
                         )}
 
                         {/* Search Button */}
@@ -294,8 +294,7 @@ export function Navbar() {
                 </div>
             </nav>
 
-            {/* Auth Modal */}
-            <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+            {/* Auth Modal removed - using /login page directly */}
         </>
     );
 }

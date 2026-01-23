@@ -34,16 +34,19 @@ exp-api-key: YOUR_VIATOR_API_KEY
 | `/products/search` | `searchViatorProducts()` | POST |
 | `/products/{product-code}` | `getViatorProductDetails()` | GET |
 | `/products/tags` | `fetchViatorTags()` | GET |
+| `/products/booking-questions` | `getProductBookingQuestions()` | GET |
 | `/destinations` | `fetchAllDestinations()` | GET |
 | `/availability/check` | `getViatorAvailability()` | POST |
 | `/availability/schedules/bulk` | `getViatorAvailabilitySchedulesBulk()` | POST |
 | `/bookings/cart/hold` | `createViatorCartHold()` | POST |
 | `/bookings/cart/book` | `createViatorBooking()` | POST |
 | `/bookings/status` | `getBookingStatus()` | POST |
+| `/bookings/{ref}/voucher` | `getBookingVoucher()` | GET |
 | `/bookings/{ref}/cancel-quote` | `cancelBookingQuote()` | POST |
 | `/bookings/{ref}/cancel` | `cancelBooking()` | POST |
 | `/bookings/cancel-reasons` | `getViatorCancellationReasons()` | GET |
 | `/bookings/modified-since` | `getBookingsModifiedSince()` | GET |
+| `/bookings/modified-since/acknowledge` | `acknowledgeModifiedBookings()` | POST |
 | `/reviews/product` | `getProductReviews()` | GET |
 
 ### ✅ Implementiert als Sync-Skripte
@@ -60,12 +63,9 @@ exp-api-key: YOUR_VIATOR_API_KEY
 
 | Endpoint | Zweck | Priorität |
 |----------|-------|-----------|
-| `/bookings/{ref}/voucher` | Voucher/Ticket abrufen | 🔴 Hoch |
-| `/products/booking-questions` | Buchungsfragen | 🟡 Mittel |
 | `/availability/schedules/modified-since` | Availability Sync | 🟡 Mittel |
 | `/locations/bulk` | Locations | 🟢 Niedrig |
 | `/attractions/search` | Attraktionen | 🟢 Niedrig |
-| `/bookings/modified-since/acknowledge` | Bestätigung | 🟡 Mittel |
 
 ---
 

@@ -53,6 +53,7 @@
 
 ### Sync-Skripte (`scripts/sync/`)
 
+
 | Endpoint | Skript | Status |
 |----------|--------|--------|
 | `/products/modified-since` | `sync-products.ts` | ✅ Funktioniert |
@@ -60,17 +61,23 @@
 | `/destinations` | `sync-destinations.ts` | ✅ Funktioniert |
 | `/products/tags` | `sync-tags.ts` | ✅ Funktioniert |
 | `/exchange-rates` | `sync-exchange-rates.ts` | ✅ Funktioniert |
+| `/products/booking-questions` | `sync-booking-questions.ts` | ✅ Neu erstellt |
 
-### ❌ Noch fehlend
+### ✅ Neu in viator-client.ts hinzugefügt (2026-01-23)
+
+| Endpoint | Funktion | Status |
+|----------|----------|--------|
+| `/bookings/{ref}/voucher` | `getBookingVoucher()` | ✅ Implementiert |
+| `/products/booking-questions` | `getProductBookingQuestions()` | ✅ Implementiert |
+| `/bookings/modified-since/acknowledge` | `acknowledgeModifiedBookings()` | ✅ Implementiert |
+
+### ❌ Noch fehlend (niedrige Priorität)
 
 | Endpoint | Zweck | Priorität |
 |----------|-------|-----------|
 | `/availability/schedules/modified-since` | Availability für DB cachen | 🟡 Mittel |
 | `/locations/bulk` | Orte/Locations abrufen | 🟢 Niedrig |
 | `/attractions/search` | Attraktionen synchronisieren | 🟢 Niedrig |
-| `/products/booking-questions` | Buchungsfragen abrufen | 🟡 Mittel |
-| `/bookings/{ref}/voucher` | Voucher/Ticket abrufen | 🔴 Hoch |
-| `/bookings/modified-since/acknowledge` | Stornierungen bestätigen | 🟡 Mittel |
 
 ---
 
