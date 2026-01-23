@@ -27,6 +27,7 @@ async function fetchProductsModifiedSince(cursor?: string) {
         method: 'GET',
         headers: {
             'Accept': 'application/json;version=2.0',
+            'Accept-Language': 'en',
             'exp-api-key': VIATOR_API_KEY!,
         },
     });
@@ -36,6 +37,35 @@ async function fetchProductsModifiedSince(cursor?: string) {
     }
 
     return await response.json();
+}
+
+// Fetch full product details using /products/bulk endpoint
+async function fetchProductDetails(productCodes: string[]) {
+    // console.log(`Fetching details for ${productCodes.slice(0, 3)}...`);
+    const response = await fetch(`${VIATOR_API_BASE}/products/bulk`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json;version=2.0',
+            'Accept-Language': 'en',
+            'Content-Type': 'application/json',
+            'exp-api-key': VIATOR_API_KEY!,
+        },
+        body: JSON.stringify({ productCodes }),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Bulk fetch failed: ${response.status} - ${errorText}`);
+        return { products: [] };
+    }
+
+    const data = await response.json();
+    // Debug: check if products are returned
+    if (!data.products || data.products.length === 0) {
+        console.warn(`Bulk API 200 OK but returned 0 products. Request size: ${productCodes.length}`);
+        // console.log("Sample requested codes:", productCodes.slice(0, 5));
+    }
+    return data;
 }
 
 async function syncProducts() {
@@ -63,57 +93,104 @@ async function syncProducts() {
             console.log(`Fetching batch... (Cursor: ${cursor || 'START'})`);
             const data: any = await fetchProductsModifiedSince(cursor);
 
-            const products = data.products;
-            if (!products || products.length === 0) {
+            const summaryProducts = data.products;
+            if (!summaryProducts || summaryProducts.length === 0) {
                 hasMore = false;
                 break;
             }
 
-            console.log(`Processing ${products.length} products...`);
 
-            for (const p of products) {
-                // Upsert Product
-                // Note: snake_case column names based on schema
-                await client.query(`
-          INSERT INTO public.products (
-            product_code, title, description, status,
-            viator_updated_at, price_from, currency,
-            destination_id, primary_image, images,
-            rating, review_count, duration, synced_at
-          )
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
-          ON CONFLICT (product_code) DO UPDATE SET
-            title = EXCLUDED.title,
-            description = EXCLUDED.description,
-            status = EXCLUDED.status,
-            viator_updated_at = EXCLUDED.viator_updated_at,
-            price_from = EXCLUDED.price_from,
-            currency = EXCLUDED.currency,
-            destination_id = EXCLUDED.destination_id,
-            primary_image = EXCLUDED.primary_image,
-            images = EXCLUDED.images,
-            rating = EXCLUDED.rating,
-            review_count = EXCLUDED.review_count,
-            duration = EXCLUDED.duration,
-            synced_at = NOW()
-        `, [
-                    p.productCode,
-                    p.title,
-                    p.description,
-                    p.status,
-                    p.lastUpdated ? new Date(p.lastUpdated) : new Date(),
-                    p.pricing?.summary?.fromPrice,
-                    p.pricing?.currency || 'EUR',
-                    p.destinations?.[0]?.ref ? parseInt(p.destinations[0].ref) : null,
-                    p.images?.[0]?.variants?.find((v: any) => v.width >= 720)?.url || p.images?.[0]?.variants?.[0]?.url,
-                    JSON.stringify(p.images || []),
-                    p.reviews?.combinedAverageRating,
-                    p.reviews?.totalReviews || 0,
-                    p.duration?.fixedDurationInMinutes ? `${p.duration.fixedDurationInMinutes}m` : null
-                ]);
+            // Separate active and inactive products
+            const activeProducts = summaryProducts.filter((p: any) => p.status === 'ACTIVE');
+            const inactiveProducts = summaryProducts.filter((p: any) => p.status === 'INACTIVE');
+
+            console.log(`Batch summary: ${activeProducts.length} ACTIVE, ${inactiveProducts.length} INACTIVE`);
+
+            if (activeProducts.length === 0) {
+                console.log("No active products in this batch, continuing...");
+                // Update cursor and continue
+                totalProcessed += summaryProducts.length; // Approximate count
+                cursor = data.nextCursor;
+
+                // Update log to show progress even if skipping
+                if (loadId) {
+                    await client.query(`
+                        UPDATE public.sync_logs 
+                        SET items_processed = $1, cursor = $2 
+                        WHERE id = $3
+                    `, [totalProcessed, cursor, loadId]);
+                }
+
+                if (!cursor) hasMore = false;
+                continue;
             }
 
-            totalProcessed += products.length;
+            // Get product codes for bulk fetch (only ACTIVE)
+            const productCodes = activeProducts.map((p: any) => p.productCode);
+            console.log(`Fetching full details for ${productCodes.length} ACTIVE products...`);
+
+            // Fetch full product details in batches of 50
+            const BATCH_SIZE = 50;
+            for (let i = 0; i < productCodes.length; i += BATCH_SIZE) {
+                const batch = productCodes.slice(i, i + BATCH_SIZE);
+                const fullData = await fetchProductDetails(batch);
+
+                if (!fullData.products || fullData.products.length === 0) {
+                    console.log(`No full data for batch ${i / BATCH_SIZE + 1} (Request size: ${batch.length})`);
+                    continue;
+                }
+
+                console.log(`Processing ${fullData.products.length} products with full data...`);
+
+                for (const p of fullData.products) {
+                    // Skip if no title (required field)
+                    if (!p.title) {
+                        console.log(`Skipping ${p.productCode} - no title`);
+                        continue;
+                    }
+
+                    await client.query(`
+              INSERT INTO public.products (
+                product_code, title, description, status,
+                viator_updated_at, price_from, currency,
+                destination_id, primary_image, images,
+                rating, review_count, duration, synced_at
+              )
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
+              ON CONFLICT (product_code) DO UPDATE SET
+                title = EXCLUDED.title,
+                description = EXCLUDED.description,
+                status = EXCLUDED.status,
+                viator_updated_at = EXCLUDED.viator_updated_at,
+                price_from = EXCLUDED.price_from,
+                currency = EXCLUDED.currency,
+                destination_id = EXCLUDED.destination_id,
+                primary_image = EXCLUDED.primary_image,
+                images = EXCLUDED.images,
+                rating = EXCLUDED.rating,
+                review_count = EXCLUDED.review_count,
+                duration = EXCLUDED.duration,
+                synced_at = NOW()
+            `, [
+                        p.productCode,
+                        p.title,
+                        p.description || '',
+                        p.status || 'ACTIVE',
+                        p.lastUpdatedAt ? new Date(p.lastUpdatedAt) : new Date(),
+                        p.pricing?.summary?.fromPrice || null,
+                        p.pricing?.currency || 'EUR',
+                        p.destinations?.[0]?.ref ? parseInt(p.destinations[0].ref) : null,
+                        p.images?.[0]?.variants?.find((v: any) => v.width >= 720)?.url || p.images?.[0]?.variants?.[0]?.url || null,
+                        JSON.stringify(p.images || []),
+                        p.reviews?.combinedAverageRating || null,
+                        p.reviews?.totalReviews || 0,
+                        p.duration?.fixedDurationInMinutes ? `${p.duration.fixedDurationInMinutes}m` : null
+                    ]);
+                    totalProcessed++;
+                }
+            }
+
+            totalProcessed += summaryProducts.length;
             cursor = data.nextCursor;
             if (!cursor) hasMore = false;
 

@@ -10,7 +10,7 @@ if (!VIATOR_API_KEY) {
 }
 
 // Test product code - replace with a real product code from your catalog
-const TEST_PRODUCT_CODE = "5010SYDHARB";  // Sydney Harbour example
+const TEST_PRODUCT_CODE = "5602P47";  // Mighty Five Aerial Adventure
 const TEST_DATE = "2026-02-15"; // Future date
 
 async function testAvailabilityCheck() {
@@ -21,6 +21,7 @@ async function testAvailabilityCheck() {
         method: 'POST',
         headers: {
             'Accept': 'application/json;version=2.0',
+            'Accept-Language': 'en',
             'Content-Type': 'application/json',
             'exp-api-key': VIATOR_API_KEY!,
         },

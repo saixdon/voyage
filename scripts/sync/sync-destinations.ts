@@ -21,6 +21,7 @@ async function fetchDestinations() {
         method: 'GET',
         headers: {
             'Accept': 'application/json;version=2.0',
+            'Accept-Language': 'en',
             'exp-api-key': VIATOR_API_KEY!,
         },
     });

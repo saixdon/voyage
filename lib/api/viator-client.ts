@@ -1015,3 +1015,106 @@ export async function getProductReviews(productCode: string, locale = "en", coun
     }
 }
 
+// Get booking voucher/ticket
+export async function getBookingVoucher(bookingRef: string, locale = "en") {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(
+            `${VIATOR_API_BASE}/bookings/${bookingRef}/voucher`,
+            {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json;version=2.0",
+                    "Accept-Language": locale,
+                    "exp-api-key": API_KEY!,
+                },
+            }
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Voucher fetch failed: ${response.status} - ${errorText}`);
+            return { error: `API Error: ${response.status}` };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to fetch voucher" };
+    }
+}
+
+// Get product booking questions
+export async function getProductBookingQuestions(productCode: string, locale = "en") {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(
+            `${VIATOR_API_BASE}/products/booking-questions?productCodes=${productCode}`,
+            {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json;version=2.0",
+                    "Accept-Language": locale,
+                    "exp-api-key": API_KEY!,
+                },
+            }
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Booking questions fetch failed: ${response.status} - ${errorText}`);
+            return { error: `API Error: ${response.status}`, bookingQuestions: [] };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to fetch booking questions", bookingQuestions: [] };
+    }
+}
+
+// Acknowledge modified bookings (required within 5 minutes of fetching)
+export async function acknowledgeModifiedBookings(bookingRefs: string[]) {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(
+            `${VIATOR_API_BASE}/bookings/modified-since/acknowledge`,
+            {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json;version=2.0",
+                    "Accept-Language": "en",
+                    "Content-Type": "application/json",
+                    "exp-api-key": API_KEY!,
+                },
+                body: JSON.stringify({ bookingRefs }),
+            }
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Acknowledge failed: ${response.status} - ${errorText}`);
+            return { error: `API Error: ${response.status}` };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to acknowledge bookings" };
+    }
+}
