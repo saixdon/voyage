@@ -28,7 +28,7 @@ export async function sendEmail({ to, subject, react }: SendEmailProps) {
         }
 
         const data = await resend.emails.send({
-            from: 'TripVega <onboarding@resend.dev>', // Update this with your verified domain in production
+            from: 'TripVega <support@tripvega.com>', // Verified domain
             to,
             subject,
             react,

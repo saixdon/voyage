@@ -19,8 +19,11 @@ export async function GET(request: NextRequest) {
 
         const result = await getProductReviews(productCode, locale, count);
 
+        // If there's an error from the Viator API (common in sandbox),
+        // return empty reviews gracefully instead of an error status
         if (result.error) {
-            return NextResponse.json(result, { status: 400 });
+            console.log('Reviews not available:', result.error);
+            return NextResponse.json({ reviews: [], message: 'Reviews not available' });
         }
 
         return NextResponse.json(result);

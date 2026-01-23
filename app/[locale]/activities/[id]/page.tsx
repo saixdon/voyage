@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { notFound, useRouter } from "next/navigation";
 import type { TransformedActivity } from "@/lib/api/viator-client";
-import { checkAvailabilityAction, type AvailabilityResult } from "@/app/actions/viator";
+import { checkAvailabilityAction, type AvailabilityResult, type SimilarProduct } from "@/app/actions/viator";
 import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { DayPicker } from "react-day-picker";
@@ -167,7 +167,8 @@ export default function ActivityDetailPage({
         const dateStr = format(selectedDate, 'yyyy-MM-dd');
 
         try {
-            const result = await checkAvailabilityAction(activity.productCode, dateStr);
+            // Pass destination for similar products when not available
+            const result = await checkAvailabilityAction(activity.productCode, dateStr, activity.location);
             setAvailability(result);
         } catch (e) {
             console.error(e);
@@ -584,8 +585,14 @@ export default function ActivityDetailPage({
                             <div className="mb-8">
                                 <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-1">Total Price from</p>
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-4xl font-black text-foreground">{displayCurrency} {displayPrice}</span>
-                                    <span className="text-muted-foreground font-bold">per adult</span>
+                                    {displayPrice && displayPrice > 0 ? (
+                                        <>
+                                            <span className="text-4xl font-black text-foreground">{displayCurrency} {displayPrice}</span>
+                                            <span className="text-muted-foreground font-bold">per adult</span>
+                                        </>
+                                    ) : (
+                                        <span className="text-2xl font-black text-primary">Check availability</span>
+                                    )}
                                 </div>
                             </div>
 
@@ -711,10 +718,87 @@ export default function ActivityDetailPage({
                                                 </Button>
                                             </>
                                         ) : (
-                                            <div className="p-8 bg-red-50 border border-red-100 rounded-3xl text-center">
-                                                <X className="w-10 h-10 text-red-500 mx-auto mb-3" />
-                                                <p className="font-black text-red-700 mb-1">Sold Out</p>
-                                                <p className="text-sm text-red-600/70 font-bold">Try another date or travelers count.</p>
+                                            <div className="space-y-4">
+                                                {/* Sold Out Header */}
+                                                <div className="p-6 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-3xl text-center">
+                                                    <p className="font-black text-amber-700 dark:text-amber-400 text-lg mb-1">
+                                                        Dieses Datum ist ausgebucht
+                                                    </p>
+                                                    <p className="text-sm text-amber-600/80 dark:text-amber-500/80 font-medium">
+                                                        für {guestCount} {guestCount === 1 ? 'Person' : 'Personen'}
+                                                    </p>
+                                                </div>
+
+                                                {/* Next Available Date */}
+                                                {availability.nextAvailableDate && (
+                                                    <div className="p-5 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-2xl">
+                                                        <p className="text-sm text-green-700 dark:text-green-400 font-bold mb-3">
+                                                            Nächstes verfügbares Datum:
+                                                        </p>
+                                                        <button
+                                                            onClick={() => setSelectedDate(new Date(availability.nextAvailableDate!))}
+                                                            className="w-full flex items-center justify-between p-4 bg-green-100 dark:bg-green-900/50 hover:bg-green-200 dark:hover:bg-green-800/50 rounded-xl transition-all group"
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <CalendarIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                                                <span className="font-black text-green-700 dark:text-green-300">
+                                                                    {format(new Date(availability.nextAvailableDate), "dd. MMMM yyyy", { locale: locale === 'de' ? de : enUS })}
+                                                                </span>
+                                                            </div>
+                                                            <ChevronRight className="w-5 h-5 text-green-600 dark:text-green-400 group-hover:translate-x-1 transition-transform" />
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                {/* Similar Products */}
+                                                {availability.similarProducts && availability.similarProducts.length > 0 && (
+                                                    <div className="pt-4 border-t border-theme">
+                                                        <p className="text-sm font-bold text-muted-foreground mb-4">
+                                                            Ähnliche Erlebnisse in {activity.location}:
+                                                        </p>
+                                                        <div className="space-y-3">
+                                                            {availability.similarProducts.map((product) => (
+                                                                <a
+                                                                    key={product.productCode}
+                                                                    href={`/${locale}/activities/${product.productCode}`}
+                                                                    className="flex gap-3 p-3 bg-surface-elevated hover:bg-primary/5 rounded-xl transition-all group"
+                                                                >
+                                                                    <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
+                                                                        <Image
+                                                                            src={product.image}
+                                                                            alt={product.title}
+                                                                            fill
+                                                                            className="object-cover"
+                                                                        />
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <h5 className="font-bold text-sm text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                                                                            {product.title}
+                                                                        </h5>
+                                                                        <div className="flex items-center gap-2 mt-1">
+                                                                            <div className="flex items-center gap-1 text-yellow-500 text-xs">
+                                                                                <Star className="w-3 h-3 fill-current" />
+                                                                                <span className="font-bold">{product.rating.toFixed(1)}</span>
+                                                                            </div>
+                                                                            <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
+                                                                            <span className="text-xs font-black text-primary ml-auto">
+                                                                                ab {product.currency} {product.price}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </a>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Go back button */}
+                                                <button
+                                                    onClick={() => setSelectedDate(undefined)}
+                                                    className="w-full text-center text-sm font-bold text-primary hover:underline py-2"
+                                                >
+                                                    ← Anderes Datum wählen
+                                                </button>
                                             </div>
                                         )}
                                     </div>

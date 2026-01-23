@@ -1,8 +1,19 @@
 'use server';
 
-import { getViatorAvailability, getViatorProductDetails } from '@/lib/api/viator-client';
+import { getViatorAvailability, getViatorProductDetails, searchViatorProducts } from '@/lib/api/viator-client';
 import { generateAffiliateLink } from '@/lib/api/viator-affiliate';
 import { randomUUID } from 'crypto'; // For UID generation
+import { format, addDays } from 'date-fns';
+
+export interface SimilarProduct {
+    productCode: string;
+    title: string;
+    image: string;
+    price: number;
+    currency: string;
+    rating: number;
+    reviewCount: number;
+}
 
 export interface AvailabilityResult {
     available: boolean;
@@ -13,15 +24,19 @@ export interface AvailabilityResult {
     affiliateUrl?: string;
     bookableItems?: any[]; // Array of available options/times
     error?: string;
+    nextAvailableDate?: string; // YYYY-MM-DD format
+    similarProducts?: SimilarProduct[];
 }
 
 /**
  * Server Action to check availability for a specific product and date.
  * Wraps the internal API client to be safe for client-side usage.
+ * Enhanced to find next available date and similar products when not available.
  */
 export async function checkAvailabilityAction(
     productCode: string,
-    date: string
+    date: string,
+    destination?: string // Optional destination for similar products search
 ): Promise<AvailabilityResult> {
     if (!productCode || !date) {
         return { available: false, error: 'Missing parameters' };
@@ -42,10 +57,6 @@ export async function checkAvailabilityAction(
         }
 
         // Parse the response to determine simple availability status
-        // The structure depends on the exact API response for /availability/check
-        // Usually it returns bookableItems if available.
-
-        // Example simplified check:
         const isAvailable = result.bookableItems && result.bookableItems.length > 0;
 
         // Extract the lowest price found for this date
@@ -54,43 +65,79 @@ export async function checkAvailabilityAction(
             const priceObj = result.bookableItems[0].totalPrice.price;
             price = {
                 amount: priceObj.value || priceObj.recommendedRetailPrice || 0,
-                currency: result.currency || 'EUR' // The currency might be at root or inside price object
+                currency: result.currency || 'EUR'
             };
         }
 
         // Generate Affiliate Link ONLY if available
         let affiliateUrl;
+        let nextAvailableDate: string | undefined;
+        let similarProducts: SimilarProduct[] | undefined;
+
         if (isAvailable) {
-            // We need the product URL to generate the affiliate link.
-            // Ideally this is passed in, or we fetch it. 
-            // For now, we will fetch product details to get the URL or construct a standard one.
-            // Standard Viator Product URL: https://www.viator.com/tours/{location}/{title}/{productCode}
-            // But we can also use a generic one if we don't have the SEO friendly URL:
-            // https://www.viator.com/tours/a/b/{productCode} might redirect?
-            // Safer to fetch details or just use productCode if generateAffiliateLink handles it?
-            // generateAffiliateLink expects a URL.
-
-            // Let's assume we can construct a functional URL:
-            // https://www.viator.com/searchResults/all?text={productCode} is a fallback but bad UX.
-            // Best is to use the `productUrl` from product details.
-
-            // Optimization: Maybe pass productUrl from client? 
-            // But client might not have it if it comes from our internal API which transforms it.
-            // Let's quickly fetch details (cached) to be safe.
             const product = await getViatorProductDetails(productCode);
             const productUrl = product.productUrl || `https://www.viator.com/tours/standard/${productCode}`;
-
-            // Generate a session UID
             const uid = randomUUID();
-
             affiliateUrl = generateAffiliateLink(productUrl, uid);
+        } else {
+            // NOT AVAILABLE - Find next available date and similar products
+
+            // 1. Search for next available date (check next 7 days)
+            const selectedDate = new Date(date);
+            for (let i = 1; i <= 7; i++) {
+                const checkDate = addDays(selectedDate, i);
+                const checkDateStr = format(checkDate, 'yyyy-MM-dd');
+
+                try {
+                    const futureResult = await getViatorAvailability(productCode, checkDateStr);
+                    if (futureResult.bookableItems && futureResult.bookableItems.length > 0) {
+                        nextAvailableDate = checkDateStr;
+                        break;
+                    }
+                } catch (e) {
+                    // Continue checking other dates
+                }
+            }
+
+            // 2. Fetch similar products from the same destination
+            if (destination) {
+                try {
+                    const searchResult = await searchViatorProducts(
+                        destination,
+                        4, // Get 4 similar products
+                        undefined,
+                        undefined,
+                        'en',
+                        { destinationId: undefined }
+                    );
+
+                    if (searchResult.activities && searchResult.activities.length > 0) {
+                        similarProducts = searchResult.activities
+                            .filter(a => a.productCode !== productCode) // Exclude current product
+                            .slice(0, 3) // Take up to 3
+                            .map(a => ({
+                                productCode: a.productCode,
+                                title: a.title,
+                                image: a.image,
+                                price: a.price,
+                                currency: a.currency,
+                                rating: a.rating,
+                                reviewCount: a.reviewCount
+                            }));
+                    }
+                } catch (e) {
+                    console.error('Failed to fetch similar products:', e);
+                }
+            }
         }
 
         return {
             available: isAvailable,
             price,
             affiliateUrl,
-            bookableItems: result.bookableItems
+            bookableItems: result.bookableItems,
+            nextAvailableDate,
+            similarProducts
         };
 
     } catch (error) {

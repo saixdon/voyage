@@ -7,14 +7,35 @@ description: Handles Viator Partner API integration for TripVega. Use when fetch
 
 TripVega integrates with the **Viator Partner API** to fetch travel activities, tours, and experiences. This skill provides patterns for consistent API usage.
 
+## Official Documentation
+
+📚 **Always refer to the official Viator Partner API documentation:**
+**https://docs.viator.com/partner-api/technical/**
+
+## Critical Requirements
+
+⚠️ **MANDATORY HEADER**: All API requests MUST include `Accept-Language: en` (or appropriate locale).
+Without this header, many endpoints will return **403 Forbidden** errors.
+
+```typescript
+headers: {
+    'Accept': 'application/json;version=2.0',
+    'Accept-Language': 'en',  // REQUIRED!
+    'exp-api-key': VIATOR_API_KEY,
+    'Content-Type': 'application/json',
+}
+```
+
 ## API Configuration
 
 ### Environment Variables
 
 ```env
 VIATOR_API_KEY=your-api-key-here
-VIATOR_API_BASE_URL=https://api.viator.com/partner
+VIATOR_API_BASE_URL=https://api.sandbox.viator.com/partner  # Sandbox
+# VIATOR_API_BASE_URL=https://api.viator.com/partner        # Production
 ```
+
 
 ### Base Client (lib/api/viator-client.ts)
 

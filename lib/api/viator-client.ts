@@ -993,27 +993,38 @@ export async function getProductReviews(productCode: string, locale = "en", coun
 
     try {
         const response = await fetch(
-            `${VIATOR_API_BASE}/reviews/product?productCode=${productCode}&count=${count}&sortOrder=REVIEW_RATING_D`,
+            `${VIATOR_API_BASE}/reviews/product`,
             {
-                method: "GET",
+                method: "POST",
                 headers: {
                     "Accept": "application/json;version=2.0",
                     "Accept-Language": locale,
+                    "Content-Type": "application/json",
                     "exp-api-key": API_KEY!,
                 },
+                body: JSON.stringify({
+                    productCode: productCode,
+                    provider: "VIATOR",
+                    count: count,
+                    start: 0,
+                    ratings: [1, 2, 3, 4, 5]
+                }),
             }
         );
 
         if (!response.ok) {
-            return { error: `API Error: ${response.status}` };
+            const errorText = await response.text();
+            console.error(`Reviews API Error: ${response.status} - ${errorText}`);
+            return { error: `API Error: ${response.status}`, reviews: [] };
         }
 
         return await response.json();
     } catch (error) {
         console.error("Viator API fetch error:", error);
-        return { error: "Failed to fetch reviews" };
+        return { error: "Failed to fetch reviews", reviews: [] };
     }
 }
+
 
 // Get booking voucher/ticket
 export async function getBookingVoucher(bookingRef: string, locale = "en") {

@@ -28,26 +28,61 @@ export async function GET(
     }
 
     if (productDetails.error) {
-        return NextResponse.json(
-            { error: productDetails.error },
-            { status: 404 }
-        );
+        // If 404 but not a mock product, return 404
+        if (!id.startsWith("mock-")) {
+            return NextResponse.json(
+                { error: productDetails.error },
+                { status: 404 }
+            );
+        }
+        // Mock fallback for mock-* IDs
+        return NextResponse.json({
+            id: id,
+            title: `Mock Activity Details for ${id}`,
+            location: "Mock City, Country",
+            image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1200&q=80",
+            images: [],
+            price: 55.00,
+            currency: "EUR",
+            rating: 4.8,
+            reviewCount: 320,
+            duration: "3 hours",
+            productCode: id,
+            productUrl: "",
+            description: "This is a mock description.",
+            badge: "Bestseller"
+        });
     }
 
-    // Transform Viator product to our format
+    // Extract best image
+    const primaryImage = productDetails.images?.[0]?.variants?.find((v: any) => v.width >= 720)?.url
+        || productDetails.images?.[0]?.variants?.[0]?.url
+        || "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1200&q=80";
+
+    // Extract multiple images for gallery
+    const allImages = productDetails.images?.slice(0, 5).map((img: any) => {
+        const variant = img.variants?.find((v: any) => v.width >= 720) || img.variants?.[0];
+        return variant?.url;
+    }).filter(Boolean) || [];
+
+    // Transform Viator product to our format with safe fallbacks
     const activity = {
         id: productDetails.productCode,
-        title: productDetails.title,
-        location: productDetails.destinations?.[0]?.name || "",
-        image: productDetails.images?.[0]?.variants?.find((v: any) => v.width >= 720)?.url
-            || productDetails.images?.[0]?.variants?.[0]?.url || "",
+        title: productDetails.title || "Untitled Activity",
+        location: productDetails.destinations?.[0]?.name
+            || productDetails.logistics?.start?.[0]?.location?.ref
+            || "Location available at booking",
+        image: primaryImage,
+        images: allImages,
         price: productDetails.pricing?.summary?.fromPrice || 0,
         currency: productDetails.pricing?.currency || "EUR",
         rating: productDetails.reviews?.combinedAverageRating || 0,
         reviewCount: productDetails.reviews?.totalReviews || 0,
         duration: formatDuration(productDetails.duration),
         productCode: productDetails.productCode,
-        description: productDetails.description || "",
+        productUrl: productDetails.productUrl || "",
+        description: productDetails.description || "Description not available.",
+        badge: productDetails.flags?.includes("BEST_SELLER") ? "Bestseller" : undefined,
     };
 
     return NextResponse.json(activity);

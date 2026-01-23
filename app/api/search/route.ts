@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchActivities as searchGygActivities } from "@/lib/api/gyg-client";
 import { searchViatorProducts } from "@/lib/api/viator-client";
+import { createClient } from "@/lib/supabase/server"; // Use server client
 import { Activity } from "@/types";
 
 export async function GET(request: NextRequest) {
@@ -15,33 +16,74 @@ export async function GET(request: NextRequest) {
     let source = "none";
     let total = 0;
 
-    // 1. Try GetYourGuide (Primary)
-    // (Skipping date update for GYG for now as per instructions focusing on adding calendar mostly for display/Viator flow first, or adapt if known)
+    // 0. Try Local Database First (Ingestion Model)
+    // This provides the fastest and most reliable results from our synced data
     try {
-        const gygResult = await searchGygActivities(query, limit);
-        if (gygResult.data?.activities && gygResult.data.activities.length > 0) {
-            activities = gygResult.data.activities.map((act: any) => ({
-                id: act.activity_id.toString(),
-                title: act.title,
-                location: act.location?.city || act.location?.country || "",
-                image: act.pictures?.[0]?.url || "",
-                price: act.price?.values?.amount || 0,
-                currency: act.price?.values?.currency || "EUR",
-                rating: act.rating || 0,
-                reviewCount: act.reviews_count || 0,
-                duration: act.duration || "",
-            }));
-            source = "gyg";
-            total = activities.length;
+        const supabase = await createClient();
+
+        // Simple text search on title or description
+        // In a real production app, we would use Full Text Search (tsvector)
+        let queryBuilder = supabase
+            .from('products')
+            .select('*')
+            .eq('status', 'ACTIVE'); // Only active products
+
+        if (query) {
+            queryBuilder = queryBuilder.ilike('title', `%${query}%`);
         }
-    } catch (e) {
-        console.error("GYG Search Error:", e);
+
+        const { data: dbProducts, error } = await queryBuilder.limit(limit);
+
+        if (!error && dbProducts && dbProducts.length > 0) {
+            activities = dbProducts.map((p: any) => ({
+                id: p.product_code,
+                title: p.title,
+                location: 'Viator Destination', // We might need to join destinations table or store city name
+                image: (p.images && p.images['0']?.variants?.[0]?.url) || "",
+                price: p.pricing?.summary?.fromPrice || 0,
+                currency: p.pricing?.currency || "EUR",
+                rating: p.reviews?.combinedAverageRating || 0,
+                reviewCount: p.reviews?.totalReviews || 0,
+                duration: p.duration?.fixedDurationInMinutes ? `${Math.floor(p.duration.fixedDurationInMinutes / 60)}h ${p.duration.fixedDurationInMinutes % 60}m` : "",
+                productCode: p.product_code,
+                source: 'viator-db'
+            }));
+            source = "database";
+            total = activities.length;
+            console.log(`Found ${activities.length} activities in local DB for "${query}"`);
+        }
+    } catch (dbError) {
+        console.error("Database Search Error:", dbError);
     }
 
-    // 2. Try Viator if GYG failed or returned nothing
+
+    // 1. If DB empty, Try GetYourGuide (Primary fallback)
     if (activities.length === 0) {
         try {
-            // Pass date range if present
+            const gygResult = await searchGygActivities(query, limit);
+            if (gygResult.data?.activities && gygResult.data.activities.length > 0) {
+                activities = gygResult.data.activities.map((act: any) => ({
+                    id: act.activity_id.toString(),
+                    title: act.title,
+                    location: act.location?.city || act.location?.country || "",
+                    image: act.pictures?.[0]?.url || "",
+                    price: act.price?.values?.amount || 0,
+                    currency: act.price?.values?.currency || "EUR",
+                    rating: act.rating || 0,
+                    reviewCount: act.reviews_count || 0,
+                    duration: act.duration || "",
+                }));
+                source = "gyg";
+                total = activities.length;
+            }
+        } catch (e) {
+            console.error("GYG Search Error:", e);
+        }
+    }
+
+    // 2. Try Viator Live API if GYG failed or returned nothing
+    if (activities.length === 0) {
+        try {
             const viatorResult = await searchViatorProducts(
                 query,
                 limit,
@@ -51,7 +93,7 @@ export async function GET(request: NextRequest) {
             );
             if (viatorResult.activities && viatorResult.activities.length > 0) {
                 activities = viatorResult.activities as unknown as Activity[];
-                source = "viator";
+                source = "viator-api";
                 total = viatorResult.totalCount || activities.length;
             }
         } catch (e) {
@@ -59,78 +101,9 @@ export async function GET(request: NextRequest) {
         }
     }
 
-
-    // 3. Mock Fallback (only if no results from real APIs)
-    // This ensures the user ALWAYS sees results, even if API keys are invalid or quota exceeded
-    if (activities.length === 0 && query) {
-        const mockImages: Record<string, string> = {
-            default: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80",
-            food: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80",
-            sport: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80",
-            culture: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=80",
-            nature: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=800&q=80",
-            water: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80"
-        };
-
-        const lowerQuery = query.toLowerCase();
-        let image = mockImages.default;
-        if (lowerQuery.includes("food") || lowerQuery.includes("eating") || lowerQuery.includes("restaurant")) image = mockImages.food;
-        else if (lowerQuery.includes("sport") || lowerQuery.includes("hike") || lowerQuery.includes("ball")) image = mockImages.sport;
-        else if (lowerQuery.includes("culture") || lowerQuery.includes("museum") || lowerQuery.includes("history")) image = mockImages.culture;
-        else if (lowerQuery.includes("nature") || lowerQuery.includes("park") || lowerQuery.includes("garden")) image = mockImages.nature;
-        else if (lowerQuery.includes("water") || lowerQuery.includes("boat") || lowerQuery.includes("swim")) image = mockImages.water;
-
-        activities = [
-            {
-                id: "mock-1",
-                title: `Ultimate ${query} Experience`,
-                location: "Popular Destination",
-                image: image,
-                price: 49.00,
-                currency: "EUR",
-                rating: 4.9,
-                reviewCount: 324,
-                duration: "3 hours",
-                badge: "bestseller"
-            },
-            {
-                id: "mock-2",
-                title: `${query} Guided Tour & Workshop`,
-                location: "City Center",
-                image: image,
-                price: 75.50,
-                currency: "EUR",
-                rating: 4.7,
-                reviewCount: 189,
-                duration: "5 hours"
-            },
-            {
-                id: "mock-3",
-                title: `Private ${query} Adventure`,
-                location: "Scenic Spot",
-                image: image,
-                price: 120.00,
-                currency: "EUR",
-                rating: 4.8,
-                reviewCount: 56,
-                duration: "4 hours",
-                badge: "likely-to-sell-out"
-            },
-            {
-                id: "mock-4",
-                title: `Introductory ${query} Session`,
-                location: "Local Hub",
-                image: image,
-                price: 29.99,
-                currency: "EUR",
-                rating: 4.5,
-                reviewCount: 42,
-                duration: "2 hours"
-            }
-        ];
-        source = "mock";
-        total = activities.length;
-    }
+    // 3. Mock Fallback (ONLY if absolutely nothing found and query is generic)
+    // Removed forceful mock fallback to avoid confusion during testing. 
+    // Now returns empty list if nothing found, which is correct behavior.
 
     return NextResponse.json({
         source,
@@ -138,3 +111,4 @@ export async function GET(request: NextRequest) {
         total,
     });
 }
+
