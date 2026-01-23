@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchActivities as searchGygActivities } from "@/lib/api/gyg-client";
+// import { searchActivities as searchGygActivities } from "@/lib/api/gyg-client";
 import { searchViatorProducts } from "@/lib/api/viator-client";
 import { createClient } from "@/lib/supabase/server"; // Use server client
 import { Activity } from "@/types";
@@ -57,29 +57,8 @@ export async function GET(request: NextRequest) {
     }
 
 
-    // 1. If DB empty, Try GetYourGuide (Primary fallback)
-    if (activities.length === 0) {
-        try {
-            const gygResult = await searchGygActivities(query, limit);
-            if (gygResult.data?.activities && gygResult.data.activities.length > 0) {
-                activities = gygResult.data.activities.map((act: any) => ({
-                    id: act.activity_id.toString(),
-                    title: act.title,
-                    location: act.location?.city || act.location?.country || "",
-                    image: act.pictures?.[0]?.url || "",
-                    price: act.price?.values?.amount || 0,
-                    currency: act.price?.values?.currency || "EUR",
-                    rating: act.rating || 0,
-                    reviewCount: act.reviews_count || 0,
-                    duration: act.duration || "",
-                }));
-                source = "gyg";
-                total = activities.length;
-            }
-        } catch (e) {
-            console.error("GYG Search Error:", e);
-        }
-    }
+    // 1. GetYourGuide fallback removed due to API access issues (HTML 404s).
+    // Proceeding directly to Viator API.
 
     // 2. Try Viator Live API if GYG failed or returned nothing
     if (activities.length === 0) {

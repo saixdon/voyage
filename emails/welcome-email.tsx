@@ -35,7 +35,7 @@ export const WelcomeEmail = ({ name = 'Traveler' }: WelcomeEmailProps) => {
 
                 <Button
                     href="http://localhost:3000"
-                    className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium text-sm hover:bg-indigo-700 transition-colors"
+                    className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium text-sm"
                 >
                     Start Exploring Now
                 </Button>

@@ -45,14 +45,14 @@ export const EmailLayout = ({ preview, children }: LayoutProps) => {
                             <Text className="text-xs text-slate-400 text-center">
                                 <Link
                                     href="http://localhost:3000"
-                                    className="text-slate-500 hover:text-slate-700 underline"
+                                    className="text-slate-500 underline"
                                 >
                                     Visit Website
                                 </Link>
                                 {' • '}
                                 <Link
                                     href="#"
-                                    className="text-slate-500 hover:text-slate-700 underline"
+                                    className="text-slate-500 underline"
                                 >
                                     Unsubscribe
                                 </Link>

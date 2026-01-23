@@ -51,6 +51,8 @@ export async function signUpAction(formData: FormData) {
     const fullName = formData.get("name") as string | null;
 
     const supabase = getSupabaseAdmin();
+
+    // Create user - Supabase will auto-confirm since we're using service role
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -62,8 +64,9 @@ export async function signUpAction(formData: FormData) {
     });
 
     if (error) return { error: error.message };
+    if (!data.user) return { error: "Benutzer konnte nicht erstellt werden." };
 
-    // Set cookie immediately (no email confirmation required)
+    // Set cookie immediately - no email confirmation required
     const cookieStore = await cookies();
     if (data.session) {
         cookieStore.set("sb-auth-token", data.session.access_token, {
@@ -73,11 +76,22 @@ export async function signUpAction(formData: FormData) {
             sameSite: "lax",
             maxAge: 60 * 60 * 24 * 7,
         });
+
+        // Send welcome email in background (don't block)
+        sendEmail({
+            to: email,
+            subject: "Welcome to TripVega! 🌍",
+            react: WelcomeEmail({ name: fullName || email.split('@')[0] })
+        }).catch(err => console.error("Failed to send welcome email:", err));
+
         return { success: true, session: data.session };
     }
 
-    // If no session, user was created but needs confirmation (shouldn't happen with current config)
-    return { success: true, session: data.session };
+    // Fallback: If no session returned, user might need to login manually
+    return {
+        success: true,
+        message: "Account erstellt. Bitte logge dich ein."
+    };
 }
 
 export async function signOutAction() {

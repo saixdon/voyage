@@ -61,7 +61,6 @@ export function AuthModal(props: AuthModalProps) {
 
                 if (result.session) {
                     await supabase.auth.setSession(result.session);
-
                     setSuccess(t('loginSuccess'));
                     setTimeout(() => {
                         if (onClose) onClose();
