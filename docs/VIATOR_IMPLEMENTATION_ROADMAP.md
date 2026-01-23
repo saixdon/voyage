@@ -63,6 +63,7 @@
 | `/exchange-rates` | `sync-exchange-rates.ts` | ✅ Funktioniert |
 | `/products/booking-questions` | `sync-booking-questions.ts` | ✅ Neu erstellt |
 
+
 ### ✅ Neu in viator-client.ts hinzugefügt (2026-01-23)
 
 | Endpoint | Funktion | Status |
@@ -70,14 +71,15 @@
 | `/bookings/{ref}/voucher` | `getBookingVoucher()` | ✅ Implementiert |
 | `/products/booking-questions` | `getProductBookingQuestions()` | ✅ Implementiert |
 | `/bookings/modified-since/acknowledge` | `acknowledgeModifiedBookings()` | ✅ Implementiert |
+| `/locations/bulk` | `fetchLocationsBulk()` | ✅ Implementiert |
+| `/attractions/search` | `searchAttractions()` | ✅ Implementiert |
 
-### ❌ Noch fehlend (niedrige Priorität)
+### ❌ Noch fehlend 
 
 | Endpoint | Zweck | Priorität |
 |----------|-------|-----------|
-| `/availability/schedules/modified-since` | Availability für DB cachen | 🟡 Mittel |
-| `/locations/bulk` | Orte/Locations abrufen | 🟢 Niedrig |
-| `/attractions/search` | Attraktionen synchronisieren | 🟢 Niedrig |
+| `/availability/schedules/modified-since` | Availability für DB cachen (nur Skript, keine Client-Funktion nötig) | 🟡 Mittel |
+
 
 ---
 

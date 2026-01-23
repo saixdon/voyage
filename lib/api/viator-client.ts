@@ -1118,3 +1118,75 @@ export async function acknowledgeModifiedBookings(bookingRefs: string[]) {
         return { error: "Failed to acknowledge bookings" };
     }
 }
+
+// Fetch locations details (Bulk)
+export async function fetchLocationsBulk(locationRefs: string[]) {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(
+            `${VIATOR_API_BASE}/locations/bulk`,
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json;version=2.0',
+                    'Accept-Language': 'en',
+                    'Content-Type': 'application/json',
+                    'exp-api-key': API_KEY!,
+                },
+                body: JSON.stringify({ locations: locationRefs.map(ref => ({ ref })) }),
+            }
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Locations fetch failed: ${response.status} - ${errorText}`);
+            return { error: `API Error: ${response.status}`, locations: [] };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to fetch locations", locations: [] };
+    }
+}
+
+// Search attractions
+export async function searchAttractions(destinationId: number, start = 1, count = 20) {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(`${VIATOR_API_BASE}/attractions/search`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json;version=2.0',
+                'Accept-Language': 'en',
+                'Content-Type': 'application/json',
+                'exp-api-key': API_KEY!,
+            },
+            body: JSON.stringify({
+                destId: destinationId,
+                pagination: { start, count }
+            }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Attractions search failed: ${response.status} - ${errorText}`);
+            return { error: `API Error: ${response.status}`, attractions: [] };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to search attractions", attractions: [] };
+    }
+}

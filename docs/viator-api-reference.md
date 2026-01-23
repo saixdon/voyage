@@ -48,6 +48,8 @@ exp-api-key: YOUR_VIATOR_API_KEY
 | `/bookings/modified-since` | `getBookingsModifiedSince()` | GET |
 | `/bookings/modified-since/acknowledge` | `acknowledgeModifiedBookings()` | POST |
 | `/reviews/product` | `getProductReviews()` | GET |
+| `/locations/bulk` | `fetchLocationsBulk()` | POST |
+| `/attractions/search` | `searchAttractions()` | POST |
 
 ### ✅ Implementiert als Sync-Skripte
 
@@ -58,14 +60,14 @@ exp-api-key: YOUR_VIATOR_API_KEY
 | `/destinations` | `sync-destinations.ts` | GET |
 | `/products/tags` | `sync-tags.ts` | GET |
 | `/exchange-rates` | `sync-exchange-rates.ts` | POST |
+| `/availability/schedules/modified-since` | `sync-availability.ts` | GET |
+| `/locations/bulk` | `sync-locations.ts` | POST |
+| `/attractions/search` | `sync-attractions.ts` | POST |
 
 ### ❌ Noch nicht implementiert
 
-| Endpoint | Zweck | Priorität |
-|----------|-------|-----------|
-| `/availability/schedules/modified-since` | Availability Sync | 🟡 Mittel |
-| `/locations/bulk` | Locations | 🟢 Niedrig |
-| `/attractions/search` | Attraktionen | 🟢 Niedrig |
+*Keine kritischen Endpoints mehr!* Alle relevanten API-Funktionen sind nun verfügbar.
+
 
 ---
 
