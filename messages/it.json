@@ -1,0 +1,108 @@
+{
+    "common": {
+        "loading": "Caricamento...",
+        "error": "Si è verificato un errore",
+        "retry": "Riprova",
+        "search": "Cerca",
+        "close": "Chiudi",
+        "pickDate": "Scegli una data",
+        "selectDate": "Seleziona data"
+    },
+    "nav": {
+        "destinations": "Mappa del Mondo Interattiva",
+        "activities": "Attività",
+        "transport": "Trasporti",
+        "culture": "Cultura",
+        "login": "Accedi",
+        "logout": "Esci",
+        "explore": "Esplora",
+        "favorites": "Preferiti",
+        "settings": "Impostazioni",
+        "language": "Lingua",
+        "currency": "Valuta"
+    },
+    "auth": {
+        "signIn": "Accedi",
+        "signUp": "Crea account",
+        "email": "Email",
+        "password": "Password",
+        "name": "Nome",
+        "welcomeBack": "Bentornato!",
+        "createAccount": "Crea il tuo account",
+        "loginSubtitle": "Accedi per visualizzare le tue prenotazioni",
+        "registerSubtitle": "Unisciti a TripVega per offerte e vantaggi esclusivi",
+        "forgotPassword": "Password dimenticata?",
+        "loggingIn": "Accesso in corso...",
+        "or": "oppure",
+        "noAccount": "Non hai un account?",
+        "hasAccount": "Hai già un account?",
+        "loginSuccess": "Accesso effettuato con successo!",
+        "registerSuccess": "Registrazione completata! Controlla la tua email."
+    },
+    "footer": {
+        "company": "Azienda",
+        "support": "Supporto",
+        "legal": "Legale",
+        "followUs": "Seguici",
+        "newsletter": "Newsletter",
+        "subscribe": "Iscriviti",
+        "desc": "Scopri le migliori esperienze al mondo con TripVega.",
+        "explore": "Esplora",
+        "allActivities": "Tutte le attività",
+        "germany": "Germania",
+        "europe": "Europa",
+        "asia": "Asia",
+        "aboutUs": "Chi siamo",
+        "contact": "Contatti",
+        "partner": "Diventa Partner",
+        "imprint": "Note legali",
+        "privacy": "Informativa sulla privacy",
+        "terms": "Termini e condizioni",
+        "rightsReserved": "Tutti i diritti riservati.",
+        "affiliateDisclaimer": "TripVega è un partner affiliato di Viator. Cliccando su \"Prenota\" verrai reindirizzato su viator.com. Riceviamo una commissione per le prenotazioni andate a buon fine."
+    },
+    "hero": {
+        "title1": "SCOPRI IL",
+        "title2": "NON VISTO",
+        "subtitle": "Esperienze indimenticabili a portata di mano. Prenota tour, attività e attrazioni in tutto il mondo.",
+        "searchPlaceholder": "Dove vuoi andare?",
+        "classicSearch": "Ricerca Classica",
+        "aiPlanner": "AI Planner",
+        "aiPlaceholder": "Descrivi il viaggio dei tuoi sogni...",
+        "customizeTrip": "Personalizza Viaggio",
+        "planning": "Pianificazione...",
+        "generatePlan": "Genera Piano",
+        "suggestions": [
+            "Weekend romantico a Parigi",
+            "Viaggio in famiglia a Roma 3 giorni",
+            "Avventura in solitaria a Tokyo",
+            "Tour gastronomico a Barcellona"
+        ],
+        "hint": "Inserisci la tua destinazione e regola opzionalmente i filtri"
+    },
+    "stats": {
+        "experiences": "Esperienze",
+        "countries": "Paesi",
+        "rating": "Valutazione Utenti"
+    },
+    "trust": {
+        "bestPrice": "Miglior Prezzo",
+        "guaranteed": "Garantito",
+        "freeCancel": "Cancellazione Gratuita",
+        "mostBookings": "Più prenotati",
+        "securePayment": "Pagamento Sicuro",
+        "secure100": "100% Sicuro",
+        "support247": "Supporto 24/7",
+        "hereForYou": "Siamo qui"
+    },
+    "home": {
+        "trendingTitle": "Destinazioni di tendenza",
+        "trendingSubtitle": "I luoghi più popolari visitati dalla nostra community",
+        "viewAll": "Vedi tutto",
+        "explore": "Esplora",
+        "newsletterTitle": "Il tuo viaggio inizia qui",
+        "newsletterSubtitle": "Iscriviti per ricevere ispirazione di viaggio, offerte esclusive e consigli per la tua prossima avventura.",
+        "emailPlaceholder": "Il tuo indirizzo email",
+        "subscribeParams": "Iscrivendoti, accetti di ricevere email promozionali. Puoi annullare l'iscrizione in qualsiasi momento."
+    }
+}

@@ -1,0 +1,108 @@
+{
+    "common": {
+        "loading": "読み込み中...",
+        "error": "エラーが発生しました",
+        "retry": "もう一度お試しください",
+        "search": "検索",
+        "close": "閉じる",
+        "pickDate": "日付を選択",
+        "selectDate": "日付を選択"
+    },
+    "nav": {
+        "destinations": "インタラクティブ世界地図",
+        "activities": "アクティビティ",
+        "transport": "交通",
+        "culture": "文化",
+        "login": "ログイン",
+        "logout": "サインアウト",
+        "explore": "探索",
+        "favorites": "お気に入り",
+        "settings": "設定",
+        "language": "言語",
+        "currency": "通貨"
+    },
+    "auth": {
+        "signIn": "サインイン",
+        "signUp": "アカウント作成",
+        "email": "メールアドレス",
+        "password": "パスワード",
+        "name": "名前",
+        "welcomeBack": "おかえりなさい！",
+        "createAccount": "アカウントを作成",
+        "loginSubtitle": "予約にアクセスするためにサインインしてください",
+        "registerSubtitle": "TripVegaに参加して、限定特典を受け取りましょう",
+        "forgotPassword": "パスワードをお忘れですか？",
+        "loggingIn": "サインイン中...",
+        "or": "または",
+        "noAccount": "アカウントをお持ちでないですか？",
+        "hasAccount": "既にアカウントをお持ちですか？",
+        "loginSuccess": "サインインに成功しました！",
+        "registerSuccess": "登録が完了しました！メールを確認してください。"
+    },
+    "footer": {
+        "company": "会社情報",
+        "support": "サポート",
+        "legal": "法的情報",
+        "followUs": "フォローする",
+        "newsletter": "ニュースレター",
+        "subscribe": "購読する",
+        "desc": "TripVegaで世界最高の体験を見つけましょう。",
+        "explore": "探索",
+        "allActivities": "すべてのアクティビティ",
+        "germany": "ドイツ",
+        "europe": "ヨーロッパ",
+        "asia": "アジア",
+        "aboutUs": "私たちについて",
+        "contact": "お問い合わせ",
+        "partner": "パートナーになる",
+        "imprint": "インプリント",
+        "privacy": "プライバシーポリシー",
+        "terms": "利用規約",
+        "rightsReserved": "All rights reserved.",
+        "affiliateDisclaimer": "TripVegaはViatorのアフィリエイトパートナーです。「予約する」をクリックするとviator.comにリダイレクトされます。予約が成功すると、当社はコミッションを受け取ります。"
+    },
+    "hero": {
+        "title1": "未知の体験を",
+        "title2": "発見しよう",
+        "subtitle": "忘れられない体験をあなたの手元に。世界中のツアー、アクティビティ、アトラクションを予約しましょう。",
+        "searchPlaceholder": "どこへ行きますか？",
+        "classicSearch": "通常検索",
+        "aiPlanner": "AIプランナー",
+        "aiPlaceholder": "理想の旅行を説明してください...",
+        "customizeTrip": "旅行をカスタマイズ",
+        "planning": "計画中...",
+        "generatePlan": "プランを作成",
+        "suggestions": [
+            "パリでのロマンチックな週末",
+            "ローマ3日間の家族旅行",
+            "東京での一人旅アドベンチャー",
+            "バルセロナのフードツアー"
+        ],
+        "hint": "目的地を入力し、必要に応じてフィルターを調整してください"
+    },
+    "stats": {
+        "experiences": "体験",
+        "countries": "国",
+        "rating": "ユーザー評価"
+    },
+    "trust": {
+        "bestPrice": "最安値",
+        "guaranteed": "保証",
+        "freeCancel": "キャンセル無料",
+        "mostBookings": "最多予約",
+        "securePayment": "安全な支払い",
+        "secure100": "100% 安全",
+        "support247": "24/7 サポート",
+        "hereForYou": "サポートいたします"
+    },
+    "home": {
+        "trendingTitle": "人気の目的地",
+        "trendingSubtitle": "コミュニティで最も人気のある旅行先",
+        "viewAll": "すべて見る",
+        "explore": "探索",
+        "newsletterTitle": "あなたの旅はここから始まります",
+        "newsletterSubtitle": "旅行のインスピレーション、限定特典、次のアドベンチャーのためのヒントを受け取るために登録してください。",
+        "emailPlaceholder": "メールアドレス",
+        "subscribeParams": "登録することで、プロモーションメールの受信に同意したものとみなされます。いつでも購読を解除できます。"
+    }
+}

@@ -1,0 +1,108 @@
+{
+    "common": {
+        "loading": "Laden...",
+        "error": "Er is een fout opgetreden",
+        "retry": "Opnieuw proberen",
+        "search": "Zoeken",
+        "close": "Sluiten",
+        "pickDate": "Kies een datum",
+        "selectDate": "Datum selecteren"
+    },
+    "nav": {
+        "destinations": "Interactieve Wereldkaart",
+        "activities": "Activiteiten",
+        "transport": "Vervoer",
+        "culture": "Cultuur",
+        "login": "Inloggen",
+        "logout": "Uitloggen",
+        "explore": "Ontdekken",
+        "favorites": "Favorieten",
+        "settings": "Instellingen",
+        "language": "Taal",
+        "currency": "Valuta"
+    },
+    "auth": {
+        "signIn": "Inloggen",
+        "signUp": "Account aanmaken",
+        "email": "E-mail",
+        "password": "Wachtwoord",
+        "name": "Naam",
+        "welcomeBack": "Welkom terug!",
+        "createAccount": "Maak je account aan",
+        "loginSubtitle": "Log in om je boekingen te bekijken",
+        "registerSubtitle": "Word lid van TripVega voor exclusieve aanbiedingen и voordelen",
+        "forgotPassword": "Wachtwoord vergeten?",
+        "loggingIn": "Inloggen...",
+        "or": "of",
+        "noAccount": "Nog geen account?",
+        "hasAccount": "Heb je al een account?",
+        "loginSuccess": "Succesvol ingelogd!",
+        "registerSuccess": "Registratie voltooid! Controleer je e-mail."
+    },
+    "footer": {
+        "company": "Bedrijf",
+        "support": "Ondersteuning",
+        "legal": "Juridisch",
+        "followUs": "Volg ons",
+        "newsletter": "Nieuwsbrief",
+        "subscribe": "Abonneren",
+        "desc": "Ontdek de beste ervaringen ter wereld met TripVega.",
+        "explore": "Ontdekken",
+        "allActivities": "Alle activiteiten",
+        "germany": "Duitsland",
+        "europe": "Europa",
+        "asia": "Azië",
+        "aboutUs": "Over ons",
+        "contact": "Contact",
+        "partner": "Partner worden",
+        "imprint": "Colofon",
+        "privacy": "Privacybeleid",
+        "terms": "Algemene voorwaarden",
+        "rightsReserved": "Alle rechten voorbehouden.",
+        "affiliateDisclaimer": "TripVega is een affiliate partner van Viator. Door op \"Boeken\" te klikken, word je doorgestuurd naar viator.com. Wij ontvangen een commissie voor succesvolle boekingen."
+    },
+    "hero": {
+        "title1": "ONTDEK HET",
+        "title2": "ONBEKENDE",
+        "subtitle": "Onvergetelijke ervaringen binnen handbereik. Boek tours, activiteiten en attracties overal ter wereld.",
+        "searchPlaceholder": "Waar ga je naartoe?",
+        "classicSearch": "Klassiek Zoeken",
+        "aiPlanner": "AI Planner",
+        "aiPlaceholder": "Beschrijf je droomreis...",
+        "customizeTrip": "Reis Aanpassen",
+        "planning": "Plannen...",
+        "generatePlan": "Plan Genereren",
+        "suggestions": [
+            "Romantisch weekend in Parijs",
+            "Gezinsreis naar Rome 3 dagen",
+            "Solo avontuur in Tokio",
+            "Culinair tour in Barcelona"
+        ],
+        "hint": "Voer je bestemming in en pas eventueel de filters aan"
+    },
+    "stats": {
+        "experiences": "Ervaringen",
+        "countries": "Landen",
+        "rating": "Gebruikerswaardering"
+    },
+    "trust": {
+        "bestPrice": "Beste Prijs",
+        "guaranteed": "Gegarandeerd",
+        "freeCancel": "Gratis Annuleren",
+        "mostBookings": "Meest geboekt",
+        "securePayment": "Veilig Betalen",
+        "secure100": "100% Veilig",
+        "support247": "24/7 Support",
+        "hereForYou": "We zijn er voor je"
+    },
+    "home": {
+        "trendingTitle": "Populaire bestemmingen",
+        "trendingSubtitle": "Meest populaire plaatsen bezocht door onze community",
+        "viewAll": "Bekijk alles",
+        "explore": "Ontdekken",
+        "newsletterTitle": "Je reis begint hier",
+        "newsletterSubtitle": "Meld je aan voor reis-inspiratie, exclusieve aanbiedingen en tips voor je volgende avontuur.",
+        "emailPlaceholder": "Je e-mailadres",
+        "subscribeParams": "Door je aan te melden, ga je akkoord met het ontvangen van promotionele e-mails. Je kunt je op elk moment afmelden."
+    }
+}

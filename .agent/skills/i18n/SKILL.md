@@ -15,6 +15,11 @@ TripVega supports multiple languages using **next-intl**. This skill ensures con
 | `de` | Deutsch | 🇩🇪 | Active |
 | `fr` | Français | 🇫🇷 | Active |
 | `es` | Español | 🇪🇸 | Active |
+| `it` | Italiano | 🇮🇹 | Active |
+| `pt` | Português | 🇵🇹 | Active |
+| `nl` | Nederlands | 🇳🇱 | Active |
+| `ja` | 日本語 | 🇯🇵 | Active |
+| `zh` | 简体中文 | 🇨🇳 | Active |
 
 ## File Structure
 
@@ -24,7 +29,12 @@ voyage/
 │   ├── en.json          # English translations (primary)
 │   ├── de.json          # German translations
 │   ├── fr.json          # French translations
-│   └── es.json          # Spanish translations
+│   ├── es.json          # Spanish translations
+│   ├── it.json          # Italian translations
+│   ├── pt.json          # Portuguese translations
+│   ├── nl.json          # Dutch translations
+│   ├── ja.json          # Japanese translations
+│   └── zh.json          # Chinese translations
 ├── lib/
 │   └── i18n/
 │       ├── config.ts    # i18n configuration
@@ -239,7 +249,7 @@ export default withNextIntl({
 
 ### lib/i18n/config.ts
 ```ts
-export const locales = ['en', 'de', 'fr', 'es'] as const;
+export const locales = ['en', 'de', 'fr', 'es', 'it', 'pt', 'nl', 'ja', 'zh'] as const;
 export const defaultLocale = 'en' as const;
 
 export type Locale = (typeof locales)[number];
@@ -252,3 +262,61 @@ Before deploying:
 2. Check that all text is translated (no English fallbacks)
 3. Verify RTL languages if added (not currently supported)
 4. Test with long German text (often longest)
+## Verification Protocol
+
+**MANDATORY**: After implementing any language changes or adding new languages:
+
+1.  **Full-Page Screenshot**: Take a screenshot of the entire page layout.
+2.  **Word Verification**:
+    *   **Analyze the screenshot** to visually confirm the presence of words in the target language.
+    *   **Explicitly check** that key UI elements (headings, buttons, navigation) are displaying the correct localized text.
+    *   **Verify** that dynamic content (e.g., product titles from Viator API) is also returned in the target language.
+3.  **Fail Condition**: If the page remains predominantly in English (or the default language) where specialized translations should be, consider the integration incomplete.
+
+## Comprehensive i18n & Translation Workflow
+
+This workflow is specialized to fully internationalize website areas without overlooking nested components or external data files (like `constants.ts`, `data/faq.ts`).
+
+### Phase 1: Discovery & Dependency Mapping (IMPORTANT)
+
+Before changing code, you must understand the scope. Do not only look at the currently open file.
+
+1.  **Entry Point Analysis:** Identify the main component (e.g., `Page.tsx` or `LandingPage.tsx`).
+2.  **Recursive Tree Traversal:**
+    *   Scan all imports within the component.
+    *   Identify **local components** (e.g., `components/Hero.tsx`, `components/FAQ.tsx`).
+    *   Identify **data files** (e.g., `data/pricing.ts`, `constants/navigation.ts`) containing text rendered in the UI.
+    *   Ignore external libraries (e.g., `node_modules`), focus on `src/` or `app/` folders.
+3.  **Create Audit List:** Create a list in the chat of all files belonging to the full page representation that contain text. Wait for user confirmation if the list seems incomplete.
+
+### Phase 2: Extraction & Structuring
+
+Process the audit list file by file. Adhere to the project's i18n framework (e.g., `next-intl`).
+
+**Extraction Rules:**
+*   **Hard-coded Strings:** Search for every user-visible string (JSX text, `placeholder`, `title`, `alt` tags, strings in arrays/objects).
+*   **Key Generation:** Create semantic keys.
+    *   *Bad:* `faq_title_1`
+    *   *Good:* `LandingPage.FAQ.title` or `Components.Pricing.monthlyPlan`
+*   **Namespace Discipline:** If an FAQ file (`faq.ts`) is separate, check if these strings belong in a separate translation file or global scope.
+*   **Variables & Pluralization:** If strings contain dynamic values (e.g., "3 articles"), use ICU Message Syntax or framework interpolation (e.g., `{count, plural, ...}`).
+
+### Phase 3: Implementation & Validation
+
+Execute changes piece by piece:
+
+1.  **Dictionary Update:** Add new keys to the primary language file (e.g., `messages/en.json`).
+2.  **Component Refactoring:**
+    *   Replace text with the hook (e.g., `useTranslations`).
+    *   Ensure Server Components and Client Components are handled correctly (`getTranslations` vs `useTranslations`).
+3.  **Layout Check (AI Vision):**
+    *   Remember that text in other languages (e.g., German vs English) is often longer (Text Expansion).
+    *   Check if layout might break due to translation (e.g., fixed widths on buttons).
+
+### Phase 4: Operational Protocols
+
+*   **STOP RULE:** If you encounter a file containing text that was not in the original audit list, add it and inform the user. Do not ignore it.
+*   **No Partial Work:** Mark a task as done only when *all* identified files of the page (incl. imported data) have been processed.
+
+### Example Activation Prompt
+"Apply the comprehensive-i18n skill to my Landing Page. The main file is `src/app/page.tsx`."

@@ -1,0 +1,108 @@
+{
+    "common": {
+        "loading": "加载中...",
+        "error": "发生错误",
+        "retry": "重试",
+        "search": "搜索",
+        "close": "关闭",
+        "pickDate": "选择日期",
+        "selectDate": "选择日期"
+    },
+    "nav": {
+        "destinations": "互动世界地图",
+        "activities": "活动",
+        "transport": "交通",
+        "culture": "文化",
+        "login": "登录",
+        "logout": "退出登录",
+        "explore": "探索",
+        "favorites": "收藏",
+        "settings": "设置",
+        "language": "语言",
+        "currency": "货币"
+    },
+    "auth": {
+        "signIn": "登录",
+        "signUp": "注册账号",
+        "email": "邮箱",
+        "password": "密码",
+        "name": "姓名",
+        "welcomeBack": "欢迎回来！",
+        "createAccount": "创建您的账号",
+        "loginSubtitle": "登录以查看您的预订",
+        "registerSubtitle": "加入 TripVega，享受专属优惠和权益",
+        "forgotPassword": "忘记密码？",
+        "loggingIn": "登录中...",
+        "or": "或",
+        "noAccount": "没有账号？",
+        "hasAccount": "已有账号？",
+        "loginSuccess": "登录成功！",
+        "registerSuccess": "注册成功！请检查您的邮箱。"
+    },
+    "footer": {
+        "company": "公司",
+        "support": "支持",
+        "legal": "法律",
+        "followUs": "关注我们",
+        "newsletter": "通讯",
+        "subscribe": "订阅",
+        "desc": "通过 TripVega 探索世界各地的最佳体验。",
+        "explore": "探索",
+        "allActivities": "所有活动",
+        "germany": "德国",
+        "europe": "欧洲",
+        "asia": "亚洲",
+        "aboutUs": "关于我们",
+        "contact": "联系我们",
+        "partner": "成为合作伙伴",
+        "imprint": "法律声明",
+        "privacy": "隐私政策",
+        "terms": "服务条款",
+        "rightsReserved": "版权所有。",
+        "affiliateDisclaimer": "TripVega 是 Viator 的合作伙伴。点击“预订”后，您将被重定向至 viator.com。我们会在成功预订后收取佣金。"
+    },
+    "hero": {
+        "title1": "探索",
+        "title2": "未见之境",
+        "subtitle": "难忘体验，触手可及。预订世界各地的旅游项目、活动和景点。",
+        "searchPlaceholder": "您想去哪里？",
+        "classicSearch": "经典搜索",
+        "aiPlanner": "AI 规划助手",
+        "aiPlaceholder": "描述您梦想中的旅行...",
+        "customizeTrip": "定制行程",
+        "planning": "规划中...",
+        "generatePlan": "生成行程",
+        "suggestions": [
+            "巴黎浪漫周末",
+            "罗马3日家庭游",
+            "东京单人冒险",
+            "巴塞罗那美食之旅"
+        ],
+        "hint": "输入目的地并可选择调整筛选条件"
+    },
+    "stats": {
+        "experiences": "项体验",
+        "countries": "个国家",
+        "rating": "用户评分"
+    },
+    "trust": {
+        "bestPrice": "最优价格",
+        "guaranteed": "保障",
+        "freeCancel": "免费取消",
+        "mostBookings": "预订最多",
+        "securePayment": "安全支付",
+        "secure100": "100% 安全",
+        "support247": "24/7 支持",
+        "hereForYou": "随时为您服务"
+    },
+    "home": {
+        "trendingTitle": "热门目的地",
+        "trendingSubtitle": "社区中最受欢迎的旅行地点",
+        "viewAll": "查看全部",
+        "explore": "探索",
+        "newsletterTitle": "您的旅程从这里开始",
+        "newsletterSubtitle": "注册以获取旅行灵感、专属优惠和下次冒险的建议。",
+        "emailPlaceholder": "您的邮箱地址",
+        "subscribeParams": "注册即表示您同意接收促销邮件。您可以随时退订。"
+    }
+}

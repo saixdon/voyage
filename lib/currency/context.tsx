@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { Currency, CurrencyCode, CurrencyContextType, currencies } from './types';
+import { Currency, CurrencyCode, CurrencyContextType, PRIMARY_CURRENCIES, getCurrencyMetadata } from './types';
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
@@ -22,17 +22,23 @@ interface CurrencyProviderProps {
 }
 
 export function CurrencyProvider({ children }: CurrencyProviderProps) {
-    const [currency, setCurrencyState] = useState<Currency>(currencies[0]);
+    const [currency, setCurrencyState] = useState<Currency>(PRIMARY_CURRENCIES[0]);
     const [rates, setRates] = useState<Record<CurrencyCode, number>>(DEFAULT_RATES);
+    const [availableCurrencies, setAvailableCurrencies] = useState<Currency[]>(PRIMARY_CURRENCIES);
     const [isLoading, setIsLoading] = useState(true);
 
     // Load saved currency preference on mount
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
-            const found = currencies.find(c => c.code === saved);
+            // Try to find in primary currencies first
+            const found = PRIMARY_CURRENCIES.find(c => c.code === saved);
             if (found) {
                 setCurrencyState(found);
+            } else {
+                // Generate metadata for saved currency
+                const generated = getCurrencyMetadata(saved);
+                setCurrencyState(generated);
             }
         }
         fetchRates();
@@ -44,9 +50,12 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
             // Check cache first
             const cached = localStorage.getItem(RATES_CACHE_KEY);
             if (cached) {
-                const { rates: cachedRates, timestamp } = JSON.parse(cached);
+                const { rates: cachedRates, currencies: cachedCurrencies, timestamp } = JSON.parse(cached);
                 if (Date.now() - timestamp < RATES_CACHE_DURATION) {
                     setRates(cachedRates);
+                    if (cachedCurrencies && cachedCurrencies.length > 0) {
+                        setAvailableCurrencies(cachedCurrencies);
+                    }
                     setIsLoading(false);
                     return;
                 }
@@ -58,9 +67,30 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
                 const data = await response.json();
                 setRates(data.rates);
 
-                // Cache the rates
+                // Build available currencies from the rates
+                const currencyList: Currency[] = [];
+
+                // Add primary currencies first (if they have rates)
+                for (const primary of PRIMARY_CURRENCIES) {
+                    if (data.rates[primary.code] !== undefined) {
+                        currencyList.push(primary);
+                    }
+                }
+
+                // Add other currencies from rates
+                const primaryCodes = new Set(PRIMARY_CURRENCIES.map(c => c.code));
+                for (const code of Object.keys(data.rates)) {
+                    if (!primaryCodes.has(code)) {
+                        currencyList.push(getCurrencyMetadata(code));
+                    }
+                }
+
+                setAvailableCurrencies(currencyList);
+
+                // Cache the rates and currencies
                 localStorage.setItem(RATES_CACHE_KEY, JSON.stringify({
                     rates: data.rates,
+                    currencies: currencyList,
                     timestamp: Date.now(),
                 }));
             }
@@ -80,8 +110,8 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
 
     // Convert amount from base currency (EUR) to selected currency
     const convert = useCallback((amount: number, from: CurrencyCode = 'EUR'): number => {
-        const fromRate = rates[from];
-        const toRate = rates[currency.code];
+        const fromRate = rates[from] || 1;
+        const toRate = rates[currency.code] || 1;
         return (amount / fromRate) * toRate;
     }, [rates, currency]);
 
@@ -102,6 +132,7 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
         convert,
         format,
         rates,
+        availableCurrencies,
         isLoading,
     };
 

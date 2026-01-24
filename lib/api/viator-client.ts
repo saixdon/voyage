@@ -1201,3 +1201,54 @@ export async function searchAttractions(destinationId: number, start = 1, count 
         return { error: "Failed to search attractions", attractions: [] };
     }
 }
+
+// Exchange Rates
+export interface ViatorExchangeRate {
+    sourceCurrency: string;
+    targetCurrency: string;
+    rate: number;
+    validFrom?: string;
+    validUntil?: string;
+}
+
+export interface ViatorExchangeRatesResponse {
+    rates?: ViatorExchangeRate[];
+    exchangeRates?: ViatorExchangeRate[];
+    error?: string;
+}
+
+/**
+ * Fetch exchange rates from Viator API.
+ * Returns rates relative to EUR (or specified source currency).
+ */
+export async function fetchViatorExchangeRates(sourceCurrency = 'EUR'): Promise<ViatorExchangeRatesResponse> {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(`${VIATOR_API_BASE}/exchange-rates`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json;version=2.0',
+                'Content-Type': 'application/json',
+                'exp-api-key': API_KEY,
+            },
+            body: JSON.stringify({ sourceCurrency }),
+            next: { revalidate: 3600 }, // Cache for 1 hour
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Exchange rates fetch failed: ${response.status} - ${errorText}`);
+            return { error: `API Error: ${response.status}` };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator Exchange Rates API error:", error);
+        return { error: "Failed to fetch exchange rates" };
+    }
+}

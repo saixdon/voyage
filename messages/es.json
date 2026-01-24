@@ -4,7 +4,9 @@
         "error": "Ha ocurrido un error",
         "retry": "Reintentar",
         "search": "Buscar",
-        "close": "Cerrar"
+        "close": "Cerrar",
+        "pickDate": "Elige una fecha",
+        "selectDate": "Seleccionar fecha"
     },
     "nav": {
         "destinations": "Mapa Mundial Interactivo",

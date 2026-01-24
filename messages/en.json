@@ -4,7 +4,9 @@
         "error": "An error occurred",
         "retry": "Try again",
         "search": "Search",
-        "close": "Close"
+        "close": "Close",
+        "pickDate": "Pick a date",
+        "selectDate": "Select Date"
     },
     "nav": {
         "destinations": "Interactive World Map",
@@ -14,9 +16,10 @@
         "login": "Login",
         "logout": "Sign Out",
         "explore": "Explore",
-        "bookings": "My Bookings",
         "favorites": "Favorites",
-        "settings": "Settings"
+        "settings": "Settings",
+        "language": "Language",
+        "currency": "Currency"
     },
     "auth": {
         "signIn": "Sign In",

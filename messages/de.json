@@ -4,7 +4,9 @@
         "error": "Ein Fehler ist aufgetreten",
         "retry": "Erneut versuchen",
         "search": "Suchen",
-        "close": "Schließen"
+        "close": "Schließen",
+        "pickDate": "Datum wählen",
+        "selectDate": "Datum auswählen"
     },
     "nav": {
         "destinations": "Interaktive Weltkarte",
@@ -16,7 +18,9 @@
         "explore": "Entdecken",
         "bookings": "Meine Buchungen",
         "favorites": "Favoriten",
-        "settings": "Einstellungen"
+        "settings": "Einstellungen",
+        "language": "Sprache",
+        "currency": "Währung"
     },
     "auth": {
         "signIn": "Anmelden",

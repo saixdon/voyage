@@ -16,8 +16,20 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { X } from "lucide-react";
 import "react-day-picker/dist/style.css";
-import { de, enUS } from "date-fns/locale";
+import { de, enUS, it, ja, zhCN, pt, nl, fr, es } from "date-fns/locale";
 import { useLocale, useTranslations } from "next-intl";
+
+const dateLocales: Record<string, any> = {
+    de,
+    en: enUS,
+    it,
+    ja,
+    zh: zhCN,
+    pt,
+    nl,
+    fr,
+    es
+};
 
 interface SearchBarProps {
     placeholder?: string;
@@ -39,6 +51,7 @@ export function SearchBar({
     const router = useRouter();
     const locale = useLocale();
     const t = useTranslations('common');
+    const tHero = useTranslations('hero');
 
     const [query, setQuery] = useState(initialValue);
     const [date, setDate] = useState<DateRange | undefined>(() => {
@@ -82,10 +95,10 @@ export function SearchBar({
     };
 
     const formatDateDisplay = () => {
-        if (!date?.from) return locale === 'de' ? "Datum wählen" : "Pick a date";
+        if (!date?.from) return t('pickDate');
 
         const formatStr = "d. MMM";
-        const localeObj = locale === 'de' ? de : enUS;
+        const localeObj = dateLocales[locale] || enUS;
 
         let display = format(date.from, formatStr, { locale: localeObj });
 
@@ -111,7 +124,7 @@ export function SearchBar({
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder={placeholder || (locale === 'de' ? "Wohin geht's?" : "Where are you going?")}
+                    placeholder={placeholder || tHero('searchPlaceholder')}
                     className="w-full text-base font-medium text-foreground placeholder:text-muted-foreground outline-none bg-transparent truncate"
                 />
             </div>
@@ -142,7 +155,7 @@ export function SearchBar({
                             <div className="p-8">
                                 <div className="flex items-center justify-center mb-8 relative">
                                     <h3 className="text-xl font-bold text-foreground">
-                                        {locale === 'de' ? "Datum auswählen" : "Select Date"}
+                                        {t('selectDate')}
                                     </h3>
                                     <DialogTrigger asChild>
                                         <button className="absolute -right-2 top-0 p-1 text-muted-foreground hover:text-foreground transition-colors">
@@ -157,7 +170,7 @@ export function SearchBar({
                                         selected={date}
                                         onSelect={setDate}
                                         numberOfMonths={1}
-                                        locale={locale === 'de' ? de : enUS}
+                                        locale={dateLocales[locale] || enUS}
                                         disabled={{ before: startOfToday() }}
                                         className="mx-auto"
                                     />
