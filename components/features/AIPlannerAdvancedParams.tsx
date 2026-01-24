@@ -75,7 +75,7 @@ export function AIPlannerAdvancedParams({ onChange, isOpen, onClose }: AIPlanner
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="overflow-hidden w-full bg-[#0f1419]/98 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-2xl"
+                    className="overflow-y-auto max-h-[70vh] md:max-h-none w-full bg-surface border border-theme shadow-2xl rounded-2xl md:backdrop-blur-2xl"
                 >
                     <div className="p-6 md:p-8 space-y-8 max-w-4xl mx-auto">
 
@@ -106,7 +106,7 @@ export function AIPlannerAdvancedParams({ onChange, isOpen, onClose }: AIPlanner
 
                         {/* Vibe Section */}
                         <div>
-                            <label className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 block">
+                            <label className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4 block">
                                 {t('vibeAndStyle')}
                             </label>
                             <div className="flex flex-wrap gap-3">
@@ -132,7 +132,7 @@ export function AIPlannerAdvancedParams({ onChange, isOpen, onClose }: AIPlanner
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {/* Budget Section */}
                             <div>
-                                <label className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 block">
+                                <label className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4 block">
                                     {t('budget')}
                                 </label>
                                 <div className="grid grid-cols-3 gap-3">
@@ -161,16 +161,16 @@ export function AIPlannerAdvancedParams({ onChange, isOpen, onClose }: AIPlanner
 
                             {/* Pacing Section */}
                             <div>
-                                <label className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 block">
+                                <label className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4 block">
                                     {t('tempo')}
                                 </label>
-                                <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                                <div className="bg-surface-elevated border border-theme rounded-xl p-6">
                                     <input
                                         type="range"
                                         min="0"
                                         max="2"
                                         step="1"
-                                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                                        className="w-full h-2 bg-theme rounded-lg appearance-none cursor-pointer accent-primary"
                                         value={prefs.pacing === 'relaxed' ? 0 : prefs.pacing === 'balanced' ? 1 : 2}
                                         onChange={(e) => {
                                             const val = parseInt(e.target.value);
@@ -195,7 +195,7 @@ export function AIPlannerAdvancedParams({ onChange, isOpen, onClose }: AIPlanner
 
                             {/* Mobility Section */}
                             <div>
-                                <label className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 block">
+                                <label className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4 block">
                                     {t('mobility')}
                                 </label>
                                 <div className="grid grid-cols-2 gap-3">
@@ -241,7 +241,7 @@ export function AIPlannerAdvancedParams({ onChange, isOpen, onClose }: AIPlanner
                     {/* Close Handle */}
                     <button
                         onClick={onClose}
-                        className="w-full py-4 bg-white/5 hover:bg-white/10 border-t border-white/10 rounded-b-2xl flex items-center justify-center gap-2 text-xs text-white/60 hover:text-white uppercase tracking-widest transition-colors"
+                        className="w-full py-4 bg-surface-elevated hover:bg-surface border-t border-theme rounded-b-2xl flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground uppercase tracking-widest transition-colors"
                     >
                         {t('closeSettings')}
                         <span className="material-symbols-outlined text-sm">keyboard_arrow_up</span>

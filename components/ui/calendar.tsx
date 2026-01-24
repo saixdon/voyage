@@ -22,7 +22,7 @@ function Calendar({
                 months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                 month: "space-y-4",
                 month_caption: "flex justify-center pt-1 relative items-center mb-4",
-                caption_label: "text-lg font-bold text-white",
+                caption_label: "text-lg font-bold text-foreground",
                 nav: "space-x-1 flex items-center absolute right-0 top-0",
                 button_previous: cn(
                     "h-9 w-9 bg-transparent p-0 opacity-70 hover:opacity-100 rounded-full flex items-center justify-center hover:bg-white/10 transition-all text-blue-500"
@@ -35,7 +35,7 @@ function Calendar({
                 weekday: "text-gray-400 rounded-md w-11 font-medium text-[13px] text-center mb-2",
                 week: "flex w-full mt-2",
                 day: cn(
-                    "h-11 w-11 p-0 font-normal aria-selected:opacity-100 hover:bg-white/10 hover:text-white rounded-full flex items-center justify-center transition-all cursor-pointer text-[14px] text-white"
+                    "h-11 w-11 p-0 font-normal aria-selected:opacity-100 hover:bg-primary/20 hover:text-foreground rounded-full flex items-center justify-center transition-all cursor-pointer text-[14px] text-foreground"
                 ),
                 range_start: "day-range-start",
                 range_end: "day-range-end",

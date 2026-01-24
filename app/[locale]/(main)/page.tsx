@@ -58,7 +58,7 @@ export default function HomePage() {
     return (
         <>
             {/* Hero Section */}
-            <div className="relative w-full min-h-screen flex flex-col items-center pt-[12vh] md:pt-[15vh] overflow-hidden">
+            <div className="relative w-full min-h-screen flex flex-col items-center pt-[12vh] md:pt-[15vh]">
                 {/* Background Animation (Auto, Smooth) */}
                 <HeroActivityAnimation />
 
@@ -115,22 +115,48 @@ export default function HomePage() {
                 <main className="relative z-10 max-w-7xl mx-auto px-6 py-12">
 
                     {/* Trust Badges Section (Moved) */}
+                    {/* Trust Badges Section (Viator Style) */}
                     <section className="mb-20">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div className="text-center mb-12">
+                            <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                                Why book with TripVega?
+                            </h2>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 px-4">
                             {[
-                                { icon: "price_check", title: trustT('bestPrice'), desc: trustT('guaranteed') },
-                                { icon: "calendar_month", title: trustT('freeCancel'), desc: trustT('mostBookings') },
-                                { icon: "lock", title: trustT('securePayment'), desc: trustT('secure100') },
-                                { icon: "support_agent", title: trustT('support247'), desc: trustT('hereForYou') },
+                                {
+                                    icon: "support_agent",
+                                    title: "24/7 customer support",
+                                    desc: "No matter the time zone, we're here to help.",
+                                    color: "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+                                },
+                                {
+                                    icon: "verified",
+                                    title: "Earn rewards",
+                                    desc: "Explore, earn, redeem, and repeat with our loyalty program.",
+                                    color: "bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400"
+                                },
+                                {
+                                    icon: "reviews",
+                                    title: "Millions of reviews",
+                                    desc: "Plan and book with confidence using reviews from fellow travelers.",
+                                    color: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400"
+                                },
+                                {
+                                    icon: "calendar_month",
+                                    title: "Plan your way",
+                                    desc: "Stay flexible with free cancellation and the option to reserve now and pay later.",
+                                    color: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                                },
                             ].map((badge, idx) => (
-                                <div key={idx} className="flex flex-col items-center text-center p-6 bg-surface border border-theme rounded-3xl hover:border-primary/30 transition-all duration-300 group hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10">
-                                    <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                                        <span className="material-symbols-outlined text-primary text-2xl">
+                                <div key={idx} className="flex flex-col items-center text-center group">
+                                    <div className={`h-16 w-16 rounded-full flex items-center justify-center mb-6 transition-transform group-hover:scale-110 ${badge.color}`}>
+                                        <span className="material-symbols-outlined text-3xl">
                                             {badge.icon}
                                         </span>
                                     </div>
-                                    <h3 className="text-foreground font-bold text-lg mb-1">{badge.title}</h3>
-                                    <p className="text-muted-foreground text-sm">{badge.desc}</p>
+                                    <h3 className="text-foreground font-bold text-lg mb-2">{badge.title}</h3>
+                                    <p className="text-muted-foreground text-sm leading-relaxed max-w-[250px]">{badge.desc}</p>
                                 </div>
                             ))}
                         </div>
