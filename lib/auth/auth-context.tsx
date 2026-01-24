@@ -30,7 +30,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const initializeAuth = async () => {
             // Initial session check
-            const { data: { session } } = await supabase.auth.getSession();
+            console.log("🔑 AuthContext: Checking session...");
+            console.log("🔑 AuthContext: document.cookie:", document.cookie);
+            const { data: { session }, error } = await supabase.auth.getSession();
+            console.log("🔑 AuthContext: getSession result:", { session: session?.user?.email, error });
             setSession(session);
             setUser(session?.user ?? null);
             setLoading(false);
