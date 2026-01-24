@@ -100,11 +100,11 @@ export function HeroSearchContainer({ className }: HeroSearchContainerProps) {
     return (
         <div className="w-full flex flex-col items-center relative z-50">
             {/* Toggle Switch */}
-            <div className="flex bg-black/40 backdrop-blur-md p-1 rounded-full mb-6 border border-white/10 opacity-0 animate-fade-in-up-delay-1">
+            <div className="flex bg-black/40 backdrop-blur-md p-1 rounded-lg mb-6 border border-white/10 opacity-0 animate-fade-in-up-delay-1">
                 <button
                     onClick={() => setMode('search')}
                     className={cn(
-                        "px-6 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                        "px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300",
                         mode === 'search'
                             ? "bg-white text-black shadow-lg"
                             : "text-gray-300 hover:text-white"
@@ -115,7 +115,7 @@ export function HeroSearchContainer({ className }: HeroSearchContainerProps) {
                 <button
                     onClick={() => setMode('ai')}
                     className={cn(
-                        "px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2",
+                        "px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2",
                         mode === 'ai'
                             ? "bg-gradient-to-r from-primary to-cyan-500 text-white shadow-lg shadow-primary/20"
                             : "text-gray-300 hover:text-white"
@@ -134,10 +134,10 @@ export function HeroSearchContainer({ className }: HeroSearchContainerProps) {
                     <div className="w-full max-w-3xl relative">
                         <form
                             onSubmit={handleAiSubmit}
-                            className="flex flex-col md:flex-row items-center p-2 bg-surface/95 backdrop-blur-xl rounded-[2rem] shadow-2xl w-full border border-primary/30 ring-1 ring-primary/20 transition-all duration-300 hover:shadow-[0_0_30px_rgba(43,140,238,0.15)] relative z-50"
+                            className="flex flex-col md:flex-row items-center p-2 bg-surface/95 backdrop-blur-xl rounded-xl shadow-2xl w-full border border-primary/30 ring-1 ring-primary/20 transition-all duration-300 hover:shadow-[0_0_30px_rgba(43,140,238,0.15)] relative z-50"
                         >
                             {/* Animated gradient border effect */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-cyan-500/10 pointer-events-none rounded-[2rem]" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-cyan-500/10 pointer-events-none rounded-xl" />
 
                             <div className="relative flex items-center flex-1 w-full md:w-auto px-6 py-2">
                                 <Sparkles className="w-5 h-5 text-primary mr-3 animate-pulse flex-shrink-0" />
@@ -166,7 +166,7 @@ export function HeroSearchContainer({ className }: HeroSearchContainerProps) {
                                 <button
                                     type="submit"
                                     disabled={isAiLoading || !aiQuery.trim()}
-                                    className="w-full md:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="w-full md:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     {isAiLoading ? (
                                         <span className="flex items-center gap-2">

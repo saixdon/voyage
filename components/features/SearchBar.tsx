@@ -113,7 +113,7 @@ export function SearchBar({
         <form
             onSubmit={handleSearch}
             className={cn(
-                "flex flex-col md:flex-row items-center p-2 bg-surface-elevated/80 backdrop-blur-xl rounded-full shadow-2xl max-w-3xl w-full border border-primary/30 ring-1 ring-primary/20 transition-all duration-300 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]",
+                "flex flex-col md:flex-row items-center p-2 bg-surface-elevated/80 backdrop-blur-xl rounded-xl shadow-2xl max-w-3xl w-full border border-primary/30 ring-1 ring-primary/20 transition-all duration-300 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]",
                 className
             )}
         >
@@ -185,7 +185,7 @@ export function SearchBar({
             <div className="p-1 w-full md:w-auto">
                 <button
                     type="submit"
-                    className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#3b82f6] hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#3b82f6] hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98]"
                 >
                     <span>{t('search')}</span>
                     <ArrowRight className="w-5 h-5" />

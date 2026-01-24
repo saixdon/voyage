@@ -23,6 +23,7 @@ interface FavoritesContextType {
     isFavorite: (activityId: string) => boolean;
     addFavorite: (activity: Omit<FavoriteActivity, "id" | "created_at" | "user_id">) => Promise<void>;
     removeFavorite: (activityId: string) => Promise<void>;
+    toggleFavorite: (activity: Omit<FavoriteActivity, "id" | "created_at" | "user_id">) => Promise<void>;
 }
 
 const FavoritesContext = createContext<FavoritesContextType>({
@@ -31,6 +32,7 @@ const FavoritesContext = createContext<FavoritesContextType>({
     isFavorite: () => false,
     addFavorite: async () => { },
     removeFavorite: async () => { },
+    toggleFavorite: async () => { },
 });
 
 import { AuthModal } from "@/components/features/AuthModal";
@@ -142,8 +144,16 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    const toggleFavorite = async (activity: Omit<FavoriteActivity, "id" | "created_at" | "user_id">) => {
+        if (isFavorite(activity.activity_id)) {
+            await removeFavorite(activity.activity_id);
+        } else {
+            await addFavorite(activity);
+        }
+    };
+
     return (
-        <FavoritesContext.Provider value={{ favorites, isLoading, isFavorite, addFavorite, removeFavorite }}>
+        <FavoritesContext.Provider value={{ favorites, isLoading, isFavorite, addFavorite, removeFavorite, toggleFavorite }}>
             {children}
             <AuthModal
                 isOpen={showAuthModal}

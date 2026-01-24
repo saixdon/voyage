@@ -9,7 +9,7 @@ import { checkAvailabilityAction, type AvailabilityResult, type SimilarProduct }
 import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { DayPicker } from "react-day-picker";
-import "react-day-picker/dist/style.css";
+import { useFavorites } from "@/lib/favorites/favorites-context";
 import {
     Calendar as CalendarIcon,
     Users,
@@ -92,7 +92,10 @@ export default function ActivityDetailPage({
     // UI State
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [isFavorite, setIsFavorite] = useState(false);
+
+    // Favorites Logic
+    const { isFavorite: checkIsFavorite, toggleFavorite } = useFavorites();
+    const isFavorite = activity ? checkIsFavorite(activity.id) : false;
 
     // Reviews State
     const [reviews, setReviews] = useState<DisplayReview[]>([]);
@@ -302,14 +305,24 @@ export default function ActivityDetailPage({
 
                         <div className="flex items-center gap-3 w-full md:w-auto">
                             <button
-                                onClick={() => setIsFavorite(!isFavorite)}
+                                onClick={() => toggleFavorite({
+                                    activity_id: activity.id,
+                                    activity_title: activity.title,
+                                    activity_image: activity.image,
+                                    activity_location: activity.location,
+                                    activity_price: activity.price,
+                                    activity_currency: activity.currency,
+                                    activity_rating: activity.rating,
+                                    activity_review_count: activity.reviewCount,
+                                    activity_duration: activity.duration
+                                })}
                                 className={cn(
                                     "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-full border transition-all font-bold",
                                     isFavorite ? "bg-red-50 border-red-100 text-red-500" : "bg-surface border-theme hover:bg-surface-elevated"
                                 )}
                             >
                                 <Heart className={cn("w-5 h-5", isFavorite && "fill-current")} />
-                                <span>{isFavorite ? "Saved" : "Save"}</span>
+                                <span>{isFavorite ? "Gespeichert" : "Speichern"}</span>
                             </button>
                             <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-surface border border-theme hover:bg-surface-elevated transition-all font-bold">
                                 <Share2 className="w-5 h-5" />
