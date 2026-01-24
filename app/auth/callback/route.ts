@@ -35,10 +35,18 @@ export async function GET(request: Request) {
                         getAll() { return cookieStore.getAll() },
                         setAll(cookiesToSet) {
                             try {
-                                cookiesToSet.forEach(({ name, value, options }) =>
-                                    cookieStore.set(name, value, options)
-                                )
-                            } catch { }
+                                cookiesToSet.forEach(({ name, value, options }) => {
+                                    // Force httpOnly: false so client-side JS can read the session
+                                    const clientOptions = {
+                                        ...options,
+                                        httpOnly: false,
+                                    };
+                                    console.log("🔐 Setting cookie:", name, "httpOnly:", clientOptions.httpOnly);
+                                    cookieStore.set(name, value, clientOptions);
+                                });
+                            } catch (e) {
+                                console.error("🔐 Error setting cookie:", e);
+                            }
                         },
                     },
                 }
