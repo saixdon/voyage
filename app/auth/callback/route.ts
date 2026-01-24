@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -24,29 +23,28 @@ export async function GET(request: Request) {
     console.log("🔐 Auth Callback: Origin:", origin);
 
     if (code) {
+        // Create response first - we'll set cookies on this response
+        const response = NextResponse.redirect(`${origin}${next}`);
+
         try {
-            // Using service role client to bypass potential ANON key issues
-            const cookieStore = await cookies();
             const supabase = createServerClient(
                 process.env.NEXT_PUBLIC_SUPABASE_URL!,
                 process.env.SUPABASE_SERVICE_ROLE_KEY!,
                 {
                     cookies: {
-                        getAll() { return cookieStore.getAll() },
+                        getAll() {
+                            return cookieStore.getAll();
+                        },
                         setAll(cookiesToSet) {
-                            try {
-                                cookiesToSet.forEach(({ name, value, options }) => {
-                                    // Force httpOnly: false so client-side JS can read the session
-                                    const clientOptions = {
-                                        ...options,
-                                        httpOnly: false,
-                                    };
-                                    console.log("🔐 Setting cookie:", name, "httpOnly:", clientOptions.httpOnly);
-                                    cookieStore.set(name, value, clientOptions);
-                                });
-                            } catch (e) {
-                                console.error("🔐 Error setting cookie:", e);
-                            }
+                            cookiesToSet.forEach(({ name, value, options }) => {
+                                // Set cookies on the response object, not the request cookieStore
+                                const cookieOptions: CookieOptions = {
+                                    ...options,
+                                    httpOnly: false, // Client JS must be able to read this
+                                };
+                                console.log("🔐 Setting cookie on response:", name, "options:", JSON.stringify(cookieOptions));
+                                response.cookies.set(name, value, cookieOptions);
+                            });
                         },
                     },
                 }
@@ -65,8 +63,10 @@ export async function GET(request: Request) {
 
             console.log("🔐 Auth Callback: SUCCESS! User:", data.user?.email);
             console.log("🔐 Auth Callback: Session expires:", data.session?.expires_at);
+            console.log("🔐 Auth Callback: Response cookies set:", response.cookies.getAll().map(c => c.name).join(", "));
             console.log("🔐 Auth Callback: Redirecting to:", `${origin}${next}`);
-            return NextResponse.redirect(`${origin}${next}`);
+
+            return response;
         } catch (e: unknown) {
             const err = e as Error;
             console.error("🔐 Auth Callback: EXCEPTION:", err.message);
