@@ -75,28 +75,25 @@ export function ActivityCard({
         return stars;
     };
 
-    const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+    const { isFavorite, toggleFavorite } = useFavorites();
     const isActivitySaved = isFavorite(id);
 
     const handleFavoriteClick = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (isActivitySaved) {
-            await removeFavorite(id);
-        } else {
-            await addFavorite({
-                activity_id: id,
-                activity_title: title,
-                activity_image: image,
-                activity_location: location,
-                activity_price: price,
-                activity_currency: currency,
-                activity_rating: rating,
-                activity_review_count: reviewCount,
-                activity_duration: duration
-            });
-        }
+        await toggleFavorite({
+            activity_id: id,
+            activity_title: title,
+            activity_image: image,
+            activity_location: location,
+            activity_price: price,
+            activity_currency: currency,
+            activity_rating: rating,
+            activity_review_count: reviewCount,
+            activity_duration: duration
+        });
+
         onSave?.();
     };
 

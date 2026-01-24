@@ -42,7 +42,8 @@ export default async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        // Skip Next.js internals, API routes, auth routes, and all static files
-        '/((?!api|auth|_next|[^?]*\\.(?:html?|css|js(?!|son)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+        // Skip Next.js internals, auth routes, and all static files
+        // We now INCLUDE /api routes so that Supabase session can be refreshed for API calls
+        '/((?!auth|_next|[^?]*\\.(?:html?|css|js(?!|son)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
     ],
 };
