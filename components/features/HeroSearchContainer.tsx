@@ -14,7 +14,7 @@ import { Calendar as CalendarIcon, Users } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 import "react-day-picker/dist/style.css";
-import { de, enUS } from "date-fns/locale";
+import { de, enUS, it, ja, zhCN, pt, nl, fr, es } from "date-fns/locale";
 import { useLocale } from "next-intl";
 import {
     Dialog,
@@ -46,6 +46,18 @@ export function HeroSearchContainer({ className }: HeroSearchContainerProps) {
     const [guestCount, setGuestCount] = useState(2);
     const locale = useLocale();
 
+    const dateLocales: Record<string, any> = {
+        de,
+        en: enUS,
+        it,
+        ja,
+        zh: zhCN,
+        pt,
+        nl,
+        fr,
+        es
+    };
+
     // Update guest count when traveler type changes
     React.useEffect(() => {
         switch (prefs.travelers) {
@@ -58,6 +70,7 @@ export function HeroSearchContainer({ className }: HeroSearchContainerProps) {
     }, [prefs.travelers]);
 
     const t = useTranslations('hero');
+    const tCommon = useTranslations('common');
 
     const handleAiSubmit = (e?: React.FormEvent) => {
         e?.preventDefault();
@@ -181,9 +194,9 @@ export function HeroSearchContainer({ className }: HeroSearchContainerProps) {
                                     )}>
                                         <CalendarIcon className="w-4 h-4" />
                                         {date?.from ? (
-                                            format(date.from, "d. MMM", { locale: locale === 'de' ? de : enUS })
+                                            format(date.from, "d. MMM", { locale: dateLocales[locale] || enUS })
                                         ) : (
-                                            t('searchPlaceholder') === "Search destinations..." ? "Any dates" : "Beliebiges Datum"
+                                            t('searchPlaceholder') === "Search destinations..." ? "Any dates" : tCommon('pickDate')
                                         )}
                                     </button>
                                 </DialogTrigger>
@@ -193,7 +206,7 @@ export function HeroSearchContainer({ className }: HeroSearchContainerProps) {
                                         <div className="p-8">
                                             <div className="flex items-center justify-center mb-8 relative">
                                                 <h3 className="text-xl font-bold text-foreground">
-                                                    {locale === 'de' ? "Datum auswählen" : "Select Date"}
+                                                    {tCommon('selectDate')}
                                                 </h3>
                                                 <DialogTrigger asChild>
                                                     <button className="absolute -right-2 top-0 p-1 text-muted-foreground hover:text-foreground transition-colors">
@@ -208,7 +221,7 @@ export function HeroSearchContainer({ className }: HeroSearchContainerProps) {
                                                     selected={date}
                                                     onSelect={setDate}
                                                     numberOfMonths={1}
-                                                    locale={locale === 'de' ? de : enUS}
+                                                    locale={dateLocales[locale] || enUS}
                                                     disabled={{ before: startOfToday() }}
                                                     className="mx-auto"
                                                 />

@@ -121,7 +121,8 @@
     },
     "topRated": {
         "title": "Attraktionen, die du nicht verpassen solltest",
-        "subtitle": "Die am besten bewerteten Erlebnisse weltweit"
+        "subtitle": "Die am besten bewerteten Erlebnisse weltweit",
+        "reviews": "Bewertungen"
     },
     "faq": {
         "title": "Häufig gestellte Fragen",

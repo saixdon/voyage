@@ -104,5 +104,10 @@
         "newsletterSubtitle": "注册以获取旅行灵感、专属优惠和下次冒险的建议。",
         "emailPlaceholder": "您的邮箱地址",
         "subscribeParams": "注册即表示您同意接收促销邮件。您可以随时退订。"
+    },
+    "topRated": {
+        "title": "不可错过的景点",
+        "subtitle": "全球评分最高的体验",
+        "reviews": "条评论"
     }
 }

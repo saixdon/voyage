@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 export function Footer() {
     const t = useTranslations('footer');
     const navT = useTranslations('nav');
+    const homeT = useTranslations('home');
 
     return (
         <footer className="bg-background-dark border-t border-theme">
@@ -20,7 +21,6 @@ export function Footer() {
                                     className="h-full w-auto object-contain transition-all duration-300 dark:brightness-100 brightness-0"
                                 />
                             </div>
-                            <h2 className="text-xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">TRIPVEGA</h2>
                         </div>
                         <p className="text-muted-foreground text-sm leading-relaxed">
                             {t('desc')}
@@ -32,7 +32,7 @@ export function Footer() {
                         <h3 className="text-foreground font-semibold mb-4">{t('explore')}</h3>
                         <ul className="space-y-2">
                             <li>
-                                <Link href="/search?q=popular" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                                <Link href="/search" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                                     {t('allActivities')}
                                 </Link>
                             </li>
@@ -42,20 +42,11 @@ export function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/search?q=Germany" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                                    {t('germany')}
+                                <Link href="/search?q=popular" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                                    {homeT('trendingTitle')}
                                 </Link>
                             </li>
-                            <li>
-                                <Link href="/search?q=Europe" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                                    {t('europe')}
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/search?q=Asia" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                                    {t('asia')}
-                                </Link>
-                            </li>
+
                         </ul>
                     </div>
 

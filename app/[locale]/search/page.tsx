@@ -50,7 +50,7 @@ function SearchResults() {
             try {
                 // If query is the default "activities", we might want to pass it or use a specific API param for "top rated"
                 // For now, passing "activities" as q to the API is a reasonable fallback
-                let url = `/api/search?q=${encodeURIComponent(query)}`;
+                let url = `/api/search?q=${encodeURIComponent(query)}&limit=40`;
                 if (dateFromParam) {
                     url += `&from=${encodeURIComponent(dateFromParam)}`;
                 }
@@ -112,21 +112,21 @@ function SearchResults() {
     return (
         <div className="max-w-7xl mx-auto">
             {/* Header with search */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12 pb-8 border-b border-theme">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-6 border-b border-theme">
                 <div>
-                    <h1 className="text-5xl font-bold text-foreground mb-4">
+                    <h1 className="text-4xl font-bold text-foreground mb-2">
                         {rawQuery ? `Results for "${rawQuery}"` : dateFromParam ? `Experiences matching your dates` : "Discover Experiences"}
                     </h1>
-                    <p className="text-muted-foreground text-lg">
+                    <p className="text-muted-foreground text-base">
                         {loading ? "Searching..." : `${filteredResults.length} experiences found`}
                         {activeCategory !== "all" && (
-                            <span className="ml-2 text-sm bg-primary/20 text-primary px-3 py-1 rounded-full font-medium">
+                            <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
                                 {CATEGORY_FILTERS.find(c => c.id === activeCategory)?.label}
                             </span>
                         )}
-                        {source === "viator" && (
-                            <span className="ml-2 text-sm bg-green-500/20 text-green-400 px-3 py-1 rounded-full font-medium">
-                                via Viator
+                        {(source === "viator" || source === "viator-api" || source === "mixed") && (
+                            <span className="ml-2 text-xs bg-green-500/10 text-green-400 px-2 py-0.5 rounded-full font-medium">
+                                {source === "mixed" ? "Mixed Results" : "via Viator"}
                             </span>
                         )}
                     </p>
@@ -165,7 +165,7 @@ function SearchResults() {
 
             {/* Results grid */}
             {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
                     {[...Array(8)].map((_, i) => (
                         <div key={i} className="animate-pulse">
                             <div className="bg-surface-elevated rounded-2xl h-64 mb-4"></div>
@@ -175,7 +175,7 @@ function SearchResults() {
                     ))}
                 </div>
             ) : filteredResults.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
                     {filteredResults.map((activity) => (
                         <ActivityCard key={activity.id} {...activity} />
                     ))}
@@ -210,7 +210,7 @@ function SearchResults() {
 
 export default function SearchPage() {
     return (
-        <div className="min-h-screen bg-background pt-32 pb-20 px-6">
+        <div className="min-h-screen bg-background pt-24 pb-20 px-6">
             <Suspense fallback={<div className="text-foreground text-center">Loading...</div>}>
                 <SearchResults />
             </Suspense>

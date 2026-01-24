@@ -60,20 +60,30 @@ export async function GET(request: NextRequest) {
     // 1. GetYourGuide fallback removed due to API access issues (HTML 404s).
     // Proceeding directly to Viator API.
 
-    // 2. Try Viator Live API if GYG failed or returned nothing
-    if (activities.length === 0) {
+    // 2. Try Viator Live API if GYG failed or returned nothing OR if we need more results
+    if (activities.length < limit) {
         try {
+            console.log(`DB returned only ${activities.length} results. Fetching from Viator API...`);
             const viatorResult = await searchViatorProducts(
                 query,
-                limit,
+                limit - activities.length, // Fetch enough to fill the limit (or just fetch limit)
                 dateFrom || undefined,
                 dateTo || undefined,
                 locale
             );
+
             if (viatorResult.activities && viatorResult.activities.length > 0) {
-                activities = viatorResult.activities as unknown as Activity[];
-                source = "viator-api";
-                total = viatorResult.totalCount || activities.length;
+                const newActivities = viatorResult.activities as unknown as Activity[];
+
+                // Merge and deduplicate based on ID or ProductCode
+                const existingIds = new Set(activities.map(a => a.id));
+                const uniqueNew = newActivities.filter(a => !existingIds.has(a.id));
+
+                activities = [...activities, ...uniqueNew];
+
+                // Update source to reflect mixed or API
+                source = activities.length === uniqueNew.length ? "viator-api" : "mixed";
+                total = (total || 0) + (viatorResult.totalCount || 0); // Estimate total
             }
         } catch (e) {
             console.error("Viator Search Error:", e);
@@ -83,6 +93,8 @@ export async function GET(request: NextRequest) {
     // 3. Mock Fallback (ONLY if absolutely nothing found and query is generic)
     // Removed forceful mock fallback to avoid confusion during testing. 
     // Now returns empty list if nothing found, which is correct behavior.
+
+    console.log(`returning ${activities.length} activities for query "${query}" (Source: ${source})`);
 
     return NextResponse.json({
         source,

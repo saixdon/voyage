@@ -120,7 +120,8 @@
     },
     "topRated": {
         "title": "Attractions you can't miss",
-        "subtitle": "Top-rated experiences around the world"
+        "subtitle": "Top-rated experiences around the world",
+        "reviews": "reviews"
     },
     "faq": {
         "title": "Frequently Asked Questions",

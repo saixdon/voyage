@@ -104,5 +104,10 @@
         "newsletterSubtitle": "Iscriviti per ricevere ispirazione di viaggio, offerte esclusive e consigli per la tua prossima avventura.",
         "emailPlaceholder": "Il tuo indirizzo email",
         "subscribeParams": "Iscrivendoti, accetti di ricevere email promozionali. Puoi annullare l'iscrizione in qualsiasi momento."
+    },
+    "topRated": {
+        "title": "Attrazioni da non perdere",
+        "subtitle": "Le esperienze più votate in tutto il mondo",
+        "reviews": "recensioni"
     }
 }

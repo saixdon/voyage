@@ -113,7 +113,8 @@
     },
     "topRated": {
         "title": "Attractions à ne pas manquer",
-        "subtitle": "Expériences les mieux notées à travers le monde"
+        "subtitle": "Expériences les mieux notées à travers le monde",
+        "reviews": "avis"
     },
     "faq": {
         "title": "Foire Aux Questions",

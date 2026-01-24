@@ -254,22 +254,7 @@ export default function HomePage() {
                             <p className="text-muted-foreground mb-8 text-lg">
                                 {homeT('newsletterSubtitle')}
                             </p>
-                            <form className="flex flex-col sm:flex-row gap-3">
-                                <input
-                                    className="flex-1 bg-surface-elevated border border-theme rounded-xl px-5 py-4 text-foreground placeholder-muted-foreground focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
-                                    placeholder={homeT('emailPlaceholder')}
-                                    type="email"
-                                />
-                                <button
-                                    className="bg-primary hover:bg-primary/90 text-white font-bold py-4 px-8 rounded-xl shadow-[0_0_20px_rgba(43,140,238,0.3)] hover:shadow-[0_0_30px_rgba(43,140,238,0.5)] transition-all transform hover:scale-105"
-                                    type="button"
-                                >
-                                    {homeT('subscribeParams').split(' ')[0] === 'Mit' ? 'Abonnieren' : 'Subscribe'}
-                                </button>
-                            </form>
-                            <p className="text-muted-foreground text-xs mt-4">
-                                {homeT('subscribeParams')}
-                            </p>
+                            <NewsletterForm t={homeT} />
                         </div>
                     </section>
                 </main>
@@ -277,3 +262,49 @@ export default function HomePage() {
         </>
     );
 }
+
+function NewsletterForm({ t }: { t: any }) {
+    const [email, setEmail] = useState("");
+    const [status, setStatus] = useState<"idle" | "success" | "loading">("idle");
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!email) return;
+        setStatus("loading");
+
+        // Mock API call
+        setTimeout(() => {
+            console.log("Newsletter subscription for:", email);
+            setStatus("success");
+            setEmail("");
+            // Reset status after 3 seconds
+            setTimeout(() => setStatus("idle"), 3000);
+        }, 1000);
+    };
+
+    return (
+        <>
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+                <input
+                    className="flex-1 bg-surface-elevated border border-theme rounded-xl px-5 py-4 text-foreground placeholder-muted-foreground focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+                    placeholder={t('emailPlaceholder')}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                />
+                <button
+                    className={`bg-primary hover:bg-primary/90 text-white font-bold py-4 px-8 rounded-xl shadow-[0_0_20px_rgba(43,140,238,0.3)] hover:shadow-[0_0_30px_rgba(43,140,238,0.5)] transition-all transform hover:scale-105 disabled:opacity-70 disabled:pointer-events-none`}
+                    type="submit"
+                    disabled={status === "loading" || status === "success"}
+                >
+                    {status === "loading" ? "..." : status === "success" ? "✓" : t('subscribeParams').split(' ')[0] === 'Mit' ? 'Abonnieren' : 'Subscribe'}
+                </button>
+            </form>
+            <p className="text-muted-foreground text-xs mt-4">
+                {t('subscribeParams')}
+            </p>
+        </>
+    );
+}
+

@@ -120,7 +120,8 @@
     },
     "topRated": {
         "title": "Atrações que você não pode perder",
-        "subtitle": "Experiências mais bem avaliadas em todo o mundo"
+        "subtitle": "Experiências mais bem avaliadas em todo o mundo",
+        "reviews": "avaliações"
     },
     "faq": {
         "title": "Perguntas Frequentes",

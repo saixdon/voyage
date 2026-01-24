@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Link } from "@/lib/i18n/navigation";
 
 interface FAQItem {
     question: string;
@@ -88,12 +89,12 @@ export function FAQSection() {
             <div className="mt-12 text-center">
                 <p className="text-muted-foreground mb-4">{t('stillQuestions')}</p>
                 <div className="flex justify-center gap-4">
-                    <button className="px-6 py-3 bg-primary text-white font-bold rounded-full hover:shadow-lg hover:shadow-primary/20 transition-all hover:scale-105">
+                    <Link href="/kontakt" className="px-6 py-3 bg-primary text-white font-bold rounded-full hover:shadow-lg hover:shadow-primary/20 transition-all hover:scale-105">
                         {t('contactSupport')}
-                    </button>
-                    <button className="px-6 py-3 bg-surface border border-theme text-foreground font-medium rounded-full hover:bg-surface-elevated transition-all">
+                    </Link>
+                    <Link href="/faq" className="px-6 py-3 bg-surface border border-theme text-foreground font-medium rounded-full hover:bg-surface-elevated transition-all">
                         {t('helpCenter')}
-                    </button>
+                    </Link>
                 </div>
             </div>
         </section>

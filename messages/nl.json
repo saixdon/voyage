@@ -104,5 +104,10 @@
         "newsletterSubtitle": "Meld je aan voor reis-inspiratie, exclusieve aanbiedingen en tips voor je volgende avontuur.",
         "emailPlaceholder": "Je e-mailadres",
         "subscribeParams": "Door je aan te melden, ga je akkoord met het ontvangen van promotionele e-mails. Je kunt je op elk moment afmelden."
+    },
+    "topRated": {
+        "title": "Attracties die je niet mag missen",
+        "subtitle": "Best beoordeelde ervaringen wereldwijd",
+        "reviews": "beoordelingen"
     }
 }

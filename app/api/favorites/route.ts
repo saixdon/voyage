@@ -86,7 +86,24 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    // Map DB columns to frontend expected fields
+    // Also filter out any corrupt entries that might have missing titles
+    const mappedData = data
+        .filter((fav: any) => fav.title && fav.activity_id)
+        .map((fav: any) => ({
+            ...fav,
+            activity_title: fav.title,
+            activity_image: fav.image,
+            activity_location: fav.destination,
+            activity_price: fav.price,
+            activity_currency: fav.currency,
+            activity_rating: fav.rating,
+            activity_review_count: fav.review_count,
+            // We use the description column to store duration for now as there is no duration column
+            activity_duration: fav.description || ""
+        }));
+
+    return NextResponse.json(mappedData);
 }
 
 export async function POST(request: Request) {
@@ -110,14 +127,15 @@ export async function POST(request: Request) {
             .insert({
                 user_id: user.id,
                 activity_id: body.activity_id,
-                activity_title: body.activity_title,
-                activity_image: body.activity_image,
-                activity_location: body.activity_location,
-                activity_price: body.activity_price,
-                activity_currency: body.activity_currency,
-                activity_rating: body.activity_rating,
-                activity_review_count: body.activity_review_count,
-                activity_duration: body.activity_duration
+                title: body.activity_title,
+                image: body.activity_image,
+                destination: body.activity_location,
+                price: body.activity_price,
+                currency: body.activity_currency,
+                rating: body.activity_rating,
+                review_count: body.activity_review_count,
+                // Valid workaround: Store duration in description column
+                description: body.activity_duration
             })
             .select()
             .single();
@@ -130,7 +148,20 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json(data);
+        // Fix: Map the single created item back to frontend format
+        const mappedData = {
+            ...data,
+            activity_title: data.title,
+            activity_image: data.image,
+            activity_location: data.destination,
+            activity_price: data.price,
+            activity_currency: data.currency,
+            activity_rating: data.rating,
+            activity_review_count: data.review_count,
+            activity_duration: data.description || ""
+        };
+
+        return NextResponse.json(mappedData);
     } catch (e) {
         return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }

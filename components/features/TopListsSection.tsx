@@ -75,7 +75,6 @@ export function TopListsSection({ className = "" }: TopListProps) {
         { id: "attractions", label: t('attractions') },
         { id: "destinations", label: t('destinations') },
         { id: "countries", label: t('countries') },
-        { id: "categories", label: t('categories') },
     ];
 
     const containerVariants: any = {
@@ -225,7 +224,7 @@ export function TopListsSection({ className = "" }: TopListProps) {
                             />
                         ))}
 
-                        {activeTab === "categories" && categories.slice(0, 15).map((cat) => (
+                        {activeTab === "categories" && categories.slice(0, 14).map((cat) => (
                             <ListItemListItem
                                 key={cat.id}
                                 variants={itemVariants}

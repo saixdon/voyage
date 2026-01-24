@@ -221,7 +221,7 @@ export interface TrendingDestination {
     lng?: number;
 }
 
-const TRENDING_DESTINATION_IDS: TrendingDestination[] = [
+export const TRENDING_DESTINATION_IDS: TrendingDestination[] = [
     { id: 479, name: "Paris", country: "France", query: "Paris", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=1200", lat: 48.8566, lng: 2.3522 },
     { id: 828, name: "Dubai", country: "UAE", query: "Dubai", image: "https://images.unsplash.com/photo-1546412414-e1885259563a?auto=format&fit=crop&q=80&w=1200", lat: 25.2048, lng: 55.2708 },
     { id: 711, name: "Rome", country: "Italy", query: "Rome", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&q=80&w=1200", lat: 41.9028, lng: 12.4964 },
@@ -232,8 +232,8 @@ const TRENDING_DESTINATION_IDS: TrendingDestination[] = [
     { id: 334, name: "Tokyo", country: "Japan", query: "Tokyo", image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&q=80&w=1200", lat: 35.6762, lng: 139.6503 },
     { id: 357, name: "Sydney", country: "Australia", query: "Sydney", image: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&q=80&w=1200", lat: -33.8688, lng: 151.2093 },
     { id: 1004, name: "Cape Town", country: "South Africa", query: "Cape Town", image: "https://images.unsplash.com/photo-1576485290814-1c72aa4bbb8e?auto=format&fit=crop&q=80&w=1200", lat: -33.9249, lng: 18.4241 },
-    { id: 1005, name: "Rio de Janeiro", country: "Brazil", query: "Rio de Janeiro", image: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&q=80&w=1200", lat: -22.9068, lng: -43.1729 },
-    { id: 1006, name: "Reykjavik", country: "Iceland", query: "Reykjavik", image: "https://images.unsplash.com/photo-1476610182048-b716b8518aae?auto=format&fit=crop&q=80&w=1200", lat: 64.1466, lng: -21.9426 }
+    // { id: 1005, name: "Rio de Janeiro", country: "Brazil", query: "Rio de Janeiro", image: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&q=80&w=1200", lat: -22.9068, lng: -43.1729 },
+    // { id: 1006, name: "Reykjavik", country: "Iceland", query: "Reykjavik", image: "https://images.unsplash.com/photo-1476610182048-b716b8518aae?auto=format&fit=crop&q=80&w=1200", lat: 64.1466, lng: -21.9426 }
 ];
 
 export async function getTrendingDestinations(locale = "en"): Promise<TrendingDestination[]> {
