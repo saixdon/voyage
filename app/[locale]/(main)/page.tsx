@@ -58,13 +58,13 @@ export default function HomePage() {
     return (
         <>
             {/* Hero Section */}
-            <div className="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
+            <div className="relative w-full min-h-screen flex flex-col items-center pt-[12vh] md:pt-[15vh] overflow-hidden">
                 {/* Background Animation (Auto, Smooth) */}
                 <HeroActivityAnimation />
 
                 {/* Content Overlay */}
-                <div className="relative z-40 flex flex-col items-center justify-center max-w-5xl px-4 text-center mt-10 w-full font-sans">
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white tracking-tighter leading-none mb-6 drop-shadow-[0_4px_16px_rgba(0,0,0,0.5)] opacity-0 animate-fade-in-up">
+                <div className="relative z-40 flex flex-col items-center max-w-5xl px-4 text-center w-full font-sans">
+                    <h1 className="text-3xl sm:text-4xl md:text-7xl lg:text-8xl font-bold text-white tracking-tighter leading-none mb-4 md:mb-6 drop-shadow-[0_4px_16px_rgba(0,0,0,0.5)] opacity-0 animate-fade-in-up">
                         {heroT('title1')}
                         <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">

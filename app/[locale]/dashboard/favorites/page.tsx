@@ -235,6 +235,16 @@ export default function DashboardFavoritesPage() {
                                 >
                                     Alle
                                 </button>
+                                <button
+                                    onClick={() => setActiveCity(activeCity === "groupBy" ? "all" : "groupBy")}
+                                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all flex items-center gap-2 ${activeCity === "groupBy"
+                                        ? "bg-primary text-white shadow-md shadow-primary/20"
+                                        : "bg-surface border border-theme text-muted-foreground hover:border-primary hover:text-primary"
+                                        }`}
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">view_list</span>
+                                    Nach Städten gruppieren
+                                </button>
                                 {cities.filter(city => activeCountry === "all" || favorites.some(f => f.activity_location?.includes(city) && f.activity_location?.includes(activeCountry)))
                                     .map(c => (
                                         <button
@@ -365,23 +375,65 @@ export default function DashboardFavoritesPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
-                        {filteredFavorites.map((fav) => (
-                            <ActivityCard
-                                key={fav.activity_id}
-                                id={fav.activity_id}
-                                title={fav.activity_title}
-                                location={fav.activity_location || ""}
-                                image={fav.activity_image || ""}
-                                price={fav.activity_price || 0}
-                                currency={fav.activity_currency || "€"}
-                                rating={fav.activity_rating || 0}
-                                reviewCount={fav.activity_review_count || 0}
-                                duration={fav.activity_duration || ""}
-                                isSaved={true}
-                            />
-                        ))}
-                    </div>
+                    activeCity === "groupBy" || (activeCity === "all" && activeCountry !== "all") ? (
+                        // Grouped View (By City)
+                        <div className="space-y-12">
+                            {Object.entries(
+                                filteredFavorites.reduce((acc, fav) => {
+                                    const loc = fav.activity_location?.split(',')[0].trim() || "Andere";
+                                    if (!acc[loc]) acc[loc] = [];
+                                    acc[loc].push(fav);
+                                    return acc;
+                                }, {} as Record<string, typeof favorites>)
+                            ).sort().map(([city, cityFavs]) => (
+                                <div key={city} className="animate-fade-in">
+                                    <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-primary">location_on</span>
+                                        {city}
+                                        <span className="text-sm font-normal text-muted-foreground ml-2">
+                                            ({cityFavs.length})
+                                        </span>
+                                    </h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
+                                        {cityFavs.map((fav) => (
+                                            <ActivityCard
+                                                key={fav.activity_id}
+                                                id={fav.activity_id}
+                                                title={fav.activity_title}
+                                                location={fav.activity_location || ""}
+                                                image={fav.activity_image || ""}
+                                                price={fav.activity_price || 0}
+                                                currency={fav.activity_currency || "€"}
+                                                rating={fav.activity_rating || 0}
+                                                reviewCount={fav.activity_review_count || 0}
+                                                duration={fav.activity_duration || ""}
+                                                isSaved={true}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        // Standard Grid View
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
+                            {filteredFavorites.map((fav) => (
+                                <ActivityCard
+                                    key={fav.activity_id}
+                                    id={fav.activity_id}
+                                    title={fav.activity_title}
+                                    location={fav.activity_location || ""}
+                                    image={fav.activity_image || ""}
+                                    price={fav.activity_price || 0}
+                                    currency={fav.activity_currency || "€"}
+                                    rating={fav.activity_rating || 0}
+                                    reviewCount={fav.activity_review_count || 0}
+                                    duration={fav.activity_duration || ""}
+                                    isSaved={true}
+                                />
+                            ))}
+                        </div>
+                    )
                 )}
             </div>
         </div>

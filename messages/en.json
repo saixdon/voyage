@@ -17,6 +17,8 @@
         "logout": "Sign Out",
         "explore": "Explore",
         "favorites": "Favorites",
+        "bookings": "My Bookings",
+        "trips": "My Trips",
         "settings": "Settings",
         "language": "Language",
         "currency": "Currency"
