@@ -138,9 +138,11 @@ export function ActivityMap({ location, lat, lng, className = "" }: ActivityMapP
         <div className={`rounded-2xl overflow-hidden border border-theme ${className}`}>
             <MapContainer
                 center={[coordinates.lat, coordinates.lng]}
-                zoom={15}
-                style={{ height: "100%", width: "100%", minHeight: "300px" }}
+                zoom={4} // Zoomed out to show continent
+                style={{ height: "100%", width: "100%", minHeight: "100%", background: "#020617" }} // Dark background matching theme
                 scrollWheelZoom={false}
+                zoomControl={false} // Clean look
+                dragging={false} // Static background feel
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
