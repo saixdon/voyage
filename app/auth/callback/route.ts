@@ -12,6 +12,12 @@ export async function GET(request: Request) {
     const code = searchParams.get("code");
     const next = searchParams.get("next") ?? "/";
 
+    const cookieStore = await cookies();
+    const allCookies = cookieStore.getAll();
+    console.log("🔐 Auth Callback: Cookies found:", allCookies.map(c => c.name).join(", "));
+    const verifierCookie = allCookies.find(c => c.name.includes("code-verifier"));
+    console.log("🔐 Auth Callback: Verifier cookie present:", !!verifierCookie);
+
     console.log("🔐 Auth Callback: Code present:", !!code);
     console.log("🔐 Auth Callback: Code value:", code?.substring(0, 10) + "...");
     console.log("🔐 Auth Callback: Next param:", next);
