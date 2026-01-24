@@ -35,19 +35,52 @@ export async function GET(request: NextRequest) {
         const { data: dbProducts, error } = await queryBuilder.limit(limit);
 
         if (!error && dbProducts && dbProducts.length > 0) {
-            activities = dbProducts.map((p: any) => ({
-                id: p.product_code,
-                title: p.title,
-                location: 'Viator Destination', // We might need to join destinations table or store city name
-                image: (p.images && p.images['0']?.variants?.[0]?.url) || "",
-                price: p.pricing?.summary?.fromPrice || 0,
-                currency: p.pricing?.currency || "EUR",
-                rating: p.reviews?.combinedAverageRating || 0,
-                reviewCount: p.reviews?.totalReviews || 0,
-                duration: p.duration?.fixedDurationInMinutes ? `${Math.floor(p.duration.fixedDurationInMinutes / 60)}h ${p.duration.fixedDurationInMinutes % 60}m` : "",
-                productCode: p.product_code,
-                source: 'viator-db'
-            }));
+            activities = dbProducts.map((p: any) => {
+                // Extract best image from JSONB array
+                let image = "";
+                if (p.images && Array.isArray(p.images)) {
+                    const firstImage = p.images[0];
+                    if (firstImage?.variants && Array.isArray(firstImage.variants)) {
+                        // Prefer HD image >= 720px
+                        const hdVariant = firstImage.variants.find((v: any) => v.width >= 720);
+                        image = hdVariant?.url || firstImage.variants[0]?.url || "";
+                    }
+                }
+
+                // Extract destination name
+                let location = "";
+                if (p.destinations && Array.isArray(p.destinations)) {
+                    location = p.destinations[0]?.name || "";
+                }
+
+                // Format duration
+                let duration = "";
+                if (p.duration?.fixedDurationInMinutes) {
+                    const hours = Math.floor(p.duration.fixedDurationInMinutes / 60);
+                    const mins = p.duration.fixedDurationInMinutes % 60;
+                    if (hours > 0 && mins > 0) duration = `${hours}h ${mins}min`;
+                    else if (hours > 0) duration = `${hours} hours`;
+                    else duration = `${mins} min`;
+                } else if (p.duration?.variableDurationFromMinutes) {
+                    const fromH = Math.floor(p.duration.variableDurationFromMinutes / 60);
+                    const toH = Math.floor((p.duration.variableDurationToMinutes || p.duration.variableDurationFromMinutes) / 60);
+                    duration = `${fromH}-${toH} hours`;
+                }
+
+                return {
+                    id: p.product_code,
+                    title: p.title,
+                    location,
+                    image,
+                    price: p.pricing?.summary?.fromPrice || 0,
+                    currency: p.pricing?.currency || "EUR",
+                    rating: p.reviews?.combinedAverageRating || 0,
+                    reviewCount: p.reviews?.totalReviews || 0,
+                    duration,
+                    productCode: p.product_code,
+                    source: 'viator-db'
+                };
+            });
             source = "database";
             total = activities.length;
             console.log(`Found ${activities.length} activities in local DB for "${query}"`);
