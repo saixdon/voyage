@@ -1252,3 +1252,33 @@ export async function fetchViatorExchangeRates(sourceCurrency = 'EUR'): Promise<
         return { error: "Failed to fetch exchange rates" };
     }
 }
+
+// Get availability schedule for a single product to find open dates efficiently
+export async function getViatorProductSchedule(productCode: string) {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!USE_MOCK && !API_KEY) {
+        return { error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(`${VIATOR_API_BASE}/availability/schedules/${productCode}`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json;version=2.0",
+                "exp-api-key": API_KEY!,
+            },
+            next: { revalidate: 3600 } // Cache schedule for 1 hour
+        });
+
+        if (!response.ok) {
+            return { error: `API Error: ${response.status}` };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator API fetch error:", error);
+        return { error: "Failed to fetch product schedule" };
+    }
+}
+

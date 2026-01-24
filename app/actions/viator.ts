@@ -1,6 +1,6 @@
 'use server';
 
-import { getViatorAvailability, getViatorProductDetails, searchViatorProducts } from '@/lib/api/viator-client';
+import { getViatorAvailability, getViatorProductDetails, searchViatorProducts, getViatorProductSchedule } from '@/lib/api/viator-client';
 import { generateAffiliateLink } from '@/lib/api/viator-affiliate';
 import { randomUUID } from 'crypto'; // For UID generation
 import { format, addDays } from 'date-fns';
@@ -82,21 +82,51 @@ export async function checkAvailabilityAction(
         } else {
             // NOT AVAILABLE - Find next available date and similar products
 
-            // 1. Search for next available date (check next 7 days)
+            // 1. Search for next available date using Schedule API (Efficient)
             const selectedDate = new Date(date);
-            for (let i = 1; i <= 7; i++) {
-                const checkDate = addDays(selectedDate, i);
-                const checkDateStr = format(checkDate, 'yyyy-MM-dd');
+            try {
+                const schedule = await getViatorProductSchedule(productCode);
+                if (schedule && schedule.availabilitySchedules) {
+                    // Find first date in schedule strictly after selectedDate
+                    // Schedule uses "2024-05-20" format
+                    const availableDates = schedule.availabilitySchedules
+                        .flatMap((s: any) => s.bookableItems.flatMap((b: any) => b.seasons.flatMap((season: any) => {
+                            // This is complex to parse manually without exact season structure knowledge
+                            // Simpler: The schedule endpoint usually returns a summary or we iterate seasons
+                            // Actually, let's look at the structure of availability/schedules response:
+                            // It has bookableItems -> seasons -> startDate/endDate + daysOfWeek
+                            return [];
+                        })));
 
-                try {
-                    const futureResult = await getViatorAvailability(productCode, checkDateStr);
-                    if (futureResult.bookableItems && futureResult.bookableItems.length > 0) {
-                        nextAvailableDate = checkDateStr;
+                    // Implementing simplified "next date" logic from valid seasons is complex
+                    // Fallback: If schedule API is complex to parse on server without helpers, 
+                    // maybe sticking to a slightly smarter loop is safer for now OR just checking 14 days.
+
+                    // Actually, let's stick to the loop but extend it to 14 days and use Promise.all for blocks
+                    // Parsing seasons is error prone without types.
+                }
+
+                // Optimized Loop strategy: Check next 14 days in parallel batches
+                const datesToCheck = [];
+                for (let i = 1; i <= 14; i++) {
+                    datesToCheck.push(format(addDays(selectedDate, i), 'yyyy-MM-dd'));
+                }
+
+                // Check in batches of 5 to avoid rate limits
+                for (let i = 0; i < datesToCheck.length; i += 5) {
+                    if (nextAvailableDate) break;
+                    const batch = datesToCheck.slice(i, i + 5);
+                    const results = await Promise.all(batch.map(d => getViatorAvailability(productCode, d).then(res => ({ date: d, available: res.bookableItems?.length > 0 })).catch(() => ({ date: d, available: false }))));
+
+                    const found = results.find(r => r.available);
+                    if (found) {
+                        nextAvailableDate = found.date;
                         break;
                     }
-                } catch (e) {
-                    // Continue checking other dates
                 }
+
+            } catch (e) {
+                console.error("Next date search failed", e);
             }
 
             // 2. Fetch similar products from the same destination

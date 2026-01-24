@@ -298,17 +298,18 @@ e
 
 ## 🏗️ IMPLEMENTATION ROADMAP
 
-### Phase 1: Database Setup (Supabase)
-- [ ] Set up Supabase locally
-- [ ] Design schema for products, availability, auxiliary data
-- [ ] Create sync jobs
+### Phase 1: Database Setup (Supabase) ✅
+- [x] Set up Supabase locally
+- [x] Design schema for products, availability, auxiliary data
+- [x] Create sync jobs (`pg_cron`)
 
-### Phase 2: Ingestion Pipeline
-- [ ] Implement `/products/modified-since` sync (hourly)
-- [ ] Implement `/availability/schedules/modified-since` sync (hourly)
-- [ ] Cache auxiliary data
+### Phase 2: Ingestion Pipeline ✅
+- [x] Implement `/products/modified-since` sync (hourly)
+- [x] Implement `/availability/schedules/modified-since` sync (hourly)
+- [x] Implement `/bookings/modified-since` sync (every 3 mins)
+- [x] Cache auxiliary data
 
-### Phase 3: Booking Flow
+### Phase 3: Booking Flow (In Progress 🔄)
 - [ ] Implement Booking Questions
 - [ ] Build checkout experience
 - [ ] Integrate payment (API or iframe)
@@ -317,6 +318,30 @@ e
 - [ ] PCI Compliance documentation
 - [ ] Submit for Viator certification
 - [ ] Testing & go-live
+
+---
+
+## ⚙️ CRON JOB IMPLEMENTATION DETAILS
+> See `supabase/migrations/20260124_setup_cron_jobs.sql` for setup script.
+
+We use **Supabase pg_cron** + **pg_net** to trigger ingestion via Next.js API Routes.
+
+### 1. Architecture
+- **Trigger**: `pg_cron` in Postgres calls an HTTPS endpoint.
+- **Proxy**: `pg_net` makes the HTTP GET request to our Next.js App.
+- **Execution**: Next.js API Route (`app/api/cron/...`) executes the ingestion logic.
+- **Security**: Request safeguarded by `Authorization: Bearer <CRON_SECRET>`.
+
+### 2. Jobs Configured
+
+| Job Name | Schedule | Endpoint | Purpose |
+|----------|----------|----------|---------|
+| `viator-products-sync` | `0 * * * *` (Hourly) | `/api/cron/viator-products` | Syncs product catalog updates |
+| `viator-availability-sync` | `30 * * * *` (Hourly) | `/api/cron/viator-availability` | Syncs availability schedules |
+| `viator-bookings-check` | `*/3 * * * *` (3 mins) | `/api/cron/viator-bookings` | Checks for supplier cancellations |
+
+### 3. Monitoring
+Check the `cron.job_run_details` table in Supabase or the `viator_ingestion_log` table for execution history.
 
 ---
 

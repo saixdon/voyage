@@ -43,6 +43,8 @@ import { ActivityMap } from "@/components/features/ActivityMap";
 
 interface ActivityWithBadge extends TransformedActivity {
     badge?: string;
+    lat?: number;
+    lng?: number;
 }
 
 // Interface for Viator review from API
@@ -129,7 +131,7 @@ export default function ActivityDetailPage({
     useEffect(() => {
         if (activity?.productCode) {
             setReviewsLoading(true);
-            fetch(`/api/reviews?productCode=${activity.productCode}&count=6`)
+            fetch(`/api/reviews?productCode=${activity.productCode}&count=6&locale=${locale}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.reviews && Array.isArray(data.reviews)) {
@@ -322,7 +324,7 @@ export default function ActivityDetailPage({
                                 )}
                             >
                                 <Heart className={cn("w-5 h-5", isFavorite && "fill-current")} />
-                                <span>{isFavorite ? "Gespeichert" : "Speichern"}</span>
+                                <span>{isFavorite ? "Saved" : "Save"}</span>
                             </button>
                             <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-surface border border-theme hover:bg-surface-elevated transition-all font-bold">
                                 <Share2 className="w-5 h-5" />
@@ -496,6 +498,8 @@ export default function ActivityDetailPage({
                                 </div>
                                 <ActivityMap
                                     location={activity.location}
+                                    lat={activity.lat}
+                                    lng={activity.lng}
                                     className="h-full min-h-[300px]"
                                 />
                             </div>
@@ -604,7 +608,10 @@ export default function ActivityDetailPage({
                                             <span className="text-muted-foreground font-bold">per adult</span>
                                         </>
                                     ) : (
-                                        <span className="text-2xl font-black text-primary">Check availability</span>
+                                        <div className="flex flex-col">
+                                            <span className="text-2xl font-black text-primary">Check availability</span>
+                                            <span className="text-[10px] text-muted-foreground font-medium">Price available after date selection</span>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -735,10 +742,10 @@ export default function ActivityDetailPage({
                                                 {/* Sold Out Header */}
                                                 <div className="p-6 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-3xl text-center">
                                                     <p className="font-black text-amber-700 dark:text-amber-400 text-lg mb-1">
-                                                        Dieses Datum ist ausgebucht
+                                                        This date is sold out
                                                     </p>
                                                     <p className="text-sm text-amber-600/80 dark:text-amber-500/80 font-medium">
-                                                        für {guestCount} {guestCount === 1 ? 'Person' : 'Personen'}
+                                                        for {guestCount} {guestCount === 1 ? 'person' : 'people'}
                                                     </p>
                                                 </div>
 
@@ -746,7 +753,7 @@ export default function ActivityDetailPage({
                                                 {availability.nextAvailableDate && (
                                                     <div className="p-5 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-2xl">
                                                         <p className="text-sm text-green-700 dark:text-green-400 font-bold mb-3">
-                                                            Nächstes verfügbares Datum:
+                                                            Next available date:
                                                         </p>
                                                         <button
                                                             onClick={() => setSelectedDate(new Date(availability.nextAvailableDate!))}
@@ -767,7 +774,7 @@ export default function ActivityDetailPage({
                                                 {availability.similarProducts && availability.similarProducts.length > 0 && (
                                                     <div className="pt-4 border-t border-theme">
                                                         <p className="text-sm font-bold text-muted-foreground mb-4">
-                                                            Ähnliche Erlebnisse in {activity.location}:
+                                                            Similar experiences in {activity.location}:
                                                         </p>
                                                         <div className="space-y-3">
                                                             {availability.similarProducts.map((product) => (
@@ -795,7 +802,7 @@ export default function ActivityDetailPage({
                                                                             </div>
                                                                             <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
                                                                             <span className="text-xs font-black text-primary ml-auto">
-                                                                                ab {product.currency} {product.price}
+                                                                                from {product.currency} {product.price}
                                                                             </span>
                                                                         </div>
                                                                     </div>

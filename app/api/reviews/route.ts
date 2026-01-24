@@ -7,8 +7,7 @@ export async function GET(request: NextRequest) {
         const searchParams = request.nextUrl.searchParams;
         const productCode = searchParams.get('productCode');
         const count = parseInt(searchParams.get('count') || '5', 10);
-        // We could also get locale from header or param, defaulting to en
-        const locale = 'en'; // Simplify for now
+        const locale = searchParams.get('locale') || 'en';
 
         if (!productCode) {
             return NextResponse.json(
