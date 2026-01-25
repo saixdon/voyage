@@ -925,7 +925,8 @@ export async function createViatorCartHold(request: CartHoldRequest) {
             },
             body: JSON.stringify({
                 ...request,
-                paymentDataSubmissionMode: "PARTNER_FORM"
+                paymentDataSubmissionMode: "PARTNER_FORM",
+                partnerCartRef: crypto.randomUUID(),
             }),
         });
 
