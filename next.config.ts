@@ -43,6 +43,7 @@ const nextConfig: NextConfig = {
             "https://api.staging.tapayments.com",
             "https://prod.accdab.net",
             "https://test.accdab.net",
+            "http://test.accdab.net", // Allow HTTP for test env
             "https://www.cdn-net.com",
             "https://staging.cdn-net.com",
         ].join(" ");
@@ -54,9 +55,12 @@ const nextConfig: NextConfig = {
             "https://checkout-assets.payments.tamg.cloud",
             "https://prod.accdab.net",
             "https://test.accdab.net",
+            "http://test.accdab.net", // Allow HTTP for test env
             "https://www.cdn-net.com",
             "https://staging.cdn-net.com",
             "https://six.cdn-net.com",
+            "https://beacon.riskified.com",
+            "http://beacon.riskified.com",
         ].join(" ");
 
         const viatorConnectSrc = [
@@ -65,8 +69,11 @@ const nextConfig: NextConfig = {
             "https://checkout-api-hare.payments-dev.tamg.cloud",
             "https://prod.accdab.net",
             "https://test.accdab.net",
+            "http://test.accdab.net", // Allow HTTP for test env
             "https://api.tapayments.com",
             "https://api.staging.tapayments.com",
+            "https://beacon.riskified.com",
+            "http://beacon.riskified.com",
         ].join(" ");
 
         return [
