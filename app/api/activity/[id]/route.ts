@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getViatorProductDetails } from "@/lib/api/viator-client";
+import { getViatorProductDetails, getViatorProductReviews } from "@/lib/api/viator-client";
 import { resolveDestinationNames } from "@/lib/api/destination-resolver";
 
 export async function GET(
@@ -9,7 +9,11 @@ export async function GET(
     try {
         const { id } = await params;
 
-        const productDetails = await getViatorProductDetails(id);
+        // Fetch details and reviews in parallel
+        const [productDetails, reviewsResult] = await Promise.all([
+            getViatorProductDetails(id),
+            getViatorProductReviews(id)
+        ]);
 
         // Mock fallback if API returns error (e.g. 401/404 because of invalid keys)
         if (productDetails.error && (id.startsWith("mock-") || productDetails.error.includes("401") || productDetails.error.includes("403"))) {
@@ -136,6 +140,7 @@ export async function GET(
             // NEU: Zusätzliche Info
             inclusions: productDetails.inclusions || [],
             exclusions: productDetails.exclusions || [],
+            userReviews: reviewsResult?.reviews || [],
             lat: undefined,
             lng: undefined
         };

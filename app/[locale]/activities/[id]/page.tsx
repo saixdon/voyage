@@ -53,6 +53,7 @@ interface ActivityWithBadge extends TransformedActivity {
     lat?: number;
     lng?: number;
     productOptions?: ProductOption[];
+    userReviews?: any[];
 }
 
 // Interface for Viator review from API
@@ -143,34 +144,26 @@ export default function ActivityDetailPage({
         fetchActivity();
     }, [id]);
 
-    // Fetch reviews when activity is loaded
+    // Load reviews directly from activity data
     useEffect(() => {
-        if (activity?.productCode) {
-            setReviewsLoading(true);
-            fetch(`/api/reviews?productCode=${activity.productCode}&count=6&locale=${locale}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.reviews && Array.isArray(data.reviews)) {
-                        const transformedReviews: DisplayReview[] = data.reviews.map((r: ViatorReview, idx: number) => ({
-                            id: r.reviewReference || `review-${idx}`,
-                            author: r.userName || "Anonymous Traveler",
-                            rating: r.rating || 5,
-                            date: r.publishedDate || new Date().toISOString(),
-                            comment: r.text || r.title || "Great experience!",
-                            avatar: undefined, // Viator doesn't provide user avatars
-                            photos: r.photos?.map(p => p.photoUrl) || []
-                        }));
-                        setReviews(transformedReviews);
-                    }
-                })
-                .catch(err => {
-                    console.error("Failed to fetch reviews:", err);
-                })
-                .finally(() => {
-                    setReviewsLoading(false);
-                });
+        if (activity?.userReviews && activity.userReviews.length > 0) {
+            const transformedReviews: DisplayReview[] = activity.userReviews.map((r: any, idx: number) => ({
+                id: r.reviewReference || `review-${idx}`,
+                author: r.userName || "Verified Traveler",
+                rating: r.rating || 5,
+                date: r.publishedDate || new Date().toISOString(),
+                comment: r.text || r.title || "No textual review provided.",
+                avatar: undefined,
+                // Try to extract photos from different structures Viator might return
+                photos: r.photos?.map((p: any) => p.url) ||
+                    r.photosInfo?.flatMap((pi: any) => pi.photoVersions?.map((pv: any) => pv.url)) ||
+                    []
+            }));
+            setReviews(transformedReviews);
+        } else {
+            setReviews([]);
         }
-    }, [activity?.productCode]);
+    }, [activity]);
 
     // Auto-Check Availability when Date, Guests or Option change
     useEffect(() => {

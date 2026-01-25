@@ -732,6 +732,58 @@ export async function getViatorAvailability(
     }
 }
 
+export async function getViatorProductReviews(productCode: string, count: number = 5, start: number = 1) {
+    const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
+
+    if (!USE_MOCK && !API_KEY) {
+        return { reviews: [] };
+    }
+
+    try {
+        if (USE_MOCK) {
+            return {
+                reviews: [
+                    {
+                        reviewReference: "mock-1",
+                        text: "Amazing experience! The guide was fantastic.",
+                        rating: 5,
+                        userName: "Mock User 1",
+                        publishedDate: "2024-01-01",
+                        title: "Great Tour"
+                    }
+                ]
+            };
+        }
+
+        const response = await fetch(`${VIATOR_API_BASE}/reviews/product`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json;version=2.0",
+                "exp-api-key": API_KEY!,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                productCode,
+                count,
+                start,
+                sortOrder: "MOST_RECENT_PER_LANGUAGE",
+                provider: "ALL"
+            }),
+            next: { revalidate: 3600 }
+        });
+
+        if (!response.ok) {
+            console.warn(`Failed to fetch reviews: ${response.status}`);
+            return { reviews: [] };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Viator Reviews fetch error:", error);
+        return { reviews: [] };
+    }
+}
+
 // Get availability schedules for multiple products (Bulk)
 export async function getViatorAvailabilitySchedulesBulk(productCodes: string[]) {
     const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
