@@ -90,11 +90,14 @@ export async function GET(
 
     // Extract Location Name
     let locationName = "Location available at booking";
-    if (productDetails.destinations && productDetails.destinations.length > 0) {
-        // Use the resolver we created
-        const { resolveDestinationNames } = await import("@/lib/api/destination-resolver");
-        locationName = await resolveDestinationNames(productDetails.destinations) || locationName;
-    }
+    // try {
+    //     if (productDetails.destinations && productDetails.destinations.length > 0) {
+    //         const { resolveDestinationNames } = await import("@/lib/api/destination-resolver");
+    //         locationName = await resolveDestinationNames(productDetails.destinations) || locationName;
+    //     }
+    // } catch (e) {
+    //     console.error("Location resolution failed:", e);
+    // }
 
     // Transform Viator product to our format with safe fallbacks
     const activity = {

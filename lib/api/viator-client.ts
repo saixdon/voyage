@@ -639,11 +639,17 @@ export async function getViatorProductDetails(productCode: string, locale = "en"
         });
 
         if (!response.ok) {
+            console.error(`Viator Bulk API Error: ${response.status} for ${productCode}`);
             return { error: `API Error: ${response.status}` };
         }
 
         const data = await response.json();
-        return data.products?.[0] || { error: "Product not found" };
+        const product = data.products?.[0];
+        if (!product) {
+            console.error(`Viator Product not found in bulk response for ${productCode}`);
+            return { error: "Product not found" };
+        }
+        return product;
     } catch (error) {
         console.error("Viator API fetch error:", error);
         return { error: "Failed to fetch product details" };
