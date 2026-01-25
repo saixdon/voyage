@@ -9,6 +9,7 @@ import { checkAvailabilityAction, type AvailabilityResult, type SimilarProduct }
 import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
 import { useFavorites } from "@/lib/favorites/favorites-context";
 import {
     Calendar as CalendarIcon,
