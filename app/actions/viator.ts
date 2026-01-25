@@ -98,10 +98,10 @@ export async function checkAvailabilityAction(
                     datesToCheck.push(format(addDays(selectedDate, i), 'yyyy-MM-dd'));
                 }
 
-                // Check in batches of 10 to cover range faster but respect limits
-                for (let i = 0; i < datesToCheck.length; i += 10) {
+                // Check in batches of 5 to avoid rate limits
+                for (let i = 0; i < datesToCheck.length; i += 5) {
                     if (nextAvailableDate) break;
-                    const batch = datesToCheck.slice(i, i + 10);
+                    const batch = datesToCheck.slice(i, i + 5);
                     const results = await Promise.all(batch.map(d => getViatorAvailability(productCode, d, undefined, productOptionCode).then(res => ({ date: d, available: res.bookableItems?.length > 0 })).catch(() => ({ date: d, available: false }))));
 
                     const found = results.find(r => r.available);
