@@ -33,17 +33,24 @@ export async function ingestProducts(): Promise<IngestionResult> {
 
     // 2. Call Viator API
     try {
-        const url = new URL(`${VIATOR_API_BASE}/products/modified-since`);
-        if (cursor) url.searchParams.append('cursor', cursor);
-        url.searchParams.append('count', '50'); // Batch size
+        const requestBody: any = {
+            count: 50, // Batch size
+            currency: 'EUR'
+        };
 
-        const response = await fetch(url.toString(), {
-            method: 'GET',
+        if (cursor) {
+            requestBody.cursor = cursor;
+        }
+
+        const response = await fetch(`${VIATOR_API_BASE}/products/modified-since`, {
+            method: 'POST',
             headers: {
                 'Accept': 'application/json;version=2.0',
                 'exp-api-key': VIATOR_API_KEY!,
-                'Accept-Language': 'en'
-            }
+                'Accept-Language': 'en',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) throw new Error(`Viator API error: ${response.status}`);
@@ -127,15 +134,23 @@ export async function ingestAvailability(): Promise<IngestionResult> {
     const cursor = logEntry?.last_cursor;
 
     try {
-        const url = new URL(`${VIATOR_API_BASE}/availability/schedules/modified-since`);
-        if (cursor) url.searchParams.append('cursor', cursor);
-        url.searchParams.append('count', '50');
+        const requestBody: any = {
+            count: 50,
+            currency: 'EUR'
+        };
 
-        const response = await fetch(url.toString(), {
+        if (cursor) {
+            requestBody.cursor = cursor;
+        }
+
+        const response = await fetch(`${VIATOR_API_BASE}/availability/schedules/modified-since`, {
+            method: 'POST',
             headers: {
                 'Accept': 'application/json;version=2.0',
-                'exp-api-key': VIATOR_API_KEY!
-            }
+                'exp-api-key': VIATOR_API_KEY!,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) throw new Error(`Viator API error: ${response.status}`);
@@ -204,15 +219,22 @@ export async function ingestBookings(): Promise<IngestionResult> {
     const cursor = logEntry?.last_cursor;
 
     try {
-        const url = new URL(`${VIATOR_API_BASE}/bookings/modified-since`);
-        if (cursor) url.searchParams.append('cursor', cursor);
-        url.searchParams.append('count', '50');
+        const requestBody: any = {
+            count: 50
+        };
 
-        const response = await fetch(url.toString(), {
+        if (cursor) {
+            requestBody.cursor = cursor;
+        }
+
+        const response = await fetch(`${VIATOR_API_BASE}/bookings/modified-since`, {
+            method: 'POST',
             headers: {
                 'Accept': 'application/json;version=2.0',
-                'exp-api-key': VIATOR_API_KEY!
-            }
+                'exp-api-key': VIATOR_API_KEY!,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) throw new Error(`Viator API error: ${response.status}`);

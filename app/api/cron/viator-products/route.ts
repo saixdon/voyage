@@ -1,6 +1,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { ingestProducts } from '@/lib/api/viator-ingestion';
+import { ingestProducts } from '@/lib/api/viator-ingestion-v2';
 
 export async function GET(request: NextRequest) {
     const authHeader = request.headers.get('authorization');
