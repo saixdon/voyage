@@ -36,6 +36,7 @@ export interface AvailabilityResult {
 export async function checkAvailabilityAction(
     productCode: string,
     date: string,
+    guestCount: number = 2,
     destination?: string, // Optional destination for similar products search
     productOptionCode?: string
 ): Promise<AvailabilityResult> {
@@ -44,7 +45,8 @@ export async function checkAvailabilityAction(
     }
 
     try {
-        const result = await getViatorAvailability(productCode, date, undefined, productOptionCode);
+        const paxMix = [{ ageBand: "ADULT", numberOfTravelers: guestCount }];
+        const result = await getViatorAvailability(productCode, date, paxMix, productOptionCode);
 
         if (result.error) {
             console.error('Availability check failed:', result.error);
@@ -102,7 +104,7 @@ export async function checkAvailabilityAction(
                 for (let i = 0; i < datesToCheck.length; i += 5) {
                     if (nextAvailableDate) break;
                     const batch = datesToCheck.slice(i, i + 5);
-                    const results = await Promise.all(batch.map(d => getViatorAvailability(productCode, d, undefined, productOptionCode).then(res => ({ date: d, available: res.bookableItems?.length > 0 })).catch(() => ({ date: d, available: false }))));
+                    const results = await Promise.all(batch.map(d => getViatorAvailability(productCode, d, paxMix, productOptionCode).then(res => ({ date: d, available: res.bookableItems?.length > 0 })).catch(() => ({ date: d, available: false }))));
 
                     const found = results.find(r => r.available);
                     if (found) {

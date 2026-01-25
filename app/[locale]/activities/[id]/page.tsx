@@ -211,7 +211,7 @@ export default function ActivityDetailPage({
 
         try {
             // Pass destination for similar products when not available, and SELECTED OPTION CODE
-            const result = await checkAvailabilityAction(activity.productCode, dateStr, activity.location, selectedOptionCode || undefined);
+            const result = await checkAvailabilityAction(activity.productCode, dateStr, guestCount, activity.location, selectedOptionCode || undefined);
             setAvailability(result);
         } catch (e) {
             console.error(e);
