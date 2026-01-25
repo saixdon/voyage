@@ -236,7 +236,7 @@ export default function ActivityDetailPage({
             pax: guestCount.toString(),
             price: price.toString(),
             currency: currency,
-            optionCode: productOptionCode || 'DEFAULT'
+            optionCode: productOptionCode || selectedOptionCode || 'DEFAULT'
         });
 
         router.push(`/checkout?${checkoutParams.toString()}`);
