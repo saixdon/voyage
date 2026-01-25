@@ -60,10 +60,16 @@ export async function checkAvailabilityAction(
         // Parse the response to determine simple availability status
         const isAvailable = result.bookableItems && result.bookableItems.length > 0;
 
-        // Extract the lowest price found for this date
+        // Match the correct item if option code is provided
+        let selectedItem = result.bookableItems ? result.bookableItems[0] : null;
+        if (productOptionCode && result.bookableItems && result.bookableItems.length > 1) {
+            selectedItem = result.bookableItems.find((i: any) => i.productOptionCode === productOptionCode) || result.bookableItems[0];
+        }
+
+        // Extract the price for the specific option
         let price;
-        if (isAvailable && result.bookableItems[0].totalPrice) {
-            const priceObj = result.bookableItems[0].totalPrice.price;
+        if (isAvailable && selectedItem?.totalPrice) {
+            const priceObj = selectedItem.totalPrice.price;
             price = {
                 amount: priceObj.value || priceObj.recommendedRetailPrice || 0,
                 currency: result.currency || 'EUR'
@@ -86,38 +92,17 @@ export async function checkAvailabilityAction(
             // 1. Search for next available date using Schedule API (Efficient)
             const selectedDate = new Date(date);
             try {
-                const schedule = await getViatorProductSchedule(productCode);
-                if (schedule && schedule.availabilitySchedules) {
-                    // Find first date in schedule strictly after selectedDate
-                    // Schedule uses "2024-05-20" format
-                    const availableDates = schedule.availabilitySchedules
-                        .flatMap((s: any) => s.bookableItems.flatMap((b: any) => b.seasons.flatMap((season: any) => {
-                            // This is complex to parse manually without exact season structure knowledge
-                            // Simpler: The schedule endpoint usually returns a summary or we iterate seasons
-                            // Actually, let's look at the structure of availability/schedules response:
-                            // It has bookableItems -> seasons -> startDate/endDate + daysOfWeek
-                            return [];
-                        })));
-
-                    // Implementing simplified "next date" logic from valid seasons is complex
-                    // Fallback: If schedule API is complex to parse on server without helpers, 
-                    // maybe sticking to a slightly smarter loop is safer for now OR just checking 14 days.
-
-                    // Actually, let's stick to the loop but extend it to 14 days and use Promise.all for blocks
-                    // Parsing seasons is error prone without types.
-                }
-
-                // Optimized Loop strategy: Check next 14 days in parallel batches
+                // Optimized Loop strategy: Check next 60 days in parallel batches
                 const datesToCheck = [];
-                for (let i = 1; i <= 14; i++) {
+                for (let i = 1; i <= 60; i++) {
                     datesToCheck.push(format(addDays(selectedDate, i), 'yyyy-MM-dd'));
                 }
 
-                // Check in batches of 5 to avoid rate limits
-                for (let i = 0; i < datesToCheck.length; i += 5) {
+                // Check in batches of 10 to cover range faster but respect limits
+                for (let i = 0; i < datesToCheck.length; i += 10) {
                     if (nextAvailableDate) break;
-                    const batch = datesToCheck.slice(i, i + 5);
-                    const results = await Promise.all(batch.map(d => getViatorAvailability(productCode, d).then(res => ({ date: d, available: res.bookableItems?.length > 0 })).catch(() => ({ date: d, available: false }))));
+                    const batch = datesToCheck.slice(i, i + 10);
+                    const results = await Promise.all(batch.map(d => getViatorAvailability(productCode, d, undefined, productOptionCode).then(res => ({ date: d, available: res.bookableItems?.length > 0 })).catch(() => ({ date: d, available: false }))));
 
                     const found = results.find(r => r.available);
                     if (found) {
