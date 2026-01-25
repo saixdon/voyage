@@ -612,12 +612,22 @@ export default function ActivityDetailPage({
                             </div>
 
                             <div className="mb-8">
-                                <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-1">Total Price from</p>
-                                <div className="flex items-baseline gap-2">
+                                <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-1">Total Price</p>
+                                <div className="flex flex-col gap-1">
                                     {displayPrice && displayPrice > 0 ? (
                                         <>
-                                            <span className="text-4xl font-black text-foreground">{displayCurrency} {displayPrice}</span>
-                                            <span className="text-muted-foreground font-bold">per adult</span>
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="text-4xl font-black text-foreground">
+                                                    {displayCurrency} {(displayPrice * guestCount).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                                                </span>
+                                            </div>
+                                            {guestCount > 1 ? (
+                                                <span className="text-sm text-muted-foreground font-bold">
+                                                    {displayCurrency} {displayPrice} x {guestCount} {guestCount === 1 ? 'Person' : 'People'}
+                                                </span>
+                                            ) : (
+                                                <span className="text-sm text-muted-foreground font-bold">per person</span>
+                                            )}
                                         </>
                                     ) : (
                                         <div className="flex flex-col">
