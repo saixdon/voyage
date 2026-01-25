@@ -923,7 +923,10 @@ export async function createViatorCartHold(request: CartHoldRequest) {
                 "exp-api-key": API_KEY!,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(request),
+            body: JSON.stringify({
+                ...request,
+                paymentDataSubmissionMode: "PARTNER_FORM"
+            }),
         });
 
         if (!response.ok) {
