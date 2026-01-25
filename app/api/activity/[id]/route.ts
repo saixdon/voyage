@@ -88,13 +88,19 @@ export async function GET(
     // Fallback if we can't find clear coords in detail: 0,0 or undefined
     // For now we rely on the component to geocode the string location if lat/lng missing
 
+    // Extract Location Name
+    let locationName = "Location available at booking";
+    if (productDetails.destinations && productDetails.destinations.length > 0) {
+        // Use the resolver we created
+        const { resolveDestinationNames } = await import("@/lib/api/destination-resolver");
+        locationName = await resolveDestinationNames(productDetails.destinations) || locationName;
+    }
+
     // Transform Viator product to our format with safe fallbacks
     const activity = {
         id: productDetails.productCode,
         title: productDetails.title || "Untitled Activity",
-        location: productDetails.destinations?.[0]?.name
-            || productDetails.logistics?.start?.[0]?.location?.ref
-            || "Location available at booking",
+        location: locationName,
         image: primaryImage,
         images: allImages,
         price: productDetails.pricing?.summary?.fromPrice || 0,
@@ -107,7 +113,7 @@ export async function GET(
         description: productDetails.description || "Description not available.",
         badge: productDetails.flags?.includes("BEST_SELLER") ? "Bestseller" : undefined,
         // Pass trough raw data for component to use if needed
-        lat: undefined,
+        lat: undefined, // Coordinates would require lookup
         lng: undefined
     };
 

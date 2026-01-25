@@ -622,13 +622,19 @@ export async function getViatorProductDetails(productCode: string, locale = "en"
             return { error: "Product not found in mock data" };
         }
 
-        const response = await fetch(`${VIATOR_API_BASE}/products/${productCode}`, {
-            method: "GET",
+        // Use BULK endpoint even for single product to ensure consistent data (pricing, etc.)
+        const response = await fetch(`${VIATOR_API_BASE}/products/bulk`, {
+            method: "POST",
             headers: {
                 "Accept": "application/json;version=2.0",
                 "Accept-Language": locale,
+                "Content-Type": "application/json",
                 "exp-api-key": VIATOR_API_KEY!,
             },
+            body: JSON.stringify({
+                productCodes: [productCode],
+                currency: "EUR"
+            }),
             next: { revalidate: 3600 }, // Cache for 1 hour
         });
 
@@ -636,7 +642,8 @@ export async function getViatorProductDetails(productCode: string, locale = "en"
             return { error: `API Error: ${response.status}` };
         }
 
-        return await response.json();
+        const data = await response.json();
+        return data.products?.[0] || { error: "Product not found" };
     } catch (error) {
         console.error("Viator API fetch error:", error);
         return { error: "Failed to fetch product details" };
