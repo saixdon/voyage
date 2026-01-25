@@ -2,10 +2,22 @@
  * Helper to resolve destination IDs to names using the viator_destinations table
  */
 
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 // In-memory cache to avoid DB calls for every request
 const destinationCache = new Map<number, string>();
+
+// Create a singleton Supabase client for destination lookups (read-only)
+const getSupabaseClient = () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+        throw new Error('Supabase credentials not configured');
+    }
+
+    return createClient(supabaseUrl, supabaseServiceKey);
+};
 
 export async function resolveDestinationName(destinationId: number | string): Promise<string> {
     const destId = typeof destinationId === 'string' ? parseInt(destinationId) : destinationId;
@@ -16,7 +28,7 @@ export async function resolveDestinationName(destinationId: number | string): Pr
     }
 
     try {
-        const supabase = await createClient();
+        const supabase = getSupabaseClient();
         const { data, error } = await supabase
             .from('viator_destinations')
             .select('name')
@@ -57,7 +69,7 @@ export async function resolveDestinationNames(destinations: Array<{ ref: string,
 export async function batchResolveDestinations(
     products: Array<{ productCode: string; destinations?: Array<{ ref: string, primary?: boolean }> }>
 ): Promise<Map<string, string>> {
-    const supabase = await createClient();
+    const supabase = getSupabaseClient();
     const result = new Map<string, string>();
 
     // Collect unique destination IDs

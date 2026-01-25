@@ -644,7 +644,8 @@ export async function getViatorProductDetails(productCode: string, locale = "en"
         }
 
         const data = await response.json();
-        const product = data.products?.[0];
+        // Viator Bulk API returns ARRAY directly: [{...}] not {products: [...]}
+        const product = Array.isArray(data) ? data[0] : data.products?.[0];
         if (!product) {
             console.error(`Viator Product not found in bulk response for ${productCode}`);
             return { error: "Product not found" };
