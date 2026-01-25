@@ -1,4 +1,5 @@
-const VIATOR_API_KEY = 'fad9e3c8-ecad-446a-81fb-40281a8e3334';
+require('dotenv').config();
+const VIATOR_API_KEY = process.env.VIATOR_API_KEY;
 const BASE_URL = 'https://api.viator.com/partner'; // Production URL
 
 async function testProduction() {

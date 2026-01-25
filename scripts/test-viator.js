@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-process.env.VIATOR_API_KEY = 'fad9e3c8-ecad-446a-81fb-40281a8e3334';
+require('dotenv').config();
 const BAS_URL = 'https://api.viator.com/partner';
 
 async function run() {

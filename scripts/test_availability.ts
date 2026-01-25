@@ -1,9 +1,7 @@
-
+import 'dotenv/config';
 import { searchViatorProducts, getViatorAvailability } from '@/lib/api/viator-client';
 import { addDays, format } from 'date-fns';
 
-// Mock env for this script execution
-process.env.VIATOR_API_KEY = "fad9e3c8-ecad-446a-81fb-40281a8e3334";
 process.env.VIATOR_API_BASE_URL = "https://api.viator.com/partner";
 
 async function testAvailability() {

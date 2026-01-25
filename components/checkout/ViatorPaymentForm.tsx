@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import Script from "next/script";
-import { Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Loader2, ShieldCheck, AlertTriangle, RefreshCw } from "lucide-react";
+import type { PaymentType, FormEvent as ViatorFormEvent, ColorTheme } from "payment-module/dist/types/types";
 
 interface ViatorPaymentFormProps {
     /** Payment Session Token from /bookings/cart/hold response */
@@ -19,63 +19,6 @@ interface ViatorPaymentFormProps {
     cardholderName?: string;
     /** Optional: Theme (LIGHT or DARK) */
     theme?: "LIGHT" | "DARK";
-}
-
-// Official Viator Payment SDK URL
-const VIATOR_SDK_URL = "https://checkout-assets.payments.tamg.cloud/stable/v2/payment.js";
-
-// Viator Payment SDK Types
-declare global {
-    interface Window {
-        Payment?: {
-            new(sessionToken: string): ViatorPaymentInstance;
-            init(sessionToken: string): ViatorPaymentInstance;
-        };
-    }
-}
-
-interface ViatorPaymentInstance {
-    renderCard(options: RenderCardOptions): void;
-    submitForm(data: SubmitFormData): Promise<PaymentResult>;
-    submitDeviceData(): void;
-}
-
-interface RenderCardOptions {
-    cardElementContainer: string;
-    cardholderName?: string;
-    onFormUpdate?: (event: FormUpdateEvent) => void;
-    styling?: {
-        colorTheme?: "LIGHT" | "DARK";
-        variables?: {
-            fontSize?: string;
-            colorInputBackground?: string;
-            colorBackground?: string;
-            colorPrimaryText?: string;
-        };
-    };
-}
-
-interface SubmitFormData {
-    address: {
-        country: string;
-        postalCode: string;
-    };
-    email?: string;
-    phoneNumber?: string;
-}
-
-interface PaymentResult {
-    result: "SUCCESS" | "ERROR";
-    paymentToken?: string;
-    cardData?: {
-        cardType: string;
-    };
-    error?: string;
-}
-
-interface FormUpdateEvent {
-    valid: boolean;
-    complete: boolean;
 }
 
 export function ViatorPaymentForm({
@@ -96,18 +39,12 @@ export function ViatorPaymentForm({
     const [postalCode, setPostalCode] = useState("");
     const [email, setEmail] = useState("");
 
-    const paymentRef = useRef<ViatorPaymentInstance | null>(null);
+    const paymentRef = useRef<PaymentType | null>(null);
+    const initAttemptedRef = useRef(false);
     const containerId = "viator-payment-iframe";
 
-    // Initialize the payment form when SDK loads
-    const initializePaymentForm = useCallback(() => {
-        if (!window.Payment) {
-            console.error("Viator Payment SDK not available on window");
-            setSdkStatus("error");
-            onError("Payment system unavailable");
-            return;
-        }
-
+    // Initialize the payment form - now waits for DOM element to be available
+    const initializePaymentForm = useCallback(async () => {
         if (!paymentSessionToken) {
             console.error("No payment session token provided");
             setSdkStatus("error");
@@ -116,21 +53,44 @@ export function ViatorPaymentForm({
         }
 
         try {
-            console.log("Initializing Viator Payment with token:", paymentSessionToken.substring(0, 20) + "...");
+            console.log("Loading Viator Payment SDK via NPM module...");
 
-            // Use init() method as recommended by Viator
-            const payment = window.Payment.init(paymentSessionToken);
+            // Wait a tick to ensure the container is in the DOM
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Verify the container exists before proceeding
+            const containerElement = document.getElementById(containerId);
+            if (!containerElement) {
+                console.error("Container element not found:", containerId);
+                throw new Error("Payment container not found");
+            }
+            console.log("Container element found:", containerElement);
+
+            // Dynamic import the NPM module
+            const loadPayment = (await import("payment-module")).default;
+
+            console.log("Viator Payment module loaded, initializing with token:", paymentSessionToken.substring(0, 30) + "...");
+
+            // Load and initialize the payment SDK
+            const payment = await loadPayment(paymentSessionToken);
             paymentRef.current = payment;
+
+            console.log("Payment instance created, rendering card form...");
+
+            // Get the correct ColorTheme enum value
+            const colorThemeValue = theme as unknown as ColorTheme;
 
             // Render the card input iframe
             payment.renderCard({
                 cardElementContainer: containerId,
                 cardholderName: cardholderName,
-                onFormUpdate: (event: FormUpdateEvent) => {
-                    setIsFormValid(event.valid && event.complete);
+                onFormUpdate: (event: ViatorFormEvent) => {
+                    console.log("Form update:", event);
+                    // Use formValid from the event
+                    setIsFormValid(event.formValid);
                 },
                 styling: {
-                    colorTheme: theme,
+                    colorTheme: colorThemeValue,
                     variables: {
                         colorBackground: theme === "DARK" ? "#1c2127" : "#ffffff",
                         colorPrimaryText: theme === "DARK" ? "#ffffff" : "#0f172a",
@@ -145,21 +105,30 @@ export function ViatorPaymentForm({
         } catch (err) {
             console.error("Failed to initialize Viator Payment:", err);
             setSdkStatus("error");
-            onError("Failed to load payment form");
+            onError("Failed to load payment form. Please try again.");
         }
     }, [paymentSessionToken, cardholderName, theme, onError]);
 
-    // Handle script load
-    const handleScriptLoad = () => {
-        console.log("Viator Payment SDK script loaded");
-        // Small delay to ensure the script is fully initialized
-        setTimeout(initializePaymentForm, 100);
-    };
+    // Initialize on mount - with a small delay to ensure container is in DOM
+    useEffect(() => {
+        if (!initAttemptedRef.current && paymentSessionToken) {
+            initAttemptedRef.current = true;
+            // Small delay to ensure mount is complete
+            const timer = setTimeout(() => {
+                initializePaymentForm();
+            }, 200);
+            return () => clearTimeout(timer);
+        }
+    }, [paymentSessionToken, initializePaymentForm]);
 
-    const handleScriptError = () => {
-        console.error("Failed to load Viator Payment SDK script");
-        setSdkStatus("error");
-        onError("Failed to load payment system");
+    // Retry handler
+    const handleRetry = () => {
+        initAttemptedRef.current = false;
+        setSdkStatus("loading");
+        // Small delay before retry
+        setTimeout(() => {
+            initializePaymentForm();
+        }, 200);
     };
 
     // Handle form submission
@@ -177,144 +146,158 @@ export function ViatorPaymentForm({
         setIsProcessing(true);
 
         try {
-            // Submit fraud detection data first
-            paymentRef.current.submitDeviceData();
-
-            // Submit the payment form
+            // Submit the payment form with CardMetadata
             const result = await paymentRef.current.submitForm({
                 address: {
                     country: billingCountry,
                     postalCode: postalCode,
                 },
-                email: email || undefined,
             });
 
-            if (result.result === "SUCCESS" && result.paymentToken) {
+            if (result.paymentToken) {
                 console.log("Payment successful, card type:", result.cardData?.cardType);
                 onPaymentSuccess(result.paymentToken);
             } else {
-                throw new Error(result.error || "Payment failed");
+                throw new Error("Payment failed - no token received");
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Payment failed. Please try again.";
             console.error("Payment submission error:", err);
-            onError(err.message || "Payment failed. Please try again.");
+            onError(errorMessage);
         } finally {
             setIsProcessing(false);
         }
     };
 
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (paymentRef.current) {
+                try {
+                    paymentRef.current.destruct();
+                } catch {
+                    // Ignore cleanup errors
+                }
+            }
+        };
+    }, []);
+
     return (
         <div className="w-full">
-            {/* Load Viator Payment SDK */}
-            <Script
-                src={VIATOR_SDK_URL}
-                onLoad={handleScriptLoad}
-                onError={handleScriptError}
-                strategy="lazyOnload"
-            />
-
-            {/* Loading State */}
-            {sdkStatus === "loading" && (
-                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                    <Loader2 className="w-10 h-10 animate-spin mb-4 text-primary" />
-                    <p className="font-medium">Lade sicheres Zahlungsformular...</p>
-                    <p className="text-sm text-muted-foreground mt-1">Powered by Viator</p>
-                </div>
-            )}
-
-            {/* Error State */}
-            {sdkStatus === "error" && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-8 text-center">
-                    <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                    <p className="text-red-400 font-bold mb-2">Zahlungssystem nicht verfügbar</p>
-                    <p className="text-sm text-muted-foreground">
-                        Bitte versuche es später erneut oder kontaktiere den Support.
-                    </p>
-                </div>
-            )}
-
-            {/* Payment Form */}
-            {sdkStatus === "ready" && (
-                <div className="space-y-6">
-                    {/* Viator iFrame Container */}
-                    <div className="bg-surface-elevated rounded-xl border border-theme overflow-hidden">
-                        <div
-                            id={containerId}
-                            className="min-h-[180px] p-4"
-                        >
-                            {/* Viator SDK injects the secure iframe here */}
+            {/* ALWAYS render the iframe container - even during loading */}
+            {/* This ensures the DOM element exists before Viator SDK tries to inject */}
+            <div className="space-y-6">
+                {/* Viator iFrame Container - Always rendered but may be hidden */}
+                <div className="bg-surface-elevated rounded-xl border border-theme overflow-hidden relative">
+                    {/* Loading overlay */}
+                    {sdkStatus === "loading" && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface-elevated z-10">
+                            <Loader2 className="w-10 h-10 animate-spin mb-4 text-primary" />
+                            <p className="font-medium text-muted-foreground">Lade sicheres Zahlungsformular...</p>
+                            <p className="text-sm text-muted-foreground mt-1">Powered by Viator</p>
                         </div>
+                    )}
+
+                    {/* Error overlay */}
+                    {sdkStatus === "error" && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface-elevated z-10 p-8">
+                            <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
+                            <p className="text-red-400 font-bold mb-2">Zahlungssystem nicht verfügbar</p>
+                            <p className="text-sm text-muted-foreground mb-4 text-center">
+                                Bitte versuche es erneut oder kontaktiere den Support.
+                            </p>
+                            <button
+                                onClick={handleRetry}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors"
+                            >
+                                <RefreshCw className="w-4 h-4" />
+                                Erneut versuchen
+                            </button>
+                        </div>
+                    )}
+
+                    {/* The actual container where Viator SDK injects the iframe */}
+                    <div
+                        id={containerId}
+                        className="min-h-[180px] p-4"
+                    >
+                        {/* Viator SDK injects the secure iframe here */}
                     </div>
+                </div>
 
-                    {/* Billing Address (Required by Viator) */}
-                    <div className="space-y-4">
-                        <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
-                            Rechnungsadresse
-                        </h4>
+                {/* Only show billing and submit when ready */}
+                {sdkStatus === "ready" && (
+                    <>
+                        {/* Billing Address (Required by Viator) */}
+                        <div className="space-y-4">
+                            <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+                                Rechnungsadresse
+                            </h4>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-medium text-muted-foreground">Land</label>
-                                <select
-                                    value={billingCountry}
-                                    onChange={(e) => setBillingCountry(e.target.value)}
-                                    className="w-full h-11 px-3 bg-surface-elevated border border-theme rounded-lg text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                                >
-                                    <option value="DE">Deutschland</option>
-                                    <option value="AT">Österreich</option>
-                                    <option value="CH">Schweiz</option>
-                                    <option value="US">USA</option>
-                                    <option value="GB">UK</option>
-                                    <option value="FR">Frankreich</option>
-                                    <option value="ES">Spanien</option>
-                                    <option value="IT">Italien</option>
-                                </select>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-medium text-muted-foreground">Land</label>
+                                    <select
+                                        value={billingCountry}
+                                        onChange={(e) => setBillingCountry(e.target.value)}
+                                        className="w-full h-11 px-3 bg-surface-elevated border border-theme rounded-lg text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                                    >
+                                        <option value="DE">Deutschland</option>
+                                        <option value="AT">Österreich</option>
+                                        <option value="CH">Schweiz</option>
+                                        <option value="US">USA</option>
+                                        <option value="GB">UK</option>
+                                        <option value="FR">Frankreich</option>
+                                        <option value="ES">Spanien</option>
+                                        <option value="IT">Italien</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-medium text-muted-foreground">Postleitzahl *</label>
+                                    <input
+                                        type="text"
+                                        value={postalCode}
+                                        onChange={(e) => setPostalCode(e.target.value)}
+                                        placeholder="12345"
+                                        required
+                                        className="w-full h-11 px-3 bg-surface-elevated border border-theme rounded-lg text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                                    />
+                                </div>
                             </div>
+
                             <div className="space-y-1.5">
-                                <label className="text-xs font-medium text-muted-foreground">Postleitzahl *</label>
+                                <label className="text-xs font-medium text-muted-foreground">E-Mail (für Bestätigung)</label>
                                 <input
-                                    type="text"
-                                    value={postalCode}
-                                    onChange={(e) => setPostalCode(e.target.value)}
-                                    placeholder="12345"
-                                    required
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="deine@email.de"
                                     className="w-full h-11 px-3 bg-surface-elevated border border-theme rounded-lg text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                                 />
                             </div>
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-medium text-muted-foreground">E-Mail (für Bestätigung)</label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="deine@email.de"
-                                className="w-full h-11 px-3 bg-surface-elevated border border-theme rounded-lg text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Submit Button */}
-                    <button
-                        onClick={handleSubmit}
-                        disabled={isProcessing || !isFormValid || !postalCode}
-                        className="w-full h-14 bg-primary hover:bg-primary/90 disabled:bg-primary/50 disabled:cursor-not-allowed text-white font-bold text-lg rounded-xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg shadow-primary/20"
-                    >
-                        {isProcessing ? (
-                            <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                <span>Verarbeite Zahlung...</span>
-                            </>
-                        ) : (
-                            <>
-                                <ShieldCheck className="w-5 h-5" />
-                                <span>Jetzt bezahlen: {currency} {price.toFixed(2)}</span>
-                            </>
-                        )}
-                    </button>
-                </div>
-            )}
+                        {/* Submit Button */}
+                        <button
+                            onClick={handleSubmit}
+                            disabled={isProcessing || !isFormValid || !postalCode}
+                            className="w-full h-14 bg-primary hover:bg-primary/90 disabled:bg-primary/50 disabled:cursor-not-allowed text-white font-bold text-lg rounded-xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg shadow-primary/20"
+                        >
+                            {isProcessing ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <span>Verarbeite Zahlung...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <ShieldCheck className="w-5 h-5" />
+                                    <span>Jetzt bezahlen: {currency} {price.toFixed(2)}</span>
+                                </>
+                            )}
+                        </button>
+                    </>
+                )}
+            </div>
 
             {/* Trust Badges */}
             <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">

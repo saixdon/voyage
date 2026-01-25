@@ -1,5 +1,5 @@
-
-const VIATOR_API_KEY = "fad9e3c8-ecad-446a-81fb-40281a8e3334";
+require('dotenv').config();
+const VIATOR_API_KEY = process.env.VIATOR_API_KEY;
 const VIATOR_API_BASE = "https://api.sandbox.viator.com/partner";
 
 async function testViator() {

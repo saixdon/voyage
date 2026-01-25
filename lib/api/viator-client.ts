@@ -915,6 +915,12 @@ export async function createViatorCartHold(request: CartHoldRequest) {
     }
 
     try {
+        // Generate unique partnerBookingRef for each item (required by Viator API)
+        const itemsWithRefs = request.items.map((item, index) => ({
+            ...item,
+            partnerBookingRef: `${crypto.randomUUID()}-${index}`,
+        }));
+
         const response = await fetch(`${VIATOR_API_BASE}/bookings/cart/hold`, {
             method: "POST",
             headers: {
@@ -925,6 +931,7 @@ export async function createViatorCartHold(request: CartHoldRequest) {
             },
             body: JSON.stringify({
                 ...request,
+                items: itemsWithRefs,
                 paymentDataSubmissionMode: "PARTNER_FORM",
                 partnerCartRef: crypto.randomUUID(),
             }),
