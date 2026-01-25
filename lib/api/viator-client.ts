@@ -561,11 +561,15 @@ export async function searchViatorProducts(
             return { activities: [], error: "No products found" };
         }
 
+        // Batch resolve destinations BEFORE mapping
+        const { batchResolveDestinations } = await import('@/lib/api/destination-resolver');
+        const locationMap = await batchResolveDestinations(data.products);
+
         // Transform Viator products to our Activity format
         const activities: TransformedActivity[] = data.products.map((product) => ({
             id: product.productCode,
             title: product.title,
-            location: product.destinations?.[0]?.name || "",
+            location: locationMap.get(product.productCode) || "",
             image: selectBestImage(product.images),
             images: extractImages(product.images), // POPULATE REAL
             price: product.pricing?.summary?.fromPrice || 0,
