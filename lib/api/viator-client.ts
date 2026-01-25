@@ -919,6 +919,7 @@ export async function createViatorCartHold(request: CartHoldRequest) {
             method: "POST",
             headers: {
                 "Accept": "application/json;version=2.0",
+                "Accept-Language": "en-US",
                 "exp-api-key": API_KEY!,
                 "Content-Type": "application/json",
             },
