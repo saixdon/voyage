@@ -300,9 +300,10 @@ export function ViatorPaymentForm({
                     )}
 
                     {/* The actual container where Viator SDK injects the iframe */}
+                    {/* The actual container where Viator SDK injects the iframe */}
                     <div
                         id={containerId}
-                        className="min-h-[180px] p-4"
+                        className="min-h-[500px] w-full h-full p-4 relative z-0"
                     >
                         {/* Viator SDK injects the secure iframe here */}
                     </div>
@@ -424,8 +425,8 @@ export function ViatorPaymentForm({
                                         <div
                                             key={i}
                                             className={`py-1 px-2 rounded ${msg.includes('ERROR') ? 'bg-red-500/20 text-red-400' :
-                                                    msg.includes('READY') || msg.includes('✅') ? 'bg-green-500/20 text-green-400' :
-                                                        'text-gray-300'
+                                                msg.includes('READY') || msg.includes('✅') ? 'bg-green-500/20 text-green-400' :
+                                                    'text-gray-300'
                                                 }`}
                                         >
                                             <pre className="whitespace-pre-wrap break-all">{msg}</pre>

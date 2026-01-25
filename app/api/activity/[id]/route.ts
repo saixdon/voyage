@@ -197,6 +197,29 @@ export async function GET(
             }
         }
 
+        // 2.b Extra Fallback: Check Search API if Price is suspicious low (< 20 for non-ticket) or mismatch
+        // The Search API often has better "fromPrice" aggregation
+        if (price > 0 && price < 20) {
+            try {
+                // Import dynamically to avoid circular deps if any
+                const { searchViatorProducts } = await import("@/lib/api/viator-client");
+                // Search by Product Code is the most precise way to find THIS product in the search index
+                const searchRes = await searchViatorProducts(id, 1);
+                if (searchRes.activities && searchRes.activities.length > 0) {
+                    // Check if we found the exact product
+                    const searchActivity = searchRes.activities.find(a => a.productCode === id) || searchRes.activities[0];
+
+                    // Only override if search price is significantly higher (indicating a "real" adult price vs child price)
+                    if (searchActivity.price > price) {
+                        console.log(`Fixing shallow price ${price} with search price ${searchActivity.price}`);
+                        price = searchActivity.price;
+                    }
+                }
+            } catch (searchErr) {
+                console.error("Search fallback failed:", searchErr);
+            }
+        }
+
         // Transform Viator product to our format with safe fallbacks
         const activity = {
             id: productDetails.productCode,
