@@ -27,6 +27,10 @@ const nextConfig: NextConfig = {
                 protocol: "https",
                 hostname: "hare-media-cdn.tripadvisor.com",
             },
+            {
+                protocol: "https",
+                hostname: "hare-dynamic-media-cdn.tripadvisor.com",
+            },
         ],
     },
 
