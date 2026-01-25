@@ -141,6 +141,7 @@ export async function GET(
             inclusions: productDetails.inclusions || [],
             exclusions: productDetails.exclusions || [],
             userReviews: reviewsResult?.reviews || [],
+            reviewsStats: reviewsResult?.totalReviewsSummary || null,
             lat: undefined,
             lng: undefined
         };

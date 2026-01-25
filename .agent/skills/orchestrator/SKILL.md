@@ -24,12 +24,21 @@ You are the master orchestrator agent. You coordinate multiple specialized skill
 
 | Skill | Domain | Use When |
 |-------|--------|----------|
-| `i18n` | Internationalization | Adding languages, translations, locale logic |
+| `ab-test-setup` | Experimentation | Designing A/B tests, statistical validity, experiment config |
+| `brainstorming` | Planning/Strategy | Exploring user intent, requirements, and design before implementation |
 | `currency` | Finance/Pricing | Price formatting, converting currencies, rates API |
 | `design-system` | UI/UX | Creating components, styling, themes |
-| `viator-api` | Backend Integration | Fetching/displaying activities, booking logic |
-| `documentation-writer` | Docs | User requests documentation (German only!) |
-| `brainstorming` | Planning | Starting new complex features |
+| `documentation-writer` | Docs | User requests documentation (README, API docs, changelog) |
+| `e2e-testing` | QA/Testing | Manual E2E testing using browser_subagent, testing flows |
+| `email-sequence` | Marketing Ops | Drip campaigns, onboarding flows, lifecycle emails |
+| `email-systems` | Infrastructure | Transactional email, deliverability, marketing automation setup |
+| `i18n` | Internationalization | Adding languages, translations, locale logic |
+| `mobile-design` | Mobile UX | Mobile-first design, touch patterns, native app considerations |
+| `prompt-enhancer` | Agent Opt. | Refining user prompts into detailed agent tasks |
+| `seo-specialist` | SEO/Visibility | SEO audits, Core Web Vitals, E-E-A-T, AI search visibility |
+| `test-driven-development` | Engineering | Writing tests before implementation (TDD workflow) |
+| `ui-interaction-audit` | QA/UX | Testing interactive elements, verifying handlers, UX purpose |
+| `viator-api` | Backend Integration | Fetching/displaying activities, availability, booking logic |
 
 ---
 
@@ -40,10 +49,13 @@ When given a complex task:
 ### Step 1: Task Analysis
 ```
 What domains does this task touch?
-- [ ] UI/Design (design-system)
+- [ ] Planning/Strategy (brainstorming, prompt-enhancer)
+- [ ] UI/Design (design-system, mobile-design)
 - [ ] Content/Language (i18n)
 - [ ] Pricing (currency)
 - [ ] Data/API (viator-api)
+- [ ] Testing/QA (e2e-testing, ui-interaction-audit, test-driven-development)
+- [ ] Marketing/Growth (email-sequence, email-systems, seo-specialist, ab-test-setup)
 - [ ] Documentation (documentation-writer)
 ```
 

@@ -70,6 +70,21 @@ interface ViatorReview {
     photos?: { photoUrl: string; caption?: string }[];
 }
 
+interface ReviewStats {
+    reviewCountTotals?: { rating: number; count: number }[];
+    totalReviews?: number;
+    combinedAverageRating?: number;
+}
+
+interface ActivityWithBadge extends TransformedActivity {
+    badge?: string;
+    lat?: number;
+    lng?: number;
+    productOptions?: ProductOption[];
+    userReviews?: any[];
+    reviewsStats?: ReviewStats;
+}
+
 // Transformed review for UI
 interface DisplayReview {
     id: string;
@@ -105,6 +120,7 @@ export default function ActivityDetailPage({
     // UI State
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [showAllReviews, setShowAllReviews] = useState(false);
 
     // Set default option when activity loads
     useEffect(() => {
@@ -517,75 +533,142 @@ export default function ActivityDetailPage({
 
                         {/* Customer Reviews Section */}
                         <section className="scroll-mt-24" id="reviews">
-                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12 pb-12 border-b border-theme/50">
+                                {/* Left: Overall & Recent Stats */}
                                 <div>
-                                    <h3 className="text-2xl md:text-3xl font-black text-foreground flex items-center gap-3 mb-2">
-                                        <MessageCircle className="w-8 h-8 text-green-500" />
+                                    <h3 className="text-2xl md:text-3xl font-black text-foreground flex items-center gap-3 mb-8">
+                                        <MessageCircle className="w-8 h-8 text-primary" />
                                         Customer Opinions
                                     </h3>
-                                    <p className="text-muted-foreground font-medium">Based on over {activity.reviewCount} verified travelers</p>
-                                </div>
-                                <div className="flex items-center gap-4 p-4 rounded-2xl bg-surface border border-theme">
-                                    <div className="text-center">
-                                        <div className="text-3xl font-black text-foreground">{activity.rating}</div>
-                                        <div className="flex text-yellow-500 justify-center">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star key={i} className={cn("w-3 h-3", i < Math.floor(activity.rating) ? "fill-current" : "text-border")} />
-                                            ))}
+
+                                    <div className="flex items-start gap-12">
+                                        {/* Total Score */}
+                                        <div>
+                                            <div className="text-6xl font-black text-foreground mb-2 tracking-tight">
+                                                {activity.rating ? activity.rating.toFixed(1) : "New"}
+                                            </div>
+                                            <div className="flex text-yellow-500 mb-3 gap-1">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <Star key={i} className={cn("w-5 h-5", i < Math.floor(activity.rating || 0) ? "fill-current" : "text-input")} />
+                                                ))}
+                                            </div>
+                                            <p className="text-sm text-muted-foreground font-bold">
+                                                Based on {activity.reviewCount} verified reviews
+                                            </p>
                                         </div>
+
+                                        {/* Recent Score (Last 10) */}
+                                        {reviews.length > 0 && (
+                                            <div className="hidden md:block pl-12 border-l border-theme/50">
+                                                <div className="text-6xl font-black text-foreground mb-2 tracking-tight">
+                                                    {(reviews.slice(0, 10).reduce((a, b) => a + b.rating, 0) / Math.min(reviews.length, 10)).toFixed(1)}
+                                                </div>
+                                                <div className="text-xs text-green-600 dark:text-green-400 font-extrabold uppercase tracking-widest mb-3">
+                                                    Recent Rating
+                                                </div>
+                                                <p className="text-sm text-muted-foreground font-medium">
+                                                    Avg. of last {Math.min(reviews.length, 10)} reviews
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="w-[1px] h-10 bg-theme mx-2" />
-                                    <div className="font-extrabold text-green-500 text-sm uppercase tracking-tighter">Excellent Choice</div>
+                                </div>
+
+                                {/* Right: Rating Histogram */}
+                                <div className="flex flex-col justify-center space-y-3 pt-4">
+                                    {[5, 4, 3, 2, 1].map(stars => {
+                                        // Get count from stats or fallback to approximate if we only have total
+                                        const stat = activity.reviewsStats?.reviewCountTotals?.find(r => r.rating === stars);
+                                        const count = stat ? stat.count : (stars === 5 ? (activity.reviewCount || 0) : 0); // Fallback: Assume mostly 5 stars if no stats
+                                        const total = activity.reviewsStats?.totalReviews || activity.reviewCount || 1;
+                                        const percent = Math.min(100, Math.max(0, (count / total) * 100));
+
+                                        return (
+                                            <div key={stars} className="flex items-center gap-4 text-sm group cursor-default">
+                                                <div className="flex items-center gap-1 w-8 shrink-0">
+                                                    <span className="font-bold text-foreground">{stars}</span>
+                                                    <Star className="w-3 h-3 text-muted-foreground" />
+                                                </div>
+                                                <div className="flex-1 h-3 bg-surface-elevated rounded-full overflow-hidden border border-transparent group-hover:border-primary/10 transition-colors">
+                                                    <div
+                                                        className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
+                                                        style={{ width: `${percent}%` }}
+                                                    />
+                                                </div>
+                                                <span className="font-medium text-muted-foreground w-12 text-right tabular-nums">{count}</span>
+                                            </div>
+                                        )
+                                    })}
                                 </div>
                             </div>
 
+                            {/* Reviews List */}
                             {reviewsLoading ? (
                                 <div className="flex items-center justify-center py-12">
                                     <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
                                 </div>
                             ) : reviews.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {reviews.map((review) => (
-                                        <div key={review.id} className="group p-6 rounded-3xl bg-gradient-to-br from-surface to-surface-elevated border border-theme hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 flex flex-col h-full">
-                                            <div className="flex items-center justify-between mb-5">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border-2 border-primary/10">
-                                                        <span className="text-lg font-black text-primary">
-                                                            {review.author.charAt(0).toUpperCase()}
-                                                        </span>
-                                                    </div>
+                                <div className="space-y-8">
+                                    {reviews.slice(0, showAllReviews ? undefined : 3).map((review) => (
+                                        <div key={review.id} className="flex gap-4 md:gap-8 pb-8 border-b border-theme/50 last:border-0 last:pb-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                            {/* Avatar */}
+                                            <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full bg-surface-elevated flex items-center justify-center shrink-0 border border-theme shadow-sm">
+                                                <span className="text-lg font-black text-primary">
+                                                    {review.author.charAt(0).toUpperCase()}
+                                                </span>
+                                            </div>
+
+                                            {/* Content */}
+                                            <div className="flex-1 space-y-3">
+                                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                                                     <div>
-                                                        <h4 className="font-bold text-foreground">{review.author}</h4>
-                                                        <p className="text-xs text-muted-foreground font-medium">
-                                                            {format(new Date(review.date), 'MMMM yyyy', { locale: locale === 'de' ? de : enUS })}
+                                                        <h4 className="font-bold text-foreground text-lg">{review.author}</h4>
+                                                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                                                            {format(new Date(review.date), 'MMMM yyyy', { locale: locale === 'de' ? de : enUS })} • Verified Booking
                                                         </p>
                                                     </div>
+                                                    <div className="flex text-yellow-500 gap-0.5">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <Star key={i} className={cn("w-4 h-4", i < review.rating ? "fill-current" : "text-input")} />
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-1 px-3 py-1.5 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-full text-sm font-bold">
-                                                    {[...Array(5)].map((_, i) => (
-                                                        <Star key={i} className={cn("w-3.5 h-3.5", i < review.rating ? "fill-current" : "opacity-30")} />
-                                                    ))}
+
+                                                <p className="text-foreground/90 leading-relaxed font-medium">
+                                                    "{review.comment}"
+                                                </p>
+
+                                                {review.photos && review.photos.length > 0 && (
+                                                    <div className="flex gap-3 pt-2 overflow-x-auto pb-2">
+                                                        {review.photos.map((photo, idx) => (
+                                                            <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-theme cursor-pointer hover:opacity-90 transition-opacity">
+                                                                <Image src={photo} alt="Review photo" fill className="object-cover" />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                <div className="flex items-center gap-4 pt-2">
+                                                    <button className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                                                        👍 Helpful
+                                                    </button>
                                                 </div>
-                                            </div>
-                                            <p className="text-foreground/80 font-medium leading-relaxed mb-4 flex-1 line-clamp-4 group-hover:line-clamp-none transition-all">
-                                                "{review.comment}"
-                                            </p>
-                                            {review.photos && review.photos.length > 0 && (
-                                                <div className="flex gap-2 mt-2 mb-4 overflow-x-auto">
-                                                    {review.photos.slice(0, 3).map((photo, idx) => (
-                                                        <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                                                            <Image src={photo} alt="Review photo" fill className="object-cover" />
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                            <div className="flex items-center gap-4 pt-4 border-t border-theme/50">
-                                                <button className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors">
-                                                    👍 Helpful
-                                                </button>
                                             </div>
                                         </div>
                                     ))}
+
+                                    {/* Show More Button */}
+                                    {!showAllReviews && reviews.length > 3 && (
+                                        <div className="pt-8 text-center">
+                                            <Button
+                                                onClick={() => setShowAllReviews(true)}
+                                                variant="ghost"
+                                                className="rounded-full px-8 py-6 font-black text-foreground border-2 border-theme hover:bg-surface-elevated hover:border-primary/20 transition-all hover:scale-105"
+                                            >
+                                                Read all {reviews.length} reviews
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="text-center py-12 px-6 rounded-3xl bg-surface-elevated/50 border border-dashed border-theme">
@@ -596,10 +679,6 @@ export default function ActivityDetailPage({
                                     </p>
                                 </div>
                             )}
-
-                            <Button variant="ghost" className="w-full mt-8 rounded-2xl h-14 font-black text-foreground border border-theme hover:bg-surface-elevated">
-                                Read all {activity.reviewCount} reviews
-                            </Button>
                         </section>
 
                     </div>
