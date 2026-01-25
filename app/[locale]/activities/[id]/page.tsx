@@ -121,6 +121,18 @@ export default function ActivityDetailPage({
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showAllReviews, setShowAllReviews] = useState(false);
+    const [selectedReviewImage, setSelectedReviewImage] = useState<string | null>(null);
+    const [helpfulReviews, setHelpfulReviews] = useState<Set<string>>(new Set());
+
+    const toggleHelpful = (reviewId: string) => {
+        const newSet = new Set(helpfulReviews);
+        if (newSet.has(reviewId)) {
+            newSet.delete(reviewId);
+        } else {
+            newSet.add(reviewId);
+        }
+        setHelpfulReviews(newSet);
+    };
 
     // Set default option when activity loads
     useEffect(() => {
@@ -255,6 +267,27 @@ export default function ActivityDetailPage({
 
     return (
         <div className="min-h-screen bg-background text-foreground selection:bg-primary/20">
+            {/* Review Lightbox */}
+            {selectedReviewImage && (
+                <div
+                    className="fixed inset-0 z-[110] bg-black/95 flex items-center justify-center animate-in fade-in duration-300 backdrop-blur-md"
+                    onClick={() => setSelectedReviewImage(null)}
+                >
+                    <button className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all z-50">
+                        <X className="w-8 h-8" />
+                    </button>
+                    <div className="relative w-full h-full max-w-5xl max-h-[90vh] p-4 flex items-center justify-center">
+                        <Image
+                            src={selectedReviewImage}
+                            alt="Review photo full"
+                            width={1200}
+                            height={900}
+                            className="object-contain max-h-full max-w-full rounded-md shadow-2xl"
+                        />
+                    </div>
+                </div>
+            )}
+
             {/* Gallery Overlay */}
             {isGalleryOpen && (
                 <div className="fixed inset-0 z-[100] bg-black/98 flex items-center justify-center animate-in fade-in duration-300 backdrop-blur-xl">
@@ -641,7 +674,11 @@ export default function ActivityDetailPage({
                                                 {review.photos && review.photos.length > 0 && (
                                                     <div className="flex gap-3 pt-2 overflow-x-auto pb-2">
                                                         {review.photos.map((photo, idx) => (
-                                                            <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-theme cursor-pointer hover:opacity-90 transition-opacity">
+                                                            <div
+                                                                key={idx}
+                                                                className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-theme cursor-pointer hover:opacity-90 hover:scale-105 transition-all shadow-sm"
+                                                                onClick={() => setSelectedReviewImage(photo)}
+                                                            >
                                                                 <Image src={photo} alt="Review photo" fill className="object-cover" />
                                                             </div>
                                                         ))}
@@ -649,8 +686,17 @@ export default function ActivityDetailPage({
                                                 )}
 
                                                 <div className="flex items-center gap-4 pt-2">
-                                                    <button className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
-                                                        👍 Helpful
+                                                    <button
+                                                        onClick={() => toggleHelpful(review.id)}
+                                                        className={cn(
+                                                            "text-xs font-bold transition-all flex items-center gap-1.5 px-4 py-2 rounded-full border",
+                                                            helpfulReviews.has(review.id)
+                                                                ? "border-primary/20 text-primary bg-primary/5"
+                                                                : "border-transparent text-muted-foreground hover:text-foreground hover:bg-surface-elevated"
+                                                        )}
+                                                    >
+                                                        <span className={cn("text-sm transition-transform", helpfulReviews.has(review.id) && "scale-125")}>👍</span>
+                                                        {helpfulReviews.has(review.id) ? "Helpful" : "Helpful"}
                                                     </button>
                                                 </div>
                                             </div>
