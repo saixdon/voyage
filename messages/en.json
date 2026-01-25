@@ -21,7 +21,12 @@
         "trips": "My Trips",
         "settings": "Settings",
         "language": "Language",
-        "currency": "Currency"
+        "currency": "Currency",
+        "close": "Close",
+        "menu": "Menu",
+        "languageAndCurrency": "Language and Currency",
+        "toggleTheme": "Toggle theme",
+        "openMenu": "Open menu"
     },
     "auth": {
         "signIn": "Sign In",

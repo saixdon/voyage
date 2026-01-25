@@ -21,7 +21,12 @@
         "favorites": "Favoriten",
         "settings": "Einstellungen",
         "language": "Sprache",
-        "currency": "Währung"
+        "currency": "Währung",
+        "close": "Schließen",
+        "menu": "Menü",
+        "languageAndCurrency": "Sprache und Währung",
+        "toggleTheme": "Farbschema umschalten",
+        "openMenu": "Menü öffnen"
     },
     "auth": {
         "signIn": "Anmelden",

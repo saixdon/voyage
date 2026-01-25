@@ -41,10 +41,18 @@ import { cn } from "@/lib/utils";
 import { useLocale } from "next-intl";
 import { ActivityMap } from "@/components/features/ActivityMap";
 
+interface ProductOption {
+    productOptionCode: string;
+    description: string;
+    title: string;
+    languageGuides?: { language: string; type: string }[];
+}
+
 interface ActivityWithBadge extends TransformedActivity {
     badge?: string;
     lat?: number;
     lng?: number;
+    productOptions?: ProductOption[];
 }
 
 // Interface for Viator review from API
@@ -87,6 +95,7 @@ export default function ActivityDetailPage({
 
     // Booking State
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+    const [selectedOptionCode, setSelectedOptionCode] = useState<string | null>(null);
     const [guestCount, setGuestCount] = useState(2);
     const [checkLoading, setCheckLoading] = useState(false);
     const [availability, setAvailability] = useState<AvailabilityResult | null>(null);
@@ -94,6 +103,13 @@ export default function ActivityDetailPage({
     // UI State
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    // Set default option when activity loads
+    useEffect(() => {
+        if (activity?.productOptions && activity.productOptions.length > 0) {
+            setSelectedOptionCode(activity.productOptions[0].productOptionCode);
+        }
+    }, [activity]);
 
     // Favorites Logic
     const { isFavorite: checkIsFavorite, toggleFavorite } = useFavorites();
@@ -156,12 +172,12 @@ export default function ActivityDetailPage({
         }
     }, [activity?.productCode]);
 
-    // Auto-Check Availability when Date or Guests change
+    // Auto-Check Availability when Date, Guests or Option change
     useEffect(() => {
         if (selectedDate && activity) {
             handleCheckAvailability();
         }
-    }, [selectedDate, guestCount, activity?.productCode]);
+    }, [selectedDate, guestCount, activity?.productCode, selectedOptionCode]);
 
     const handleCheckAvailability = async () => {
         if (!selectedDate || !activity) return;
@@ -172,8 +188,8 @@ export default function ActivityDetailPage({
         const dateStr = format(selectedDate, 'yyyy-MM-dd');
 
         try {
-            // Pass destination for similar products when not available
-            const result = await checkAvailabilityAction(activity.productCode, dateStr, activity.location);
+            // Pass destination for similar products when not available, and SELECTED OPTION CODE
+            const result = await checkAvailabilityAction(activity.productCode, dateStr, activity.location, selectedOptionCode || undefined);
             setAvailability(result);
         } catch (e) {
             console.error(e);
@@ -578,9 +594,12 @@ export default function ActivityDetailPage({
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-center py-12 text-muted-foreground">
-                                    <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                                    <p className="font-medium">No reviews available yet</p>
+                                <div className="text-center py-12 px-6 rounded-3xl bg-surface-elevated/50 border border-dashed border-theme">
+                                    <MessageCircle className="w-12 h-12 mx-auto mb-4 text-primary opacity-50" />
+                                    <h4 className="text-lg font-bold mb-2">No reviews yet</h4>
+                                    <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                                        Be the first to share your experience! Book this activity and let others know what you think.
+                                    </p>
                                 </div>
                             )}
 
@@ -617,6 +636,30 @@ export default function ActivityDetailPage({
                             </div>
 
                             <div className="space-y-6 mb-8">
+                                {/* Product Options Selector */}
+                                {activity?.productOptions && activity.productOptions.length > 1 && (
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Option</label>
+                                        <div className="grid gap-2 max-h-[300px] overflow-y-auto pr-1">
+                                            {activity.productOptions.map((opt) => (
+                                                <button
+                                                    key={opt.productOptionCode}
+                                                    onClick={() => setSelectedOptionCode(opt.productOptionCode)}
+                                                    className={cn(
+                                                        "w-full px-4 py-3 rounded-2xl border-2 text-left transition-all",
+                                                        selectedOptionCode === opt.productOptionCode
+                                                            ? "bg-primary/10 border-primary text-primary font-bold shadow-sm"
+                                                            : "bg-surface-elevated border-transparent hover:border-primary/30 text-foreground"
+                                                    )}
+                                                >
+                                                    <div className="text-sm font-semibold">{opt.title}</div>
+                                                    {opt.description && <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{opt.description}</div>}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Date Selection */}
                                 <div className="space-y-2">
                                     <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Travel Date</label>

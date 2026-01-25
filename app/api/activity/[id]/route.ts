@@ -80,7 +80,39 @@ export async function GET(
             }
         } catch (locError) {
             console.error("Location resolution failed in route handler:", locError);
-            // Fallback to safe default
+        }
+
+        // Extract duration from itinerary if not at root level
+        const durationData = productDetails.duration || productDetails.itinerary?.duration;
+
+        // Extract price - try pricing.summary first, then fallback to availability/schedules
+        let price = productDetails.pricing?.summary?.fromPrice || 0;
+        let currency = productDetails.pricing?.currency || "EUR";
+
+        if (price === 0) {
+            // Fallback: Fetch from availability/schedules (lightweight call)
+            try {
+                const scheduleRes = await fetch(
+                    `${process.env.VIATOR_API_BASE_URL || "https://api.sandbox.viator.com/partner"}/availability/schedules/${productDetails.productCode}?currency=EUR`,
+                    {
+                        headers: {
+                            "Accept": "application/json;version=2.0",
+                            "Accept-Language": "en",
+                            "exp-api-key": process.env.VIATOR_API_KEY!,
+                        },
+                        next: { revalidate: 3600 }
+                    }
+                );
+                if (scheduleRes.ok) {
+                    const scheduleData = await scheduleRes.json();
+                    const firstPrice = scheduleData.bookableItems?.[0]?.seasons?.[0]?.pricingRecords?.[0]?.pricingDetails?.[0]?.price?.original?.recommendedRetailPrice;
+                    if (firstPrice) {
+                        price = firstPrice;
+                    }
+                }
+            } catch (priceErr) {
+                console.error("Price fallback failed:", priceErr);
+            }
         }
 
         // Transform Viator product to our format with safe fallbacks
@@ -90,15 +122,20 @@ export async function GET(
             location: locationName,
             image: primaryImage,
             images: allImages,
-            price: productDetails.pricing?.summary?.fromPrice || 0,
-            currency: productDetails.pricing?.currency || "EUR",
+            price,
+            currency,
             rating: productDetails.reviews?.combinedAverageRating || 0,
             reviewCount: productDetails.reviews?.totalReviews || 0,
-            duration: formatDuration(productDetails.duration),
+            duration: formatDuration(durationData),
             productCode: productDetails.productCode,
             productUrl: productDetails.productUrl || "",
             description: productDetails.description || "Description not available.",
             badge: productDetails.flags?.includes("BEST_SELLER") ? "Bestseller" : undefined,
+            // NEU: Produkt-Optionen für das Frontend
+            productOptions: productDetails.productOptions || [],
+            // NEU: Zusätzliche Info
+            inclusions: productDetails.inclusions || [],
+            exclusions: productDetails.exclusions || [],
             lat: undefined,
             lng: undefined
         };

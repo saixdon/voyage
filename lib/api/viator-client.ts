@@ -663,11 +663,11 @@ export interface PaxMixItem {
     numberOfTravelers: number;
 }
 
-// Get availability for a product (with optional paxMix for booking)
 export async function getViatorAvailability(
     productCode: string,
     travelDate: string, // Format: YYYY-MM-DD
-    paxMix?: PaxMixItem[]
+    paxMix?: PaxMixItem[],
+    productOptionCode?: string
 ) {
     // Read env dynamically to allow testing
     const API_KEY = process.env.VIATOR_API_KEY || VIATOR_API_KEY;
@@ -705,6 +705,10 @@ export async function getViatorAvailability(
 
         if (paxMix && paxMix.length > 0) {
             body.paxMix = paxMix;
+        }
+
+        if (productOptionCode) {
+            body.productOptionCode = productOptionCode;
         }
 
         const response = await fetch(`${VIATOR_API_BASE}/availability/check`, {

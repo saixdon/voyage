@@ -98,7 +98,7 @@ export function Navbar() {
                                     setShowUserMenu(false);
                                 }}
                                 className="h-10 w-10 flex items-center justify-center text-foreground/80 hover:text-foreground hover:bg-surface-elevated rounded-lg transition-all group"
-                                aria-label="Language and Currency"
+                                aria-label={t('languageAndCurrency')}
                             >
                                 <span className="material-symbols-outlined transition-transform group-hover:rotate-45">language</span>
                             </button>
@@ -109,7 +109,7 @@ export function Navbar() {
                             <button
                                 onClick={() => setTheme(currentTheme === "dark" ? "light" : "dark")}
                                 className="hidden md:flex h-10 w-10 items-center justify-center text-foreground/80 hover:text-foreground hover:bg-surface-elevated rounded-lg transition-all"
-                                aria-label="Toggle theme"
+                                aria-label={t('toggleTheme')}
                             >
                                 <span className="material-symbols-outlined">
                                     {currentTheme === "dark" ? "light_mode" : "dark_mode"}
@@ -202,7 +202,7 @@ export function Navbar() {
                             <button
                                 onClick={() => setIsMobileMenuOpen(true)}
                                 className="h-10 w-10 flex items-center justify-center text-foreground hover:bg-surface-elevated rounded-lg transition-colors min-w-[44px] min-h-[44px]"
-                                aria-label="Open menu"
+                                aria-label={t('openMenu')}
                             >
                                 <Menu className="w-6 h-6" />
                             </button>

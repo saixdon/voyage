@@ -36,14 +36,15 @@ export interface AvailabilityResult {
 export async function checkAvailabilityAction(
     productCode: string,
     date: string,
-    destination?: string // Optional destination for similar products search
+    destination?: string, // Optional destination for similar products search
+    productOptionCode?: string
 ): Promise<AvailabilityResult> {
     if (!productCode || !date) {
         return { available: false, error: 'Missing parameters' };
     }
 
     try {
-        const result = await getViatorAvailability(productCode, date);
+        const result = await getViatorAvailability(productCode, date, undefined, productOptionCode);
 
         if (result.error) {
             console.error('Availability check failed:', result.error);

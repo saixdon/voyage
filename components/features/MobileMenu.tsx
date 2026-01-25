@@ -49,7 +49,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             >
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-theme">
-                    <span className="text-xl font-bold tracking-tight text-foreground">Menu</span>
+                    <span className="text-xl font-bold tracking-tight text-foreground">{t('menu')}</span>
                     <button
                         onClick={onClose}
                         className="p-2 rounded-full hover:bg-surface-elevated text-foreground transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
