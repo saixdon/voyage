@@ -2,8 +2,11 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { SearchBar } from "@/components/features/SearchBar";
 import { ActivityCard } from "@/components/features/ActivityCard";
+import { AISearchAssist } from "@/components/features/AISearchAssist";
+import { parseSearchQuery, buildSearchParams } from "@/lib/utils/ai-query-parser";
 import { Activity } from "@/types";
 import { useLocale } from "next-intl";
 
@@ -16,16 +19,16 @@ interface SearchResult {
     gygError?: string | null;
 }
 
-// Category filter definitions
+import { CATEGORY_MAPPING } from "@/lib/utils/categories";
+
 const CATEGORY_FILTERS = [
-    { id: "all", label: "All", icon: "apps" },
-    { id: "food", label: "Food & Drink", icon: "restaurant", keywords: ["food", "culinary", "wine", "beer", "cooking", "gastronomy", "tasting", "dinner", "lunch", "brunch", "restaurant"] },
-    { id: "sport", label: "Sport & Outdoor", icon: "sports_soccer", keywords: ["sport", "hiking", "biking", "cycling", "climbing", "kayak", "surf", "ski", "golf", "adventure", "outdoor"] },
-    { id: "culture", label: "Art & Culture", icon: "museum", keywords: ["museum", "art", "gallery", "history", "heritage", "architecture", "culture", "monument", "theater", "theatre", "church", "cathedral", "palace"] },
-    { id: "nature", label: "Nature", icon: "park", keywords: ["nature", "park", "garden", "wildlife", "safari", "forest", "mountain", "lake", "beach", "waterfall", "eco"] },
-    { id: "tours", label: "City Tours", icon: "location_city", keywords: ["city tour", "walking tour", "sightseeing", "hop-on", "bus tour", "guided tour"] },
-    { id: "water", label: "Water Activities", icon: "sailing", keywords: ["boat", "cruise", "sailing", "snorkel", "diving", "swim", "water", "river", "canal", "yacht", "kayak", "paddle"] },
-    { id: "transport", label: "Transport", icon: "directions_bus", keywords: ["transport", "transfer", "airport", "shuttle", "driver", "taxi", "pickup", "bus", "train", "limousine"] },
+    { id: "all", label: "All", icon: "apps", keywords: [] as string[] },
+    ...CATEGORY_MAPPING.map(c => ({
+        id: c.id,
+        label: c.label,
+        icon: c.icon,
+        keywords: c.keywords
+    }))
 ];
 
 function SearchResults() {
@@ -37,42 +40,80 @@ function SearchResults() {
     const dateFromParam = searchParams.get("from") || "";
     const dateToParam = searchParams.get("to") || "";
     const categoryParam = searchParams.get("category") || "all";
+    const priceMinParam = searchParams.get("priceMin") || "";
+    const priceMaxParam = searchParams.get("priceMax") || "";
 
     const [results, setResults] = useState<Activity[]>([]);
     const [total, setTotal] = useState<number>(0);
     const [loading, setLoading] = useState(false);
     const [source, setSource] = useState<string>("");
     const [activeCategory, setActiveCategory] = useState(categoryParam);
+    const [nextStart, setNextStart] = useState<number>(1);
+    const [searchIntent, setSearchIntent] = useState<string | null>(null);
+    const LIMIT = 20;
 
-    useEffect(() => {
-        async function fetchResults() {
-            setLoading(true);
-            try {
-                // If query is the default "activities", we might want to pass it or use a specific API param for "top rated"
-                // For now, passing "activities" as q to the API is a reasonable fallback
-                let url = `/api/search?q=${encodeURIComponent(query)}&limit=40`;
-                if (dateFromParam) {
-                    url += `&from=${encodeURIComponent(dateFromParam)}`;
-                }
-                if (dateToParam) {
-                    url += `&to=${encodeURIComponent(dateToParam)}`;
-                }
-                const response = await fetch(url);
-                const data: SearchResult = await response.json();
+    // Function to fetch results
+    const fetchResults = async (start: number, isNewSearch: boolean) => {
+        setLoading(true);
+        try {
+            // Get locale from useLocale hook
+            const currentLocale = typeof window !== 'undefined'
+                ? window.location.pathname.split('/')[1]
+                : 'en';
+
+            let url = `/api/search?q=${encodeURIComponent(query)}&limit=${LIMIT}&start=${start}&locale=${currentLocale}`;
+            if (dateFromParam) {
+                url += `&from=${encodeURIComponent(dateFromParam)}`;
+            }
+            if (dateToParam) {
+                url += `&to=${encodeURIComponent(dateToParam)}`;
+            }
+            if (priceMinParam) {
+                url += `&priceMin=${encodeURIComponent(priceMinParam)}`;
+            }
+            if (priceMaxParam) {
+                url += `&priceMax=${encodeURIComponent(priceMaxParam)}`;
+            }
+
+            // Add semantic filters if present
+            const tags = searchParams.get("tags");
+            const vibes = searchParams.get("vibes");
+            const persona = searchParams.get("persona");
+            if (tags) url += `&tags=${encodeURIComponent(tags)}`;
+            if (vibes) url += `&vibes=${encodeURIComponent(vibes)}`;
+            if (persona) url += `&persona=${encodeURIComponent(persona)}`;
+
+            const response = await fetch(url);
+            const data: SearchResult = await response.json();
+
+            if (isNewSearch) {
                 setResults(data.activities);
-                setTotal(data.total);
-                setSource(data.source);
-            } catch (error) {
-                console.error("Search error:", error);
+            } else {
+                setResults(prev => [...prev, ...data.activities]);
+            }
+
+            setTotal(data.total);
+            setSource(data.source);
+            setNextStart(start + LIMIT);
+
+        } catch (error) {
+            console.error("Search error:", error);
+            if (isNewSearch) {
                 setResults([]);
                 setTotal(0);
-            } finally {
-                setLoading(false);
             }
+        } finally {
+            setLoading(false);
         }
+    };
 
-        fetchResults();
-    }, [query, dateFromParam, dateToParam]);
+    // Initial fetch when params change
+    useEffect(() => {
+        setResults([]);
+        setTotal(0);
+        setNextStart(1);
+        fetchResults(1, true); // Start at 1, isNewSearch = true
+    }, [query, dateFromParam, dateToParam, priceMinParam, priceMaxParam, searchParams.get("tags"), searchParams.get("vibes"), searchParams.get("persona")]);
 
     // Update active category when URL param changes
     useEffect(() => {
@@ -109,27 +150,111 @@ function SearchResults() {
         router.push(`/search?${params.toString()}`, { scroll: false });
     };
 
+    const handleLoadMore = () => {
+        fetchResults(nextStart, false);
+    };
+
+    // Handle AI Assist search - use DeepSeek for intelligent parsing
+    const handleAISearch = async (aiQuery: string) => {
+        setLoading(true);
+        try {
+            const currentQuery = rawQuery.trim();
+            const combinedQuery = currentQuery ? `${currentQuery} ${aiQuery}` : aiQuery;
+
+            // Call our new AI parsing API
+            const response = await fetch('/api/ai/parse-query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: combinedQuery,
+                    locale: typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : 'de'
+                })
+            });
+
+            if (!response.ok) throw new Error("AI parsing failed");
+
+            const aiParsed = await response.json();
+            console.log('DeepSeek Parsed:', aiParsed);
+            if (aiParsed.intent) setSearchIntent(aiParsed.intent);
+
+            // Map DeepSeek response to URL params
+            const params = new URLSearchParams();
+
+            // searchTerm from AI or original keywords
+            const finalSearchTerm = aiParsed.searchTerm || aiParsed.location || combinedQuery;
+            params.set('q', finalSearchTerm);
+
+            if (aiParsed.priceMax) params.set('priceMax', String(aiParsed.priceMax));
+            if (aiParsed.priceMin) params.set('priceMin', String(aiParsed.priceMin));
+            if (aiParsed.durationMax) params.set('durationMax', String(aiParsed.durationMax));
+
+            if (aiParsed.categories && Array.isArray(aiParsed.categories) && aiParsed.categories.length > 0) {
+                params.set('categories', aiParsed.categories.join(','));
+            }
+
+            // Advanced semantic logics
+            if (aiParsed.tags?.length) params.set('tags', aiParsed.tags.join(','));
+            if (aiParsed.vibes?.length) params.set('vibes', aiParsed.vibes.join(','));
+            if (aiParsed.travelerPersona) params.set('persona', aiParsed.travelerPersona);
+
+            // Preserve dates if set
+            if (dateFromParam) params.set('from', dateFromParam);
+            if (dateToParam) params.set('to', dateToParam);
+
+            router.push(`/search?${params.toString()}`);
+        } catch (error) {
+            console.error("AI Search Error, falling back to regex:", error);
+            // Fallback to existing regex parser
+            const combinedQuery = rawQuery.trim() ? `${rawQuery.trim()} ${aiQuery}` : aiQuery;
+            const parsed = parseSearchQuery(combinedQuery);
+            const params = buildSearchParams(parsed);
+            if (dateFromParam) params.set('from', dateFromParam);
+            if (dateToParam) params.set('to', dateToParam);
+            router.push(`/search?${params.toString()}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="max-w-7xl mx-auto">
             {/* Header with search */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-6 border-b border-theme">
-                <div>
+                <div className="flex-1">
                     <h1 className="text-4xl font-bold text-foreground mb-2">
                         {rawQuery ? `Results for "${rawQuery}"` : dateFromParam ? `Experiences matching your dates` : "Discover Experiences"}
                     </h1>
-                    <p className="text-muted-foreground text-base">
-                        {loading ? "Searching..." : `${filteredResults.length} experiences found`}
+
+                    {/* AI Intent Highlight */}
+                    {searchIntent && (
+                        <div className="flex items-center gap-2 mb-3 animate-in fade-in slide-in-from-left-2 duration-500">
+                            <span className="material-symbols-outlined text-primary text-sm">auto_awesome</span>
+                            <span className="text-primary font-medium text-sm italic">"{searchIntent}"</span>
+                        </div>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-2 text-muted-foreground text-base">
+                        <span>{loading ? "Searching..." : `${filteredResults.length} experiences found`}</span>
+
                         {activeCategory !== "all" && (
-                            <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
                                 {CATEGORY_FILTERS.find(c => c.id === activeCategory)?.label}
                             </span>
                         )}
-                        {(source === "viator" || source === "viator-api" || source === "mixed") && (
-                            <span className="ml-2 text-xs bg-green-500/10 text-green-400 px-2 py-0.5 rounded-full font-medium">
-                                {source === "mixed" ? "Mixed Results" : "via Viator"}
+
+                        {searchParams.get('persona') && (
+                            <span className="text-xs bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[14px]">person</span>
+                                {searchParams.get('persona')}
                             </span>
                         )}
-                    </p>
+
+                        {(source === "viator" || source === "viator-api" || source === "mixed" || source === "database") && (
+                            <span className="text-xs bg-green-500/10 text-green-400 px-2 py-0.5 rounded-full font-medium">
+                                {source === "database" ? "Local Database" : source === "mixed" ? "Mixed Results" : "via Viator"}
+                            </span>
+                        )}
+                    </div>
                 </div>
                 <div className="w-full md:w-auto md:min-w-[450px]">
                     <SearchBar
@@ -141,7 +266,7 @@ function SearchResults() {
             </div>
 
             {/* Category filter chips */}
-            <div className="mb-12">
+            <div className="mb-8">
                 <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-4">
                     {CATEGORY_FILTERS.map((category) => (
                         <button
@@ -163,24 +288,28 @@ function SearchResults() {
                 </div>
             </div>
 
+            {/* AI Search Assist */}
+            <div className="mb-10">
+                <AISearchAssist onSearch={handleAISearch} isProcessing={loading} />
+            </div>
+
             {/* Results grid */}
-            {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
-                    {[...Array(8)].map((_, i) => (
-                        <div key={i} className="animate-pulse">
-                            <div className="bg-surface-elevated rounded-2xl h-64 mb-4"></div>
-                            <div className="bg-surface-elevated rounded h-4 w-3/4 mb-2"></div>
-                            <div className="bg-surface-elevated rounded h-4 w-1/2"></div>
-                        </div>
-                    ))}
-                </div>
-            ) : filteredResults.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
-                    {filteredResults.map((activity) => (
-                        <ActivityCard key={activity.id} {...activity} />
-                    ))}
-                </div>
-            ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
+                {results.map((activity) => (
+                    <ActivityCard key={activity.id} {...activity} />
+                ))}
+
+                {loading && [...Array(4)].map((_, i) => (
+                    <div key={`skeleton-${i}`} className="animate-pulse">
+                        <div className="bg-surface-elevated rounded-2xl h-64 mb-4"></div>
+                        <div className="bg-surface-elevated rounded h-4 w-3/4 mb-2"></div>
+                        <div className="bg-surface-elevated rounded h-4 w-1/2"></div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Empty State */}
+            {!loading && results.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
                     <span className="material-symbols-outlined text-6xl text-muted-foreground mb-4">
                         search_off
@@ -202,6 +331,38 @@ function SearchResults() {
                             Show all results
                         </button>
                     )}
+                </div>
+            )}
+
+            {/* Load More Button */}
+            {!loading && results.length > 0 && results.length < total && (
+                <div className="mt-12 flex justify-center">
+                    <button
+                        onClick={handleLoadMore}
+                        className="px-8 py-3 bg-surface border border-theme hover:bg-surface-elevated text-foreground font-medium rounded-full transition-colors flex items-center gap-2"
+                    >
+                        Load More Results
+                        <span className="text-xs text-muted-foreground">({results.length} of {total})</span>
+                    </button>
+                </div>
+            )}
+
+            {/* Footer Branding */}
+            {results.length > 0 && (source === 'viator-api' || source === 'mixed' || source === 'database') && (
+                <div className="mt-16 text-center border-t border-theme pt-8">
+                    <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
+                        Powering your adventures
+                        <span className="font-bold flex items-center gap-1.5">
+                            via
+                            <Image
+                                src="/brand/viator-logo.svg"
+                                alt="Viator"
+                                width={60}
+                                height={18}
+                                className="inline-block"
+                            />
+                        </span>
+                    </p>
                 </div>
             )}
         </div>

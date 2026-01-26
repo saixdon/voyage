@@ -167,12 +167,27 @@ export async function GET(
         // Extract duration from itinerary if not at root level
         const durationData = productDetails.duration || productDetails.itinerary?.duration;
 
-        // Extract price - try pricing.summary first, then fallback to availability/schedules
-        let price = productDetails.pricing?.summary?.fromPrice || 0;
+        // Extract price - Prioritize ADULT age band price
+        let price = 0;
         let currency = productDetails.pricing?.currency || "EUR";
 
+        // Try to get ADULT price from paxAmounts (if available in pricing summary)
+        if (productDetails.pricing?.summary?.paxAmounts && Array.isArray(productDetails.pricing.summary.paxAmounts)) {
+            const adultPax = productDetails.pricing.summary.paxAmounts.find(
+                (p: any) => p.ageBand === "ADULT"
+            );
+            if (adultPax?.amount) {
+                price = adultPax.amount;
+            }
+        }
+
+        // Fallback to fromPrice if no ADULT price found
         if (price === 0) {
-            // Fallback: Fetch from availability/schedules (lightweight call)
+            price = productDetails.pricing?.summary?.fromPrice || 0;
+        }
+
+        // Second fallback: Fetch from availability/schedules and prioritize ADULT
+        if (price === 0) {
             try {
                 const scheduleRes = await fetch(
                     `${process.env.VIATOR_API_BASE_URL || "https://api.sandbox.viator.com/partner"}/availability/schedules/${productDetails.productCode}?currency=EUR`,
@@ -187,9 +202,25 @@ export async function GET(
                 );
                 if (scheduleRes.ok) {
                     const scheduleData = await scheduleRes.json();
-                    const firstPrice = scheduleData.bookableItems?.[0]?.seasons?.[0]?.pricingRecords?.[0]?.pricingDetails?.[0]?.price?.original?.recommendedRetailPrice;
-                    if (firstPrice) {
-                        price = firstPrice;
+                    const pricingRecords = scheduleData.bookableItems?.[0]?.seasons?.[0]?.pricingRecords || [];
+
+                    // Look for ADULT pricing first
+                    for (const record of pricingRecords) {
+                        const adultDetail = record.pricingDetails?.find(
+                            (pd: any) => pd.ageBand === "ADULT"
+                        );
+                        if (adultDetail?.price?.original?.recommendedRetailPrice) {
+                            price = adultDetail.price.original.recommendedRetailPrice;
+                            break;
+                        }
+                    }
+
+                    // If no ADULT found, use first available price
+                    if (price === 0) {
+                        const firstPrice = pricingRecords[0]?.pricingDetails?.[0]?.price?.original?.recommendedRetailPrice;
+                        if (firstPrice) {
+                            price = firstPrice;
+                        }
                     }
                 }
             } catch (priceErr) {

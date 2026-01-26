@@ -21,6 +21,11 @@ export interface AvailabilityResult {
         amount: number;
         currency: string;
     };
+    priceBreakdown?: {
+        ageBand: string;
+        price: number;
+        count: number;
+    }[];
     affiliateUrl?: string;
     bookableItems?: any[]; // Array of available options/times
     error?: string;
@@ -38,14 +43,29 @@ export async function checkAvailabilityAction(
     date: string,
     guestCount: number = 2,
     destination?: string, // Optional destination for similar products search
-    productOptionCode?: string
+    productOptionCode?: string,
+    travelers?: { adults: number; children: number; youth?: number; infants: number }
 ): Promise<AvailabilityResult> {
     if (!productCode || !date) {
         return { available: false, error: 'Missing parameters' };
     }
 
     try {
-        const paxMix = [{ ageBand: "ADULT", numberOfTravelers: guestCount }];
+        let paxMix: { ageBand: string; numberOfTravelers: number }[] = [];
+
+        if (travelers) {
+            if (travelers.adults > 0) paxMix.push({ ageBand: "ADULT", numberOfTravelers: travelers.adults });
+            if (travelers.youth && travelers.youth > 0) paxMix.push({ ageBand: "YOUTH", numberOfTravelers: travelers.youth });
+            if (travelers.children > 0) paxMix.push({ ageBand: "CHILD", numberOfTravelers: travelers.children });
+            if (travelers.infants > 0) paxMix.push({ ageBand: "INFANT", numberOfTravelers: travelers.infants });
+        } else {
+            paxMix = [{ ageBand: "ADULT", numberOfTravelers: guestCount }];
+        }
+
+        // If no travelers at all, default to 1 adult for checking
+        if (paxMix.length === 0) {
+            paxMix = [{ ageBand: "ADULT", numberOfTravelers: 1 }];
+        }
         const result = await getViatorAvailability(productCode, date, paxMix, productOptionCode);
 
         if (result.error) {
@@ -70,12 +90,25 @@ export async function checkAvailabilityAction(
 
         // Extract the price for the specific option
         let price;
+        let priceBreakdown: AvailabilityResult['priceBreakdown'];
+
         if (isAvailable && selectedItem?.totalPrice) {
             const priceObj = selectedItem.totalPrice.price;
             price = {
                 amount: priceObj.value || priceObj.recommendedRetailPrice || 0,
                 currency: result.currency || 'EUR'
             };
+
+            // Extract price breakdown per age band if available
+            // Note: Viator sometimes returns paxMixBreakdown or lineItems
+            const breakdown = selectedItem.totalPrice.price.paxMixBreakdown || selectedItem.lineItems;
+            if (breakdown && Array.isArray(breakdown)) {
+                priceBreakdown = breakdown.map((item: any) => ({
+                    ageBand: item.ageBand,
+                    price: item.price?.value || item.subtotalPrice?.price?.value || 0,
+                    count: item.numberOfTravelers || item.quantity || 0
+                }));
+            }
         }
 
         // Generate Affiliate Link ONLY if available
@@ -152,6 +185,7 @@ export async function checkAvailabilityAction(
         return {
             available: isAvailable,
             price,
+            priceBreakdown,
             affiliateUrl,
             bookableItems: result.bookableItems,
             nextAvailableDate,

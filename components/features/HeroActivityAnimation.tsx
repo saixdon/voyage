@@ -6,8 +6,9 @@ export function HeroActivityAnimation() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [frames, setFrames] = useState<string[]>([]);
     const [images, setImages] = useState<HTMLImageElement[]>([]);
-    const [progress, setProgress] = useState(0);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [isVisible, setIsVisible] = useState(true);
+    const lastDimensions = useRef({ width: 0, height: 0 });
 
     // 1. Fetch the manifest
     useEffect(() => {
@@ -49,12 +50,27 @@ export function HeroActivityAnimation() {
         setImages(loadedImgs);
     };
 
-    // 3. Animation Loop
+    // 3. Visibility Tracking
     useEffect(() => {
-        if (!isLoaded || images.length === 0 || !canvasRef.current) return;
+        if (!canvasRef.current) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsVisible(entry.isIntersecting);
+            },
+            { threshold: 0.1 }
+        );
+
+        observer.observe(canvasRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    // 4. Animation Loop
+    useEffect(() => {
+        if (!isLoaded || images.length === 0 || !canvasRef.current || !isVisible) return;
 
         const canvas = canvasRef.current;
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext("2d", { alpha: false }); // Optimization: no alpha
         if (!ctx) return;
 
         let frameIndex = 0;
@@ -110,17 +126,36 @@ export function HeroActivityAnimation() {
 
         animationFrameId = requestAnimationFrame(render);
 
-        return () => cancelAnimationFrame(animationFrameId);
-    }, [isLoaded, images]);
+        return () => {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        };
+    }, [isLoaded, images, isVisible]);
 
-    // Handle Resize
+    // Handle Resize with DPI Scaling and Mobile Scroll Protection
     useEffect(() => {
         const handleResize = () => {
-            if (canvasRef.current) {
-                canvasRef.current.width = window.innerWidth;
-                canvasRef.current.height = window.innerHeight;
+            if (!canvasRef.current) return;
+
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const dpr = window.devicePixelRatio || 1;
+
+            // Protection against mobile address bar flickering:
+            // Only re-initialize if width changes or height changes significantly (> 100px)
+            const heightDiff = Math.abs(height - lastDimensions.current.height);
+            const widthChanged = width !== lastDimensions.current.width;
+
+            if (!widthChanged && heightDiff < 100 && lastDimensions.current.height !== 0) {
+                return;
             }
+
+            lastDimensions.current = { width, height };
+
+            // Apply DPI Scaling
+            canvasRef.current.width = width * dpr;
+            canvasRef.current.height = height * dpr;
         };
+
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);

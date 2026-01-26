@@ -32,12 +32,29 @@ interface ViatorProduct {
     };
     destinations?: { ref: string; name?: string }[];
     tags?: { tagId: number; name?: string }[];
+    pricingInfo?: {
+        ageBands?: {
+            ageBand: string;
+            startAge?: number;
+            endAge?: number;
+            minTravelersPerBooking?: number;
+            maxTravelersPerBooking?: number;
+        }[];
+    };
 }
 
 interface ViatorSearchResponse {
     products?: ViatorProduct[];
     totalCount?: number;
     error?: string;
+}
+
+export interface AgeBand {
+    ageBand: string;
+    startAge: number;
+    endAge: number;
+    minTravelersPerBooking: number;
+    maxTravelersPerBooking: number;
 }
 
 export interface TransformedActivity {
@@ -53,6 +70,8 @@ export interface TransformedActivity {
     duration: string;
     productCode: string;
     productUrl: string; // Full Viator URL with affiliate tracking
+    ageBands?: AgeBand[];
+    description?: string;
 }
 
 function formatDuration(duration?: ViatorProduct["duration"]): string {
@@ -467,7 +486,8 @@ export async function searchViatorProducts(
         priceMax?: number;
         tags?: number[];
         destinationId?: string;
-    }
+    },
+    start = 1 // Added start parameter for pagination
 ): Promise<{ activities: TransformedActivity[]; totalCount?: number; error?: string; resolvedDestinationId?: string }> {
     if (!USE_MOCK && !VIATOR_API_KEY) {
         return { activities: [], error: "Viator API key not configured" };
@@ -505,16 +525,9 @@ export async function searchViatorProducts(
         let destinationId = filters?.destinationId || await resolveDestinationId(query, locale);
 
         if (!destinationId) {
-            // FALLBACK: If query is generic (like "activities", "culture"), use a showcase destination (e.g. Europe: 8 or London: 737)
-            // This ensures we show REAL data instead of failing or showing mock data.
-            const lowerQ = query.toLowerCase();
-            if (lowerQ.includes('activit') || lowerQ.includes('culture') || lowerQ.includes('tour') || lowerQ === 'popular') {
-                console.log(`Using showcase destination (Europe/London) for generic query: ${query}`);
-                destinationId = "8"; // Try Europe first
-            } else {
-                console.warn(`Could not resolve destination for query: ${query}.`);
-                return { activities: [], error: `Could not resolve destination: ${query}` };
-            }
+            // FALLBACK TO FREE TEXT SEARCH
+            console.log(`Could not resolve destination for query: "${query}". Attempting Free Text Search...`);
+            return await searchViatorFreeText(query, limit, start, locale, filters);
         }
 
         // 2. Search products with the found Destination ID
@@ -529,7 +542,7 @@ export async function searchViatorProducts(
             body: JSON.stringify({
                 searchTerm: query, // Still verify text match + destination
                 pagination: {
-                    start: 1,
+                    start: start,
                     count: limit,
                 },
                 filtering: {
@@ -596,6 +609,95 @@ export async function searchViatorProducts(
     } catch (error) {
         console.error("Viator API fetch error:", error);
         return { activities: [], totalCount: 0, error: "Failed to fetch from Viator API" };
+    }
+}
+
+// NEW: Free Text Search function using /search/freetext endpoint
+export async function searchViatorFreeText(
+    query: string,
+    limit = 20,
+    start = 1,
+    locale = "en",
+    filters?: {
+        priceMin?: number;
+        priceMax?: number;
+    }
+): Promise<{ activities: TransformedActivity[]; totalCount?: number; error?: string; resolvedDestinationId?: string }> {
+    if (!USE_MOCK && !VIATOR_API_KEY) {
+        return { activities: [], error: "Viator API key not configured" };
+    }
+
+    try {
+        const response = await fetch(`${VIATOR_API_BASE}/search/freetext`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json;version=2.0",
+                "Accept-Language": locale,
+                "exp-api-key": VIATOR_API_KEY!,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                searchTerm: query,
+                pagination: {
+                    start: start,
+                    count: limit,
+                },
+                currency: "EUR",
+                sorting: {
+                    sort: "TRAVELER_RATING",
+                    order: "DESCENDING"
+                },
+                // searchTypes: ["PRODUCT"] // Optional: restrict to products
+            }),
+            next: { revalidate: 300 }, // Cache for 5 minutes
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Viator Free Text API Error:", response.status, errorText);
+
+            // If 400 or 404, might mean feature not enabled or invalid. Fallback to empty.
+            return { activities: [], error: `Free Text API Error: ${response.status}` };
+        }
+
+        const data: ViatorSearchResponse = await response.json();
+
+        if (!data.products || data.products.length === 0) {
+            return { activities: [], error: "No products found via free text search" };
+        }
+
+        // Batch resolve destinations
+        const { batchResolveDestinations } = await import('@/lib/api/destination-resolver');
+        const locationMap = await batchResolveDestinations(data.products);
+
+        // Transform
+        let activities: TransformedActivity[] = data.products.map((product) => ({
+            id: product.productCode,
+            title: product.title,
+            location: locationMap.get(product.productCode) || "",
+            image: selectBestImage(product.images),
+            images: extractImages(product.images),
+            price: product.pricing?.summary?.fromPrice || 0,
+            currency: product.pricing?.currency || "EUR",
+            rating: product.reviews?.combinedAverageRating || 0,
+            reviewCount: product.reviews?.totalReviews || 0,
+            duration: formatDuration(product.duration),
+            productCode: product.productCode,
+            productUrl: product.productUrl || "",
+        }));
+
+        // Apply filters manually if they weren't (or couldn't be) applied by the API
+        if (filters?.priceMin !== undefined) {
+            activities = activities.filter(a => a.price >= filters.priceMin!);
+        }
+        if (filters?.priceMax !== undefined) {
+            activities = activities.filter(a => a.price <= filters.priceMax!);
+        }
+
+        return { activities, totalCount: activities.length };
+    } catch (error) {
+        console.error("Viator Free Text Search error:", error);
+        return { activities: [], totalCount: 0, error: "Failed to fetch from Viator Free Text API" };
     }
 }
 
